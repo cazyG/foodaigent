@@ -74,3 +74,27 @@ Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-mu
 
 We would appreciate your feedback on Compose/Web and Kotlin/Wasm in the public Slack channel [#compose-web](https://slack-chats.kotlinlang.org/c/compose-web).
 If you face any issues, please report them on [YouTrack](https://youtrack.jetbrains.com/newIssue?project=CMP).
+
+this is about food Menu
+// 文件结构说明：
+// - commonMain/kotlin/com/example/cookingheart/Main.kt (应用入口与导航)
+// - commonMain/kotlin/com/example/cookingheart/ui/screens/ (各页面)
+// - commonMain/kotlin/com/example/cookingheart/ui/components/ (雷达图、日历等组件)
+// - commonMain/kotlin/com/example/cookingheart/data/ (数据模型与模拟数据)
+// - commonMain/kotlin/com/example/cookingheart/viewmodel/ (状态管理)
+//
+// 依赖配置 (build.gradle.kts 关键部分):
+// kotlin {
+//     sourceSets {
+//         commonMain.dependencies {
+//             implementation(compose.runtime)
+//             implementation(compose.foundation)
+//             implementation(compose.material3)
+//             implementation(compose.materialIconsExtended)
+//             implementation(compose.ui)
+//             implementation("org.jetbrains.compose.navigation:navigation-compose:1.6.0")
+//             implementation("io.coil-kt.coil3:coil-compose:3.0.0-alpha10")
+//             implementation("io.coil-kt.coil3:coil-network-ktor:3.0.0-alpha10")
+//         }
+//     }
+// }
