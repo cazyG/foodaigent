@@ -1,8 +1,11 @@
 package org.xg.project.screen
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,40 +19,66 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import org.xg.project.Routes.Routes
 
 @Composable
-fun TabBar(active: String) {
-    val items = listOf("首页", "食谱库", "点菜", "历史", "我的")
+fun TabBar(
+    activeRoute: String,
+    onTabClick: (String) -> Unit
+) {
+    data class TabItem(val label: String, val icon: ImageVector, val route: String)
+    val items = listOf(
+        TabItem("首页", Icons.Default.Home, Routes.Home),
+        TabItem("食谱库", Icons.Default.Book, Routes.Recipes),
+        TabItem("点菜", Icons.Default.AddCircle, Routes.Plan),
+        TabItem("历史", Icons.Default.History, Routes.History),
+        TabItem("我的", Icons.Default.Person, Routes.Profile),
+    )
+
     Card(
-        modifier = Modifier
+        Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
             .fillMaxWidth()
-            .padding(16.dp),
+            .height(70.dp),
         shape = RoundedCornerShape(32.dp),
-        elevation = CardDefaults.cardElevation(16.dp) // Material3 写法
+        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.92f)),
+        elevation = CardDefaults.cardElevation(16.dp),
     ) {
         Row(
-            Modifier
-                .height(56.dp)
-                .padding(horizontal = 12.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
+            Modifier.fillMaxSize().padding(horizontal = 28.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            items.forEach {
-                val isActive = it == active
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        "🔸",
-                        Modifier.size(22.dp),
-                        color = if (isActive) Color(0xFFF97316) else Color.Gray
+            items.forEach { tab ->
+                val isActive = tab.route == activeRoute
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .weight(1f)
+                        .clickable { onTabClick(tab.route) }
+                ) {
+                    Icon(
+                        imageVector = tab.icon,
+                        contentDescription = tab.label,
+                        modifier = Modifier.size(28.dp),
+                        tint = if (isActive) Color(0xFFF97316) else Color(0xFFC2C2C2)
                     )
                     Text(
-                        it,
-                        fontSize = 10.sp,
-                        color = if (isActive) Color(0xFFF97316) else Color.Gray,
-                        fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal
+                        tab.label,
+                        fontSize = 11.sp,
+                        fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
+                        color = if (isActive) Color(0xFFF97316) else Color(0xFFC2C2C2),
+                        modifier = Modifier.padding(top = 2.dp)
                     )
                 }
             }

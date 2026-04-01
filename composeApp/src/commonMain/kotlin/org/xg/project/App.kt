@@ -14,28 +14,53 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 import aigent.composeapp.generated.resources.Res
 import aigent.composeapp.generated.resources.compose_multiplatform
 import androidx.compose.material3.Scaffold
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import org.xg.project.Routes.Routes
+import org.xg.project.screen.HistoryScreen
 import org.xg.project.screen.IndexScreen
+import org.xg.project.screen.PlanningScreen
+import org.xg.project.screen.RecipesScreen
 import org.xg.project.screen.TabBar
 
 //import com.multiplatform.webview.web.WebView
 //import com.multiplatform.webview.web.rememberWebViewState
 
 @Composable
-@Preview
 fun App() {
     MaterialTheme {
+        val navController = rememberNavController()
 
         Scaffold(
             bottomBar = {
-                TabBar(active = "首页")
+                TabBar(
+                    activeRoute = navController.currentBackStackEntry?.destination?.route ?: Routes.Home,
+                    onTabClick = { route ->
+                        // 防止重复导航
+                        if (navController.currentBackStackEntry?.destination?.route != route) {
+                            navController.navigate(route) {
+                                // launchSingleTop 可选：避免多次入栈
+                            }
+                        }
+                    }
+                )
             }
         ) {
-            IndexScreen()
+            NavHost(
+                navController = navController,
+                startDestination = Routes.Home
+            ) {
+                composable(Routes.Home) { IndexScreen() }
+                composable(Routes.Recipes) { RecipesScreen() }
+                composable(Routes.Plan) { PlanningScreen() }
+                composable(Routes.History) { HistoryScreen() }
+                composable(Routes.Profile) { Text("测试") }
+            }
         }
 //        var showContent by remember { mutableStateOf(false) }
 ////        val state = rememberWebViewState("http://baidu.com")

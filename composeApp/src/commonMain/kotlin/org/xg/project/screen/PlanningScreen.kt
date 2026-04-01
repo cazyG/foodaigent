@@ -19,6 +19,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarToday
@@ -56,7 +57,7 @@ fun PlanningScreen() {
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Default.ArrowBack, contentDescription = null, tint = Color.Gray)
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = Color.Gray)
             Spacer(Modifier.width(8.dp))
             Text("协作点菜", fontSize = 20.sp, fontWeight = FontWeight.Bold)
         }
@@ -116,7 +117,7 @@ fun PlanningScreen() {
         }
         Spacer(Modifier.height(96.dp))
     }
-    TabBar(active = "点菜")
+//    TabBar(active = "点菜")
 }
 
 @Composable

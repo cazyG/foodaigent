@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -34,23 +33,36 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun RecipesScreen() {
-    Column(Modifier.fillMaxSize().background(Color(0xFFFCFAF2)).verticalScroll(rememberScrollState())) {
+    Column(
+        modifier = Modifier.fillMaxSize().background(Color(0xFFFCFAF2))
+        // 移除 verticalScroll，让 LazyVerticalGrid 自己滚动
+    ) {
         // 顶部标题和新建按钮
         Row(
             Modifier.fillMaxWidth().background(Color.White).padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text("食谱灵感库", fontWeight = FontWeight.Bold, fontSize = 22.sp)
-            Button(onClick = {}, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFEDD5))) {
+            Button(
+                onClick = {},
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFEDD5))
+            ) {
                 Text("+ 手动录入", color = Color(0xFFF59E42))
             }
         }
+
         TextField(
-            value = "", onValueChange = {}, modifier = Modifier
-                .fillMaxWidth().padding(horizontal = 16.dp),
+            value = "",
+            onValueChange = {},
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
             placeholder = { Text("想吃什么？搜索菜名或食材") }
         )
-        Row(Modifier.horizontalScroll(rememberScrollState()).padding(12.dp)) {
+
+        // 分类按钮（可水平滚动）
+        Row(
+            Modifier.horizontalScroll(rememberScrollState()).padding(12.dp)
+        ) {
             CategoryButton("全部", true)
             CategoryButton("快手菜")
             CategoryButton("硬菜/大餐")
@@ -59,22 +71,26 @@ fun RecipesScreen() {
             CategoryButton("甜品")
         }
 
-        // 食谱卡片区域
+        // 关键修改：让 LazyVerticalGrid 占据剩余高度，自己滚动
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize = 160.dp),
-            contentPadding = PaddingValues(all = 12.dp)
+            contentPadding = PaddingValues(all = 12.dp),
+            modifier = Modifier.weight(1f) // 填充剩余空间
         ) {
             items(sampleRecipes) { r -> RecipeCard(r) }
         }
-        Spacer(Modifier.height(96.dp))
+
+        // 底部预留空间（如果有 TabBar 则不需要）
+        Spacer(Modifier.height(16.dp))
     }
-    TabBar(active = "食谱库")
 }
 
+// 以下内容保持不变
 @Composable
 fun CategoryButton(label: String, selected: Boolean = false) {
     Button(
-        onClick = {}, Modifier.padding(end = 8.dp),
+        onClick = {},
+        Modifier.padding(end = 8.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = if (selected) Color(0xFFF59E42) else Color.White,
             contentColor = if (selected) Color.White else Color(0xFF4B5563)
@@ -83,6 +99,7 @@ fun CategoryButton(label: String, selected: Boolean = false) {
 }
 
 data class Recipe(val name: String, val duration: String, val difficulty: String, val tag: String, val img: String? = null)
+
 val sampleRecipes = listOf(
     Recipe("经典红烧肉", "45分钟", "中等难度", "老公爱吃"),
     Recipe("牛油果大虾沙拉", "15分钟", "新手入门", "老婆最爱"),
@@ -99,7 +116,8 @@ fun RecipeCard(recipe: Recipe) {
     Card(
         Modifier
             .padding(8.dp)
-            .width(160.dp), shape = RoundedCornerShape(24.dp)
+            .width(160.dp),
+        shape = RoundedCornerShape(24.dp)
     ) {
         Column {
             Box(Modifier.height(96.dp).fillMaxWidth().background(Color.Gray)) {

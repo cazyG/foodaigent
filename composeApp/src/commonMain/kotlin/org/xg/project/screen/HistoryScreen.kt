@@ -81,7 +81,7 @@ fun HistoryScreen() {
         }
         Spacer(Modifier.height(96.dp))
     }
-    TabBar(active = "历史")
+//    TabBar(active = "历史")
 }
 
 @Composable
