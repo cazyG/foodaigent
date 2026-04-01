@@ -18,6 +18,10 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 import aigent.composeapp.generated.resources.Res
 import aigent.composeapp.generated.resources.compose_multiplatform
+import androidx.compose.material3.Scaffold
+import org.xg.project.screen.IndexScreen
+import org.xg.project.screen.TabBar
+
 //import com.multiplatform.webview.web.WebView
 //import com.multiplatform.webview.web.rememberWebViewState
 
@@ -25,31 +29,39 @@ import aigent.composeapp.generated.resources.compose_multiplatform
 @Preview
 fun App() {
     MaterialTheme {
-        var showContent by remember { mutableStateOf(false) }
-//        val state = rememberWebViewState("http://baidu.com")
-//        WebView(state = state)
-        Column(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.primaryContainer)
-                .safeContentPadding()
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
+
+        Scaffold(
+            bottomBar = {
+                TabBar(active = "首页")
+            }
         ) {
-            Button(onClick = { showContent = !showContent }) {
-                Text("Click me!")
-            }
-            AnimatedVisibility(showContent) {
-                val greeting = remember { Greeting().greet() }
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Image(painterResource(Res.drawable.compose_multiplatform), null)
-                    Text("Compose: $greeting")
-                }
-            }
-
-
-
+            IndexScreen()
         }
+//        var showContent by remember { mutableStateOf(false) }
+////        val state = rememberWebViewState("http://baidu.com")
+////        WebView(state = state)
+//        Column(
+//            modifier = Modifier
+//                .background(MaterialTheme.colorScheme.primaryContainer)
+//                .safeContentPadding()
+//                .fillMaxSize(),
+//            horizontalAlignment = Alignment.CenterHorizontally,
+//        ) {
+//            Button(onClick = { showContent = !showContent }) {
+//                Text("Click me!")
+//            }
+//            AnimatedVisibility(showContent) {
+//                val greeting = remember { Greeting().greet() }
+//                Column(
+//                    horizontalAlignment = Alignment.CenterHorizontally,
+//                ) {
+//                    Image(painterResource(Res.drawable.compose_multiplatform), null)
+//                    Text("Compose: $greeting")
+//                }
+//            }
+//
+//
+//
+//        }
     }
 }

@@ -18,10 +18,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.SegmentedButtonDefaults.Icon
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -105,9 +110,9 @@ fun PlanningScreen() {
         Button(
             onClick = {},
             Modifier.fillMaxWidth().padding(16.dp),
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFF97316))
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF97316))
         ) {
-            Text("生成计划（由$selectedRole发起）", fontWeight = FontWeight.Bold)
+            Text("生成计划（由${selectedRole}发起)", fontWeight = FontWeight.Bold)
         }
         Spacer(Modifier.height(96.dp))
     }

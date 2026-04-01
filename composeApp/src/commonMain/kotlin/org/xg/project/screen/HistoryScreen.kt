@@ -1,5 +1,32 @@
 package org.xg.project.screen
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
 @Composable
 fun HistoryScreen() {
     Column(
@@ -33,7 +60,7 @@ fun HistoryScreen() {
         Column {
             MealRecord(
                 date = "2026.03.29 (昨天)",
-                stars = 5,
+                stars = 5f,
                 title = "晚餐：麻辣香锅",
                 comment = "“老公大展身手的一次，辣度刚刚好，藕片很清脆！”",
                 imgUrl = "https://modao.cc/agent-py/media/generated_images/2026-03-30/8801c842ff4c4601b0eaef5a8bb46f63.jpg"
@@ -91,7 +118,8 @@ fun MealRecord(
             if (buttonLabel != null) {
                 Button(
                     onClick = { /*TODO*/ },
-                    Modifier.padding(top = 8.dp), colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFF59E42))
+                    Modifier.padding(top = 8.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF59E42))
                 ) {
                     Text(buttonLabel, fontSize = 12.sp)
                 }

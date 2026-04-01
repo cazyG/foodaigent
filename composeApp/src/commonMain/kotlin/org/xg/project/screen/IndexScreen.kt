@@ -3,12 +3,18 @@ package org.xg.project.screen
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.*
-import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.Alignment
@@ -56,8 +62,8 @@ fun IndexScreen() {
         Spacer(Modifier.height(96.dp))
     }
 
-    // 底部TabBar
-    TabBar(active = "首页")
+//    // 底部TabBar
+//    TabBar(active = "首页")
 }
 
 @Composable
@@ -75,7 +81,7 @@ fun SectionTitle(title: String, action: String? = null) {
 @Composable
 fun MenuCard(meal: String, name: String, desc: String, chef: String, isPending: Boolean = false, labelColor: Color = Color(0xFF60A5FA)) {
     Card(
-        Modifier.weight(1f),
+        modifier = Modifier, // 正确用法
         shape = RoundedCornerShape(24.dp),
         border = if (isPending) BorderStroke(2.dp, Color(0xFF6366F1)) else null
     ) {
@@ -96,7 +102,7 @@ fun MenuCard(meal: String, name: String, desc: String, chef: String, isPending: 
                 Button(
                     onClick = { /*TODO*/ },
                     Modifier.fillMaxWidth().padding(top = 8.dp),
-                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFF59E42))
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF59E42))
                 ) {
                     Text("去点菜", color = Color.White)
                 }
@@ -108,7 +114,8 @@ fun MenuCard(meal: String, name: String, desc: String, chef: String, isPending: 
 @Composable
 fun CalendarSection() {
     Card(
-        Modifier.padding(16.dp), shape = RoundedCornerShape(32.dp), backgroundColor = Color.White
+        Modifier.padding(16.dp), shape = RoundedCornerShape(32.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column(Modifier.padding(16.dp)) {
             Row(
