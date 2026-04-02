@@ -20,6 +20,7 @@ import aigent.composeapp.generated.resources.compose_multiplatform
 import androidx.compose.material3.Scaffold
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import org.xg.project.Routes.Routes
 import org.xg.project.screen.HistoryScreen
@@ -35,16 +36,21 @@ import org.xg.project.screen.TabBar
 fun App() {
     MaterialTheme {
         val navController = rememberNavController()
-
+        val currentBackStackEntry by navController.currentBackStackEntryAsState()
+        val currentRoute = currentBackStackEntry?.destination?.route ?: Routes.Home
         Scaffold(
             bottomBar = {
                 TabBar(
-                    activeRoute = navController.currentBackStackEntry?.destination?.route ?: Routes.Home,
+                    activeRoute = currentRoute,
                     onTabClick = { route ->
-                        // 防止重复导航
                         if (navController.currentBackStackEntry?.destination?.route != route) {
                             navController.navigate(route) {
-                                // launchSingleTop 可选：避免多次入栈
+                                popUpTo(navController.graph.id) {
+                                    inclusive = true
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
                             }
                         }
                     }

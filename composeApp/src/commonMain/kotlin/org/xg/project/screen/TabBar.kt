@@ -31,12 +31,15 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import org.xg.project.Routes.Routes
 
+data class TabItem(val label: String, val icon: ImageVector, val route: String)
+
 @Composable
 fun TabBar(
     activeRoute: String,
     onTabClick: (String) -> Unit
 ) {
-    data class TabItem(val label: String, val icon: ImageVector, val route: String)
+    print("isActive ${activeRoute} ")
+
     val items = listOf(
         TabItem("首页", Icons.Default.Home, Routes.Home),
         TabItem("食谱库", Icons.Default.Book, Routes.Recipes),
@@ -60,12 +63,15 @@ fun TabBar(
         ) {
             items.forEach { tab ->
                 val isActive = tab.route == activeRoute
+                print("isActive ${isActive} ${tab.label} ${activeRoute} \n")
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
                         .fillMaxHeight()
                         .weight(1f)
-                        .clickable { onTabClick(tab.route) }
+                        .clickable {
+                            onTabClick(tab.route)
+                        }
                 ) {
                     Icon(
                         imageVector = tab.icon,

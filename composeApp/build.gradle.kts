@@ -62,6 +62,7 @@ kotlin {
             implementation(libs.coil.network.ktor3)
             implementation(libs.kotlinx.datetime)
             implementation(libs.navigation.compose)
+            implementation(libs.kotlinx.io.core)
 //            implementation(libs.kevinnzou.compose.webview.multiplatform)
 //            implementation(libs.compose.webview.multiplatform)
 //            implementation(libs.imagepickerkmp)
