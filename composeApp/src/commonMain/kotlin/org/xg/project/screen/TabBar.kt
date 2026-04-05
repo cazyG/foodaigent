@@ -1,5 +1,6 @@
 package org.xg.project.screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -38,34 +39,33 @@ fun TabBar(
     activeRoute: String,
     onTabClick: (String) -> Unit
 ) {
-    print("isActive ${activeRoute} ")
 
     val items = listOf(
         TabItem("首页", Icons.Default.Home, Routes.Home),
         TabItem("食谱库", Icons.Default.Book, Routes.Recipes),
-        TabItem("点菜", Icons.Default.AddCircle, Routes.Plan),
+//        TabItem("点菜", Icons.Default.AddCircle, Routes.Plan),
         TabItem("历史", Icons.Default.History, Routes.History),
         TabItem("我的", Icons.Default.Person, Routes.Profile),
     )
 
     Card(
-        Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
+        Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
             .fillMaxWidth()
             .height(70.dp),
-        shape = RoundedCornerShape(32.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.92f)),
-        elevation = CardDefaults.cardElevation(16.dp),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(48.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.85f)),
     ) {
         Row(
-            Modifier.fillMaxSize().padding(horizontal = 28.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            Modifier.fillMaxSize().padding(horizontal = 14.dp),
+            horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             items.forEach { tab ->
                 val isActive = tab.route == activeRoute
-                print("isActive ${isActive} ${tab.label} ${activeRoute} \n")
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
                     modifier = Modifier
                         .fillMaxHeight()
                         .weight(1f)
@@ -76,15 +76,14 @@ fun TabBar(
                     Icon(
                         imageVector = tab.icon,
                         contentDescription = tab.label,
-                        modifier = Modifier.size(28.dp),
+                        modifier = Modifier.size(32.dp),
                         tint = if (isActive) Color(0xFFF97316) else Color(0xFFC2C2C2)
                     )
                     Text(
-                        tab.label,
+                        text = tab.label,
                         fontSize = 11.sp,
                         fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
                         color = if (isActive) Color(0xFFF97316) else Color(0xFFC2C2C2),
-                        modifier = Modifier.padding(top = 2.dp)
                     )
                 }
             }

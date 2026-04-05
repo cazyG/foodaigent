@@ -1,91 +1,190 @@
 package org.xg.project.screen
 
-import androidx.compose.foundation.*
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
-import androidx.compose.ui.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.*
-import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.number
+import kotlinx.datetime.todayIn
+import kotlin.time.Clock
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun IndexScreen() {
+fun IndexScreen(
+    onAddPlan: () -> Unit   // 点击“去添加计划”时触发，用于跳转到点餐页面
+) {
+    val today = remember {
+        val timeZone = TimeZone.currentSystemDefault()
+        Clock.System.todayIn(timeZone)
+    }
+
     Column(
-        modifier = Modifier.fillMaxSize().background(Color(0xFFFCFAF2)).verticalScroll(rememberScrollState())
+        Modifier
+            .fillMaxSize()
+            .background(Color(0xFFFCFAF2))
+            .safeContentPadding()
     ) {
-        // 顶部导航栏
+        // 顶部栏
         Row(
-            Modifier.fillMaxWidth().background(Color.White).padding(16.dp),
+            Modifier.fillMaxWidth().background(Color.White),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(modifier = Modifier.padding(top = 6.dp, start = 10.dp), verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     Modifier
                         .background(Color(0xFFFBBF24), RoundedCornerShape(12.dp))
                         .padding(8.dp)
                 ) {
-                    Text("🍴")
+                    Text("黄小厨", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 }
-                Spacer(Modifier.width(8.dp))
-                Text("心动厨房", fontSize = 20.sp, fontWeight = FontWeight.Bold)
             }
-            Text("2026年03月30日 星期一", color = Color(0xFFF59E42))
+            Text("${today.year}年${today.month.number}月${today.day}日", color = Color(0xFFF59E42))
         }
 
-        // 今日菜单
-        SectionTitle("今日菜单", "修改计划 >")
-        Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            MenuCard("早餐", "全麦欧包 & 煎蛋", "配料：黑咖啡、蓝莓、无糖酸奶", chef = "丈夫掌勺")
-            MenuCard("午餐", "清蒸鲈鱼 & 蚝油生菜", "配料：糙米饭、排骨海带汤", chef = "妻子掌勺", labelColor = Color(0xFFFF9720))
-            MenuCard("晚餐", "待定", "", chef = "夫妻", isPending = true)
+        // 早餐、午餐、晚餐均分剩余高度
+        MenuSection(
+            title = "早餐",
+            titleColor = Color(0xFF39EC51),
+            menus = listOf(
+                MenuItemData(
+                    name = "全麦欧包 & 煎蛋",
+                    desc = "配料：黑咖啡、蓝莓、无糖酸奶",
+                    chef = "丈夫掌勺"
+                ),
+                MenuItemData(
+                    name = "全麦欧包 & 煎蛋1",
+                    desc = "配料：黑咖啡、蓝莓、无糖酸奶",
+                    chef = "丈夫掌勺"
+                ),
+                MenuItemData(
+                    name = "全麦欧包 & 煎蛋2",
+                    desc = "配料：黑咖啡、蓝莓、无糖酸奶",
+                    chef = "丈夫掌勺"
+                )
+            ),
+            modifier = Modifier.weight(1f),
+            onAddPlan = onAddPlan
+        )
+
+        MenuSection(
+            title = "午餐",
+            menus = listOf(
+                MenuItemData(
+                    name = "清蒸鲈鱼 & 蚝油生菜",
+                    desc = "配料：糙米饭、排骨海带汤",
+                    chef = "妻子掌勺"
+                ),
+                // ... 省略重复数据，实际代码保持不变
+            ),
+            modifier = Modifier.weight(1f),
+            onAddPlan = onAddPlan
+        )
+
+        MenuSection(
+            title = "晚餐",
+            menus = listOf(),
+            modifier = Modifier.weight(1f),
+            onAddPlan = onAddPlan
+        )
+    }
+}
+
+// 菜单项数据结构
+data class MenuItemData(
+    val name: String,
+    val desc: String,
+    val chef: String
+)
+
+// 带标题和网格的菜单区块，支持空状态和点击添加计划
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun MenuSection(
+    title: String,
+    titleColor: Color = Color(0xFFF59E42),
+    menus: List<MenuItemData>,
+    modifier: Modifier = Modifier,
+    onAddPlan: () -> Unit
+) {
+    Column(modifier = modifier) {
+        Text(
+            title,
+            fontSize = 24.sp,
+            color = titleColor,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(start = 18.dp, top = 18.dp, bottom = 8.dp)
+        )
+
+        if (menus.isEmpty()) {
+            // 空状态：可点击区域占满剩余空间，点击调用 onAddPlan
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .clickable { onAddPlan() },
+                contentAlignment = Alignment.Center
+            ) {
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = titleColor.copy(alpha = 0.1f))
+                ) {
+                    Text(
+                        "➕ 去添加计划",
+                        fontSize = 18.sp,
+                        color = titleColor,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp)
+                    )
+                }
+            }
+        } else {
+            // 有菜单：显示网格列表
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = 120.dp),
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                items(menus) { item ->
+                    MenuCard(title, item.name, item.desc, chef = item.chef)
+                }
+            }
         }
-
-        // 点菜日历
-        CalendarSection()
-
-        // 最近动态
-        SectionTitle("爱的评价")
-        ReviewCard("老婆大人", "昨天 19:45", "今天的红烧排骨简直绝了！汤汁拌饭我可以吃三碗，五星好评~ ⭐⭐⭐⭐⭐", "红烧排骨计划")
-        ReviewCard("老公大人", "前天 12:30", "番茄炒蛋永远是我的神，就是稍微有点点咸了，下次少放点盐哦。 ❤️", "午餐家常菜")
-        Spacer(Modifier.height(96.dp))
-    }
-
-//    // 底部TabBar
-//    TabBar(active = "首页")
-}
-
-@Composable
-fun SectionTitle(title: String, action: String? = null) {
-    Row(
-        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(title, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-        if (action != null) Text(action, color = Color(0xFFF59E42), fontSize = 14.sp)
     }
 }
 
+// 菜单卡片（保持不变）
 @Composable
-fun MenuCard(meal: String, name: String, desc: String, chef: String, isPending: Boolean = false, labelColor: Color = Color(0xFF60A5FA)) {
+fun MenuCard(
+    meal: String,
+    name: String,
+    desc: String,
+    chef: String,
+    labelColor: Color = Color(0xFF60A5FA)
+) {
     Card(
-        modifier = Modifier, // 正确用法
-        shape = RoundedCornerShape(24.dp),
-        border = if (isPending) BorderStroke(2.dp, Color(0xFF6366F1)) else null
+        modifier = Modifier,
+        shape = RoundedCornerShape(24.dp)
     ) {
         Column(Modifier.padding(12.dp)) {
             Row(
@@ -100,66 +199,6 @@ fun MenuCard(meal: String, name: String, desc: String, chef: String, isPending: 
             }
             Text(name, fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.padding(top = 4.dp))
             if (desc.isNotEmpty()) Text(desc, fontSize = 12.sp, color = Color.Gray, modifier = Modifier.padding(top = 2.dp))
-            if (isPending) {
-                Button(
-                    onClick = { /*TODO*/ },
-                    Modifier.fillMaxWidth().padding(top = 8.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF59E42))
-                ) {
-                    Text("去点菜", color = Color.White)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun CalendarSection() {
-    Card(
-        Modifier.padding(16.dp), shape = RoundedCornerShape(32.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
-    ) {
-        Column(Modifier.padding(16.dp)) {
-            Row(
-                Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column {
-                    Text("点菜日历", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                    Text("本月已打卡 22 天", fontSize = 12.sp, color = Color.Gray)
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
-                    Text("2026年3月", Modifier.padding(horizontal = 8.dp), fontWeight = FontWeight.Bold)
-                    Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null)
-                }
-            }
-            CalendarGrid() // 用自定义的 Compose 日历组件实现
-        }
-    }
-}
-
-@Composable
-fun CalendarGrid() {
-    // 实际可用 LazyVerticalGrid 或 Row/Column 设置点菜打卡标记和样式
-    Text("实现略（模拟日历 grid，可用 LazyVerticalGrid或自己实现）", color = Color.LightGray, fontSize = 12.sp)
-}
-
-@Composable
-fun ReviewCard(user: String, time: String, content: String, target: String) {
-    Card(Modifier.padding(horizontal = 16.dp, vertical = 4.dp), shape = RoundedCornerShape(24.dp)) {
-        Row(Modifier.padding(12.dp)) {
-            Box(Modifier.size(40.dp).background(Color(0xFFFFEDD5), RoundedCornerShape(16.dp)))
-            Column(Modifier.padding(start = 8.dp)) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(user, fontWeight = FontWeight.Bold)
-                    Text(time, fontSize = 10.sp, color = Color.Gray)
-                }
-                Text(content, fontSize = 14.sp, modifier = Modifier.padding(top = 2.dp))
-                Box(Modifier.background(Color(0xFFF9FAFB), RoundedCornerShape(8.dp)).padding(4.dp).padding(top = 4.dp)) {
-                    Text("针对：$target", fontSize = 10.sp, color = Color.Gray)
-                }
-            }
         }
     }
 }

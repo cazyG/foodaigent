@@ -17,6 +17,9 @@ import org.jetbrains.compose.resources.painterResource
 
 import aigent.composeapp.generated.resources.Res
 import aigent.composeapp.generated.resources.compose_multiplatform
+import androidx.compose.foundation.layout.safeGesturesPadding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.Scaffold
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -39,6 +42,7 @@ fun App() {
         val currentBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = currentBackStackEntry?.destination?.route ?: Routes.Home
         Scaffold(
+            modifier = Modifier.statusBarsPadding(),
             bottomBar = {
                 TabBar(
                     activeRoute = currentRoute,
@@ -61,7 +65,11 @@ fun App() {
                 navController = navController,
                 startDestination = Routes.Home
             ) {
-                composable(Routes.Home) { IndexScreen() }
+                composable(Routes.Home) {
+                    IndexScreen(
+                        onAddPlan = { navController.navigate(Routes.Recipes) }
+                    )
+                }
                 composable(Routes.Recipes) { RecipesScreen() }
                 composable(Routes.Plan) { PlanningScreen() }
                 composable(Routes.History) { HistoryScreen() }

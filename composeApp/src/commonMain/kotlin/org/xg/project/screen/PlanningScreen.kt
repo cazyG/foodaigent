@@ -47,37 +47,14 @@ import androidx.compose.ui.unit.sp
 fun PlanningScreen() {
     var selectedRole by remember { mutableStateOf("丈夫") }
     var selectedMeal by remember { mutableStateOf("午餐") }
+    val state = rememberScrollState()
 
     Column(
-        modifier = Modifier.fillMaxSize().background(Color(0xFFFCFAF2)).verticalScroll(rememberScrollState()),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFFCFAF2))
+            .verticalScroll(state),
     ) {
-        // 顶部栏
-        Row(
-            Modifier.fillMaxWidth().background(Color.White).padding(16.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = Color.Gray)
-            Spacer(Modifier.width(8.dp))
-            Text("协作点菜", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-        }
-
-        // 身份切换
-        Card(
-            Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            shape = RoundedCornerShape(24.dp)
-        ) {
-            Row(Modifier.padding(horizontal = 18.dp, vertical = 12.dp)) {
-                Text("当前点菜人：", fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.width(12.dp))
-                ToggleButtonGroup(
-                    options = listOf("丈夫", "妻子"),
-                    selected = selectedRole,
-                    onSelect = { selectedRole = it }
-                )
-            }
-        }
-
         // 步骤1：选择日期
         SectionTitle("第一步：选择日期")
         Card(Modifier.padding(horizontal = 16.dp), shape = RoundedCornerShape(40.dp)) {
