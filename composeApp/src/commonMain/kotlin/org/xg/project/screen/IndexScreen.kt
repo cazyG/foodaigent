@@ -8,6 +8,8 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
@@ -22,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.number
 import kotlinx.datetime.todayIn
+import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -34,11 +37,23 @@ fun IndexScreen(
         Clock.System.todayIn(timeZone)
     }
 
+    val scrollState = rememberScrollState()
+
+    val now = remember {
+        Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+    }
+    val currentHour = now.hour
+    val showBreakfastReview = currentHour >= 9
+    val showLunchReview = currentHour >= 12
+    val showDinnerReview = currentHour > 19
+    val showSnackReview = currentHour >= 21
+
     Column(
         Modifier
             .fillMaxSize()
             .background(Color(0xFFFCFAF2))
             .safeContentPadding()
+            .verticalScroll(scrollState)
     ) {
         // 顶部栏
         Row(
@@ -58,7 +73,7 @@ fun IndexScreen(
             Text("${today.year}年${today.month.number}月${today.day}日", color = Color(0xFFF59E42))
         }
 
-        // 早餐、午餐、晚餐均分剩余高度
+        // 早餐、午餐、晚餐、宵夜根据内容自适应高度，整体可滚动
         MenuSection(
             title = "早餐",
             titleColor = Color(0xFF39EC51),
@@ -79,7 +94,9 @@ fun IndexScreen(
                     chef = "丈夫掌勺"
                 )
             ),
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.wrapContentSize(),
+            showReviewButton = showBreakfastReview,
+            onReviewClick = { /* TODO */ },
             onAddPlan = onAddPlan
         )
 
@@ -93,14 +110,28 @@ fun IndexScreen(
                 ),
                 // ... 省略重复数据，实际代码保持不变
             ),
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.wrapContentSize(),
+            showReviewButton = showLunchReview,
+            onReviewClick = { /* TODO */ },
             onAddPlan = onAddPlan
         )
 
         MenuSection(
             title = "晚餐",
             menus = listOf(),
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.wrapContentSize(),
+            showReviewButton = showDinnerReview,
+            onReviewClick = { /* TODO */ },
+            onAddPlan = onAddPlan
+        )
+
+        MenuSection(
+            title = "宵夜",
+            titleColor = Color(0xFF9C27B0),
+            menus = listOf(),
+            modifier = Modifier.wrapContentSize(),
+            showReviewButton = showSnackReview,
+            onReviewClick = { /* TODO */ },
             onAddPlan = onAddPlan
         )
     }
@@ -121,23 +152,45 @@ fun MenuSection(
     titleColor: Color = Color(0xFFF59E42),
     menus: List<MenuItemData>,
     modifier: Modifier = Modifier,
+    showReviewButton: Boolean = false,
+    onReviewClick: () -> Unit = {},
     onAddPlan: () -> Unit
 ) {
     Column(modifier = modifier) {
-        Text(
-            title,
-            fontSize = 24.sp,
-            color = titleColor,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(start = 18.dp, top = 18.dp, bottom = 8.dp)
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 18.dp, top = 18.dp, bottom = 8.dp, end = 18.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                title,
+                fontSize = 24.sp,
+                color = titleColor,
+                fontWeight = FontWeight.Bold
+            )
+
+            if (showReviewButton) {
+                Text(
+                    "去评价 >",
+                    fontSize = 14.sp,
+                    color = Color(0xFF6366F1),
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier
+                        .clickable { onReviewClick() }
+                        .padding(4.dp)
+                )
+            }
+        }
 
         if (menus.isEmpty()) {
-            // 空状态：可点击区域占满剩余空间，点击调用 onAddPlan
+            // 空状态：固定高度，点击调用 onAddPlan
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
+                    .height(120.dp)
+                    .padding(horizontal = 12.dp)
                     .clickable { onAddPlan() },
                 contentAlignment = Alignment.Center
             ) {
@@ -156,17 +209,26 @@ fun MenuSection(
             }
         } else {
             // 有菜单：显示网格列表
-            LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 120.dp),
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
+                    .padding(horizontal = 12.dp, vertical = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(menus) { item ->
-                    MenuCard(title, item.name, item.desc, chef = item.chef)
+                menus.chunked(2).forEach { rowMenus ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        for (item in rowMenus) {
+                            Box(modifier = Modifier.weight(1f)) {
+                                MenuCard(title, item.name, item.desc, chef = item.chef)
+                            }
+                        }
+                        if (rowMenus.size == 1) {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
+                    }
                 }
             }
         }

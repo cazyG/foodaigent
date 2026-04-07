@@ -49,13 +49,21 @@ fun HistoryScreen() {
         Spacer(Modifier.height(16.dp))
 
         // 口味分布
-        Card(Modifier.padding(horizontal = 16.dp), shape = RoundedCornerShape(40.dp)) {
+        Card(Modifier.padding(horizontal = 16.dp), shape = RoundedCornerShape(40.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
             Column(Modifier.padding(24.dp)) {
                 Text("口味偏好分布", color = Color.Gray, fontSize = 14.sp, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(8.dp))
-                Box(Modifier.fillMaxWidth().height(120.dp).background(Color.LightGray)) {
-                    Text("雷达图区域（可用Canvas或图片占位）", Modifier.align(Alignment.Center))
-                }
+                RadarChart(
+                    data = mapOf(
+                        "辣" to 0.8f,
+                        "甜" to 0.4f,
+                        "咸" to 0.6f,
+                        "酸" to 0.3f,
+                        "鲜" to 0.7f,
+                        "苦" to 0.1f
+                    ),
+                    modifier = Modifier.fillMaxWidth().height(200.dp)
+                )
             }
         }
 
@@ -216,16 +224,13 @@ fun CalendarGrid() {
 fun ReviewCard(user: String, time: String, content: String, target: String) {
     Card(Modifier.padding(horizontal = 16.dp, vertical = 4.dp), shape = RoundedCornerShape(24.dp)) {
         Row(Modifier.padding(12.dp)) {
-            Box(Modifier.size(40.dp).background(Color(0xFFFFEDD5), RoundedCornerShape(16.dp)))
-            Column(Modifier.padding(start = 8.dp)) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(user, fontWeight = FontWeight.Bold)
-                    Text(time, fontSize = 10.sp, color = Color.Gray)
-                }
-                Text(content, fontSize = 14.sp, modifier = Modifier.padding(top = 2.dp))
-                Box(Modifier.background(Color(0xFFF9FAFB), RoundedCornerShape(8.dp)).padding(4.dp).padding(top = 4.dp)) {
-                    Text("针对：$target", fontSize = 10.sp, color = Color.Gray)
-                }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(user, fontWeight = FontWeight.Bold)
+                Text(time, fontSize = 10.sp, color = Color.Gray)
+            }
+            Text(content, fontSize = 14.sp, modifier = Modifier.padding(top = 2.dp))
+            Box(Modifier.background(Color(0xFFF9FAFB), RoundedCornerShape(8.dp)).padding(4.dp).padding(top = 4.dp)) {
+                Text("针对：$target", fontSize = 10.sp, color = Color.Gray)
             }
         }
     }

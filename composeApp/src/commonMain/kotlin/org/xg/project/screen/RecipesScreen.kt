@@ -18,6 +18,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
 
 // 食谱数据类，增加 mealType 字段表示所属分类
 data class Recipe(
@@ -39,7 +41,7 @@ enum class MealType(val title: String) {
 
 // 示例数据，按分类整理
 val sampleRecipes = listOf(
-    Recipe(1, "经典红烧肉", "45分钟", "中等难度", "老公爱吃", MealType.LUNCH),
+    Recipe(1, "经典红烧肉", "45分钟", "中等难度", "老公爱吃", MealType.LUNCH,"https://modao.cc/agent-py/media/generated_images/2026-03-30/8801c842ff4c4601b0eaef5a8bb46f63.jpg"),
     Recipe(2, "牛油果大虾沙拉", "15分钟", "新手入门", "老婆最爱", MealType.LUNCH),
     Recipe(3, "西红柿炒鸡蛋", "10分钟", "必点基础", "", MealType.DINNER),
     Recipe(4, "秘制宫保鸡丁", "25分钟", "挑战厨艺", "", MealType.DINNER),
@@ -209,13 +211,22 @@ fun RecipeCard(
         )
     ) {
         Column {
-            // 图片占位区（可替换实际图片）
+            // 图片加载区
             Box(
                 modifier = Modifier
                     .height(96.dp)
                     .fillMaxWidth()
                     .background(Color.LightGray)
             ) {
+                if (recipe.img != null) {
+                    AsyncImage(
+                        model = recipe.img,
+                        contentDescription = recipe.name,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+
                 if (recipe.tag.isNotEmpty()) {
                     Box(
                         modifier = Modifier

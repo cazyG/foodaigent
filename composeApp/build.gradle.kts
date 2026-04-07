@@ -44,6 +44,7 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.ui.tooling.preview)
             implementation(libs.androidx.activity.compose)
+            implementation(libs.ktor.client.okhttp)
         }
         commonMain.dependencies {
             implementation(libs.runtime)
@@ -63,6 +64,8 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             implementation(libs.navigation.compose)
             implementation(libs.kotlinx.io.core)
+            
+            implementation(libs.ktor.client.core)
 //            implementation(libs.kevinnzou.compose.webview.multiplatform)
 //            implementation(libs.compose.webview.multiplatform)
 //            implementation(libs.imagepickerkmp)
@@ -73,6 +76,7 @@ kotlin {
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
+            implementation(libs.ktor.client.okhttp)
         }
     }
 }

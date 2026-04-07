@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -13,6 +14,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import coil3.ImageLoader
+import coil3.compose.setSingletonImageLoaderFactory
+import coil3.network.ktor3.KtorNetworkFetcherFactory
+import coil3.request.crossfade
+import coil3.util.DebugLogger
 import org.jetbrains.compose.resources.painterResource
 
 import aigent.composeapp.generated.resources.Res
@@ -37,6 +43,17 @@ import org.xg.project.screen.TabBar
 
 @Composable
 fun App() {
+    // Coil3 初始化网络请求组件
+    setSingletonImageLoaderFactory { context ->
+        ImageLoader.Builder(context)
+            .crossfade(true)
+            .logger(DebugLogger())
+            .components {
+                add(KtorNetworkFetcherFactory())
+            }
+            .build()
+    }
+
     MaterialTheme {
         val navController = rememberNavController()
         val currentBackStackEntry by navController.currentBackStackEntryAsState()
@@ -60,10 +77,11 @@ fun App() {
                     }
                 )
             }
-        ) {
+        ) { innerPadding ->
             NavHost(
                 navController = navController,
-                startDestination = Routes.Home
+                startDestination = Routes.Home,
+                modifier = Modifier.padding(innerPadding)
             ) {
                 composable(Routes.Home) {
                     IndexScreen(
