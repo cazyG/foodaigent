@@ -6,13 +6,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.ui.NavDisplay
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.network.ktor3.KtorNetworkFetcherFactory
@@ -43,44 +42,37 @@ fun App() {
         modules(appModule)
     }) {
         MaterialTheme {
-            val navController = rememberNavController()
-            val currentBackStackEntry by navController.currentBackStackEntryAsState()
-            val currentRoute = currentBackStackEntry?.destination?.route ?: Routes.Home
+            val backStack = remember { mutableStateListOf<String>(Routes.Home) }
+            val currentRoute = backStack.lastOrNull() ?: Routes.Home
             Scaffold(
                 modifier = Modifier.statusBarsPadding(),
                 bottomBar = {
                     TabBar(
                         activeRoute = currentRoute,
                         onTabClick = { route ->
-                            if (navController.currentBackStackEntry?.destination?.route != route) {
-                                navController.navigate(route) {
-                                    popUpTo(navController.graph.id) {
-                                        inclusive = true
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
+                            if (currentRoute != route) {
+                                backStack.clear()
+                                backStack.add(route)
                             }
                         }
                     )
                 }
             ) { innerPadding ->
-                NavHost(
-                    navController = navController,
-                    startDestination = Routes.Home,
+                NavDisplay(
+                    backStack = backStack,
                     modifier = Modifier.padding(innerPadding)
-                ) {
-                    composable(Routes.Home) {
-                        IndexScreen(
-                            onAddPlan = { navController.navigate(Routes.Recipes) }
-                        )
-                    }
-                    composable(Routes.Recipes) { RecipesScreen() }
-                    composable(Routes.Plan) { PlanningScreen() }
-                    composable(Routes.History) { HistoryScreen() }
-                    composable(Routes.Profile) {
-                        ProfileScreen()
+                ) { key ->
+                    when (key) {
+                        Routes.Home -> NavEntry(key) {
+                            IndexScreen(
+                                onAddPlan = { backStack.add(Routes.Recipes) }
+                            )
+                        }
+                        Routes.Recipes -> NavEntry(key) { RecipesScreen() }
+                        Routes.Plan -> NavEntry(key) { PlanningScreen() }
+                        Routes.History -> NavEntry(key) { HistoryScreen() }
+                        Routes.Profile -> NavEntry(key) { ProfileScreen() }
+                        else -> NavEntry(key) { Text("Unknown Route") }
                     }
                 }
             }
