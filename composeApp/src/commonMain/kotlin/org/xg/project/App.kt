@@ -16,6 +16,8 @@ import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import org.koin.compose.KoinApplication
+import org.koin.core.KoinApplication
+import org.koin.dsl.koinConfiguration
 import org.xg.project.Routes.Routes
 import org.xg.project.di.appModule
 import org.xg.project.screen.HistoryScreen
@@ -37,45 +39,45 @@ fun App() {
             }
             .build()
     }
-
-    KoinApplication(application = {
-        modules(appModule)
-    }) {
-        MaterialTheme {
-            val backStack = remember { mutableStateListOf<String>(Routes.Home) }
-            val currentRoute = backStack.lastOrNull() ?: Routes.Home
-            Scaffold(
-                modifier = Modifier.statusBarsPadding(),
-                bottomBar = {
-                    TabBar(
-                        activeRoute = currentRoute,
-                        onTabClick = { route ->
-                            if (currentRoute != route) {
-                                backStack.clear()
-                                backStack.add(route)
+    KoinApplication(
+        configuration = koinConfiguration(declaration = { modules(appModule) }),
+        content = {
+            MaterialTheme {
+                val backStack = remember { mutableStateListOf<String>(Routes.Home) }
+                val currentRoute = backStack.lastOrNull() ?: Routes.Home
+                Scaffold(
+                    modifier = Modifier.statusBarsPadding(),
+                    bottomBar = {
+                        TabBar(
+                            activeRoute = currentRoute,
+                            onTabClick = { route ->
+                                if (currentRoute != route) {
+                                    backStack.clear()
+                                    backStack.add(route)
+                                }
                             }
+                        )
+                    }
+                ) { innerPadding ->
+                    NavDisplay(
+                        backStack = backStack,
+//                        modifier = Modifier.padding(innerPadding)
+                    ) { key ->
+                        when (key) {
+                            Routes.Home -> NavEntry(key) {
+                                IndexScreen(
+                                    onAddPlan = { backStack.add(Routes.Recipes) }
+                                )
+                            }
+
+                            Routes.Recipes -> NavEntry(key) { RecipesScreen() }
+                            Routes.Plan -> NavEntry(key) { PlanningScreen() }
+                            Routes.History -> NavEntry(key) { HistoryScreen() }
+                            Routes.Profile -> NavEntry(key) { ProfileScreen() }
+                            else -> NavEntry(key) { Text("Unknown Route") }
                         }
-                    )
-                }
-            ) { innerPadding ->
-                NavDisplay(
-                    backStack = backStack,
-                    modifier = Modifier.padding(innerPadding)
-                ) { key ->
-                    when (key) {
-                        Routes.Home -> NavEntry(key) {
-                            IndexScreen(
-                                onAddPlan = { backStack.add(Routes.Recipes) }
-                            )
-                        }
-                        Routes.Recipes -> NavEntry(key) { RecipesScreen() }
-                        Routes.Plan -> NavEntry(key) { PlanningScreen() }
-                        Routes.History -> NavEntry(key) { HistoryScreen() }
-                        Routes.Profile -> NavEntry(key) { ProfileScreen() }
-                        else -> NavEntry(key) { Text("Unknown Route") }
                     }
                 }
             }
-        }
-    }
+        })
 }

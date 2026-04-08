@@ -69,7 +69,6 @@ fun IndexScreen(
         Modifier
             .fillMaxSize()
             .background(Color(0xFFFCFAF2))
-            .safeContentPadding()
             .verticalScroll(scrollState)
     ) {
         // 顶部栏
