@@ -30,12 +30,10 @@ class HistoryViewModel(
             _state.value = _state.value.copy(isLoading = true, error = null)
             try {
                 // 模拟并行请求
-                val radarData = repository.fetchTasteRadar()
                 val records = repository.fetchDailyRecords()
                 
                 _state.value = _state.value.copy(
                     isLoading = false,
-                    tasteRadarData = radarData,
                     dailyRecords = records
                 )
             } catch (e: Exception) {

@@ -6,6 +6,7 @@ import org.xg.project.data.repository.FoodRepository
 import org.xg.project.domain.usecase.CheckMealReviewEligibilityUseCase
 import org.xg.project.presentation.history.HistoryViewModel
 import org.xg.project.presentation.index.IndexViewModel
+import org.xg.project.presentation.profile.ProfileViewModel
 import org.xg.project.presentation.recipes.RecipesViewModel
 
 val appModule = module {
@@ -19,4 +20,5 @@ val appModule = module {
     viewModelOf(::IndexViewModel)
     viewModelOf(::HistoryViewModel)
     viewModelOf(::RecipesViewModel)
+    viewModelOf(::ProfileViewModel)
 }

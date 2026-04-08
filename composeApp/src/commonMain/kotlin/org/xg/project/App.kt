@@ -22,6 +22,7 @@ import org.xg.project.di.appModule
 import org.xg.project.screen.HistoryScreen
 import org.xg.project.screen.IndexScreen
 import org.xg.project.screen.PlanningScreen
+import org.xg.project.screen.ProfileScreen
 import org.xg.project.screen.RecipesScreen
 import org.xg.project.screen.TabBar
 
@@ -78,7 +79,9 @@ fun App() {
                     composable(Routes.Recipes) { RecipesScreen() }
                     composable(Routes.Plan) { PlanningScreen() }
                     composable(Routes.History) { HistoryScreen() }
-                    composable(Routes.Profile) { Text("测试") }
+                    composable(Routes.Profile) {
+                        ProfileScreen()
+                    }
                 }
             }
         }

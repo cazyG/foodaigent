@@ -1,9 +1,5 @@
 package org.xg.project.screen
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -29,9 +25,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,8 +48,6 @@ fun HistoryScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val scrollState = rememberScrollState()
-    // 当向下滚动超过 100 像素时隐藏雷达图
-    val showRadar by remember { derivedStateOf { scrollState.value < 100 } }
 
     Column(
         modifier = Modifier.fillMaxSize().background(Color(0xFFFCFAF2)).verticalScroll(scrollState)
@@ -73,26 +65,6 @@ fun HistoryScreen(
                 CircularProgressIndicator(color = Color(0xFFF59E42))
             }
         } else {
-            Spacer(Modifier.height(16.dp))
-
-            // 口味分布（带有消失动画）
-            AnimatedVisibility(
-                visible = showRadar,
-                enter = expandVertically(animationSpec = tween(300)),
-                exit = shrinkVertically(animationSpec = tween(300))
-            ) {
-                Card(Modifier.padding(horizontal = 16.dp), shape = RoundedCornerShape(40.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
-                    Column(Modifier.padding(24.dp)) {
-                        Text("口味偏好分布", color = Color.Gray, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                        Spacer(Modifier.height(8.dp))
-                        RadarChart(
-                            data = state.tasteRadarData,
-                            modifier = Modifier.fillMaxWidth().height(200.dp)
-                        )
-                    }
-                }
-            }
-
             // 历史记录
             Spacer(Modifier.height(16.dp))
             Text("饮食记录流", fontWeight = FontWeight.Bold, color = Color.Gray, modifier = Modifier.padding(16.dp, 4.dp, 0.dp, 4.dp))
