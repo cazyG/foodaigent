@@ -24,14 +24,25 @@ import androidx.compose.ui.unit.sp
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.number
 import kotlinx.datetime.todayIn
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import org.koin.compose.viewmodel.koinViewModel
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
+
+import org.xg.project.domain.model.DailyMenuRecord
+import org.xg.project.domain.model.MenuItemData
+import org.xg.project.presentation.index.IndexViewModel
+import org.xg.project.presentation.index.IndexIntent
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun IndexScreen(
-    onAddPlan: () -> Unit   // 点击“去添加计划”时触发，用于跳转到点餐页面
+    onAddPlan: () -> Unit,   // 点击“去添加计划”时触发，用于跳转到点餐页面
+    viewModel: IndexViewModel = koinViewModel()
 ) {
+    val state by viewModel.state.collectAsState()
     val today = remember {
         val timeZone = TimeZone.currentSystemDefault()
         Clock.System.todayIn(timeZone)
@@ -39,14 +50,20 @@ fun IndexScreen(
 
     val scrollState = rememberScrollState()
 
-    val now = remember {
-        Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+    if (state.isLoading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = Color(0xFFF59E42))
+        }
+        return
     }
-    val currentHour = now.hour
-    val showBreakfastReview = currentHour >= 9
-    val showLunchReview = currentHour >= 12
-    val showDinnerReview = currentHour > 19
-    val showSnackReview = currentHour >= 21
+
+    val todayRecord = state.todayRecord ?: DailyMenuRecord(
+        date = "${today.year}.${today.month.number}.${today.day} (今天)",
+        breakfast = emptyList(),
+        lunch = emptyList(),
+        dinner = emptyList(),
+        snack = emptyList()
+    )
 
     Column(
         Modifier
@@ -61,7 +78,10 @@ fun IndexScreen(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(modifier = Modifier.padding(top = 6.dp, start = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.padding(top = 6.dp, start = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Box(
                     Modifier
                         .background(Color(0xFFFBBF24), RoundedCornerShape(12.dp))
@@ -77,50 +97,27 @@ fun IndexScreen(
         MenuSection(
             title = "早餐",
             titleColor = Color(0xFF39EC51),
-            menus = listOf(
-                MenuItemData(
-                    name = "全麦欧包 & 煎蛋",
-                    desc = "配料：黑咖啡、蓝莓、无糖酸奶",
-                    chef = "丈夫掌勺"
-                ),
-                MenuItemData(
-                    name = "全麦欧包 & 煎蛋1",
-                    desc = "配料：黑咖啡、蓝莓、无糖酸奶",
-                    chef = "丈夫掌勺"
-                ),
-                MenuItemData(
-                    name = "全麦欧包 & 煎蛋2",
-                    desc = "配料：黑咖啡、蓝莓、无糖酸奶",
-                    chef = "丈夫掌勺"
-                )
-            ),
+            menus = todayRecord.breakfast,
             modifier = Modifier.wrapContentSize(),
-            showReviewButton = showBreakfastReview,
+            showReviewButton = state.canReviewBreakfast,
             onReviewClick = { /* TODO */ },
             onAddPlan = onAddPlan
         )
 
         MenuSection(
             title = "午餐",
-            menus = listOf(
-                MenuItemData(
-                    name = "清蒸鲈鱼 & 蚝油生菜",
-                    desc = "配料：糙米饭、排骨海带汤",
-                    chef = "妻子掌勺"
-                ),
-                // ... 省略重复数据，实际代码保持不变
-            ),
+            menus = todayRecord.lunch,
             modifier = Modifier.wrapContentSize(),
-            showReviewButton = showLunchReview,
+            showReviewButton = state.canReviewLunch,
             onReviewClick = { /* TODO */ },
             onAddPlan = onAddPlan
         )
 
         MenuSection(
             title = "晚餐",
-            menus = listOf(),
+            menus = todayRecord.dinner,
             modifier = Modifier.wrapContentSize(),
-            showReviewButton = showDinnerReview,
+            showReviewButton = state.canReviewDinner,
             onReviewClick = { /* TODO */ },
             onAddPlan = onAddPlan
         )
@@ -128,21 +125,14 @@ fun IndexScreen(
         MenuSection(
             title = "宵夜",
             titleColor = Color(0xFF9C27B0),
-            menus = listOf(),
+            menus = todayRecord.snack,
             modifier = Modifier.wrapContentSize(),
-            showReviewButton = showSnackReview,
+            showReviewButton = state.canReviewSnack,
             onReviewClick = { /* TODO */ },
             onAddPlan = onAddPlan
         )
     }
 }
-
-// 菜单项数据结构
-data class MenuItemData(
-    val name: String,
-    val desc: String,
-    val chef: String
-)
 
 // 带标题和网格的菜单区块，支持空状态和点击添加计划
 @OptIn(ExperimentalFoundationApi::class)

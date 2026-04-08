@@ -1,5 +1,9 @@
 package org.xg.project.screen
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -25,6 +29,9 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,11 +39,26 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.collectAsState
+import org.koin.compose.viewmodel.koinViewModel
+import org.xg.project.domain.model.DailyMenuRecord
+import org.xg.project.presentation.history.HistoryViewModel
+import org.xg.project.presentation.history.HistoryIntent
 
 @Composable
-fun HistoryScreen() {
+fun HistoryScreen(
+    viewModel: HistoryViewModel = koinViewModel()
+) {
+    val state by viewModel.state.collectAsState()
+    val scrollState = rememberScrollState()
+    // 当向下滚动超过 100 像素时隐藏雷达图
+    val showRadar by remember { derivedStateOf { scrollState.value < 100 } }
+
     Column(
-        modifier = Modifier.fillMaxSize().background(Color(0xFFFCFAF2)).verticalScroll(rememberScrollState())
+        modifier = Modifier.fillMaxSize().background(Color(0xFFFCFAF2)).verticalScroll(scrollState)
     ) {
         // 顶部栏
         Box(Modifier.fillMaxWidth().background(Color.White).padding(24.dp)) {
@@ -46,66 +68,48 @@ fun HistoryScreen() {
             }
         }
 
-        Spacer(Modifier.height(16.dp))
-
-        // 口味分布
-        Card(Modifier.padding(horizontal = 16.dp), shape = RoundedCornerShape(40.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
-            Column(Modifier.padding(24.dp)) {
-                Text("口味偏好分布", color = Color.Gray, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(8.dp))
-                RadarChart(
-                    data = mapOf(
-                        "辣" to 0.8f,
-                        "甜" to 0.4f,
-                        "咸" to 0.6f,
-                        "酸" to 0.3f,
-                        "鲜" to 0.7f,
-                        "苦" to 0.1f
-                    ),
-                    modifier = Modifier.fillMaxWidth().height(200.dp)
-                )
+        if (state.isLoading) {
+            Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = Color(0xFFF59E42))
             }
-        }
+        } else {
+            Spacer(Modifier.height(16.dp))
 
-        // 历史记录
-        Spacer(Modifier.height(16.dp))
-        Text("饮食记录流", fontWeight = FontWeight.Bold, color = Color.Gray, modifier = Modifier.padding(16.dp, 4.dp, 0.dp, 4.dp))
+            // 口味分布（带有消失动画）
+            AnimatedVisibility(
+                visible = showRadar,
+                enter = expandVertically(animationSpec = tween(300)),
+                exit = shrinkVertically(animationSpec = tween(300))
+            ) {
+                Card(Modifier.padding(horizontal = 16.dp), shape = RoundedCornerShape(40.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+                    Column(Modifier.padding(24.dp)) {
+                        Text("口味偏好分布", color = Color.Gray, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                        Spacer(Modifier.height(8.dp))
+                        RadarChart(
+                            data = state.tasteRadarData,
+                            modifier = Modifier.fillMaxWidth().height(200.dp)
+                        )
+                    }
+                }
+            }
 
-        Column {
-            MealRecord(
-                date = "2026.03.29 (昨天)",
-                stars = 5f,
-                title = "晚餐：麻辣香锅",
-                comment = "“老公大展身手的一次，辣度刚刚好，藕片很清脆！”",
-                imgUrl = "https://modao.cc/agent-py/media/generated_images/2026-03-30/8801c842ff4c4601b0eaef5a8bb46f63.jpg"
-            )
-            MealRecord(
-                date = "2026.03.28",
-                stars = 4.5f,
-                title = "中餐：酸汤肥牛",
-                comment = "“老婆辛苦了，肥牛稍微煮老了一点点，但汤汁拌饭无敌。”",
-                buttonLabel = "再吃一次"
-            )
-            MealRecord(
-                date = "2026.03.27",
-                stars = 4f,
-                title = "晚餐：外卖打卡（披萨）",
-                comment = "“加班太累了，今天不做饭。这家榴莲披萨料好足。”"
-            )
+            // 历史记录
+            Spacer(Modifier.height(16.dp))
+            Text("饮食记录流", fontWeight = FontWeight.Bold, color = Color.Gray, modifier = Modifier.padding(16.dp, 4.dp, 0.dp, 4.dp))
+
+            Column {
+                state.dailyRecords.forEach { record ->
+                    MealRecord(record = record)
+                }
+            }
+            Spacer(Modifier.height(96.dp))
         }
-        Spacer(Modifier.height(96.dp))
     }
-//    TabBar(active = "历史")
 }
 
 @Composable
 fun MealRecord(
-    date: String,
-    stars: Float,
-    title: String,
-    comment: String = "",
-    imgUrl: String? = null,
-    buttonLabel: String? = null
+    record: DailyMenuRecord
 ) {
     Card(Modifier.padding(start = 32.dp, end = 16.dp, bottom = 12.dp), shape = RoundedCornerShape(32.dp)) {
         Column(Modifier.padding(16.dp)) {
@@ -113,30 +117,40 @@ fun MealRecord(
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(date, color = Color.Gray, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                Row {
-                    val fullStars = stars.toInt()
-                    repeat(fullStars) { Text("⭐", fontSize = 14.sp, color = Color(0xFFFBBF24)) }
-                    if (stars - fullStars >= 0.5f) Text("⭐", fontSize = 14.sp, color = Color(0x80FBBF24))
+                Text(record.date, color = Color.Gray, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                if (record.stars > 0) {
+                    Row {
+                        val fullStars = record.stars.toInt()
+                        repeat(fullStars) { Text("⭐", fontSize = 14.sp, color = Color(0xFFFBBF24)) }
+                        if (record.stars - fullStars >= 0.5f) Text("⭐", fontSize = 14.sp, color = Color(0x80FBBF24))
+                    }
                 }
             }
-            Text(title, fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.padding(top = 8.dp))
-            if (comment.isNotEmpty()) Text(comment, fontSize = 13.sp, color = Color.Gray, modifier = Modifier.padding(top = 6.dp))
-            if (imgUrl != null) {
+            Spacer(Modifier.height(8.dp))
+
+            // 展示各个餐段的数据
+            if (record.breakfast.isNotEmpty()) {
+                Text("早餐：${record.breakfast.joinToString("，") { it.name }}", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+            }
+            if (record.lunch.isNotEmpty()) {
+                Text("午餐：${record.lunch.joinToString("，") { it.name }}", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+            }
+            if (record.dinner.isNotEmpty()) {
+                Text("晚餐：${record.dinner.joinToString("，") { it.name }}", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+            }
+            if (record.snack.isNotEmpty()) {
+                Text("宵夜：${record.snack.joinToString("，") { it.name }}", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+            }
+
+            if (record.comment.isNotEmpty()) Text(record.comment, fontSize = 13.sp, color = Color.Gray, modifier = Modifier.padding(top = 6.dp))
+            if (record.imgUrl != null) {
                 Spacer(Modifier.height(12.dp))
-                // TODO: 图片加载需要配合compose-image-loader（Web/桌面需要不同loader），这里只写图片占位
-                Box(Modifier.size(64.dp).background(Color.Gray).clip(RoundedCornerShape(16.dp))) {
-                    Text("图", Modifier.align(Alignment.Center), color = Color.White)
-                }
-            }
-            if (buttonLabel != null) {
-                Button(
-                    onClick = { /*TODO*/ },
-                    Modifier.padding(top = 8.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF59E42))
-                ) {
-                    Text(buttonLabel, fontSize = 12.sp)
-                }
+                AsyncImage(
+                    model = record.imgUrl,
+                    contentDescription = null,
+                    modifier = Modifier.size(64.dp).clip(RoundedCornerShape(16.dp)),
+                    contentScale = ContentScale.Crop
+                )
             }
         }
     }

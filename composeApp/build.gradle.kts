@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 kotlin {
@@ -66,6 +67,13 @@ kotlin {
             implementation(libs.kotlinx.io.core)
             
             implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(libs.kotlinx.serialization.json)
+            
+            implementation(libs.koin.core)
+            implementation(libs.koin.compose)
+            implementation(libs.koin.compose.viewmodel)
 //            implementation(libs.kevinnzou.compose.webview.multiplatform)
 //            implementation(libs.compose.webview.multiplatform)
 //            implementation(libs.imagepickerkmp)
@@ -109,7 +117,7 @@ android {
 }
 
 dependencies {
-    debugImplementation(compose.uiTooling)
+    debugImplementation(libs.ui.tooling)
 }
 
 compose.desktop {
@@ -120,6 +128,9 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "org.xg.project"
             packageVersion = "1.0.0"
+            macOS {
+                entitlementsFile.set(project.file("entitlements.plist"))
+            }
         }
     }
 }

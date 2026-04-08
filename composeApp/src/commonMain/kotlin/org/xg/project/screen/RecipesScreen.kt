@@ -21,79 +21,22 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import androidx.compose.ui.layout.ContentScale
 
-// 食谱数据类，增加 mealType 字段表示所属分类
-data class Recipe(
-    val id: Int,
-    val name: String,
-    val duration: String,
-    val difficulty: String,
-    val tag: String,
-    val mealType: MealType,
-    val img: String? = null
-)
-
-enum class MealType(val title: String) {
-    BREAKFAST("早餐"),
-    LUNCH("午餐"),
-    DINNER("晚餐"),
-    SNACK("宵夜")
-}
-
-// 示例数据，按分类整理
-val sampleRecipes = listOf(
-    Recipe(1, "经典红烧肉", "45分钟", "中等难度", "老公爱吃", MealType.LUNCH,"https://modao.cc/agent-py/media/generated_images/2026-03-30/8801c842ff4c4601b0eaef5a8bb46f63.jpg"),
-    Recipe(2, "牛油果大虾沙拉", "15分钟", "新手入门", "老婆最爱", MealType.LUNCH),
-    Recipe(3, "西红柿炒鸡蛋", "10分钟", "必点基础", "", MealType.DINNER),
-    Recipe(4, "秘制宫保鸡丁", "25分钟", "挑战厨艺", "", MealType.DINNER),
-    Recipe(5, "孔雀开屏清蒸鱼", "20分钟", "颜值极高", "低脂健康", MealType.DINNER),
-    Recipe(6, "正宗麻婆豆腐", "15分钟", "下饭神器", "", MealType.LUNCH),
-    Recipe(7, "冬瓜薏米排骨汤", "90分钟", "滋补养生", "", MealType.DINNER),
-    Recipe(8, "蒜蓉粉丝蒸大虾", "20分钟", "宴客之选", "", MealType.DINNER),
-    Recipe(9, "全麦三明治", "10分钟", "新手入门", "减脂", MealType.BREAKFAST),
-    Recipe(10, "燕麦水果酸奶碗", "5分钟", "简单", "快手", MealType.BREAKFAST),
-    Recipe(11, "煎饺", "15分钟", "中等难度", "中式", MealType.BREAKFAST),
-    Recipe(12, "煎饺", "15分钟", "中等难度", "中式", MealType.BREAKFAST),
-    Recipe(13, "煎饺", "15分钟", "中等难度", "中式", MealType.BREAKFAST),
-    Recipe(14, "煎饺", "15分钟", "中等难度", "中式", MealType.BREAKFAST),
-    Recipe(15, "煎饺", "15分钟", "中等难度", "中式", MealType.BREAKFAST),
-    Recipe(16, "煎饺", "15分钟", "中等难度", "中式", MealType.BREAKFAST),
-    Recipe(17, "煎饺", "15分钟", "中等难度", "中式", MealType.BREAKFAST),
-    Recipe(18, "煎饺", "15分钟", "中等难度", "中式", MealType.BREAKFAST),
-    Recipe(19, "煎饺", "15分钟", "中等难度", "中式", MealType.BREAKFAST),
-    Recipe(20, "煎饺", "15分钟", "中等难度", "中式", MealType.BREAKFAST),
-
-    Recipe(12, "烤鸡翅", "25分钟", "简单", "宵夜最爱", MealType.SNACK),
-    Recipe(13, "芝士焗红薯", "20分钟", "简单", "甜品", MealType.SNACK)
-)
+import org.koin.compose.viewmodel.koinViewModel
+import org.xg.project.domain.model.MealType
+import org.xg.project.domain.model.Recipe
+import org.xg.project.presentation.recipes.RecipesViewModel
+import org.xg.project.presentation.recipes.RecipesIntent
 
 @Composable
-fun RecipesScreen() {
-    // 当前选中的分类
-    var selectedMealType by remember { mutableStateOf(MealType.BREAKFAST) }
-    // 选中的食谱 id 集合
-    var selectedRecipeIds by remember { mutableStateOf(setOf<Int>()) }
-
-    // 当前分类下的食谱列表
-    val currentRecipes = remember(selectedMealType) {
-        sampleRecipes.filter { it.mealType == selectedMealType }
-    }
-
-    // 处理卡片点击（多选）
-    fun toggleSelection(recipeId: Int) {
-        selectedRecipeIds = if (selectedRecipeIds.contains(recipeId)) {
-            selectedRecipeIds - recipeId
-        } else {
-            selectedRecipeIds + recipeId
+fun RecipesScreen(
+    viewModel: RecipesViewModel = koinViewModel()
+) {
+    val state by viewModel.state.collectAsState()
+    if (state.isLoading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = Color(0xFFF59E42))
         }
-    }
-
-    // 保存选中的食谱
-    fun saveSelections() {
-        val selectedRecipes = sampleRecipes.filter { it.id in selectedRecipeIds }
-        // 示例：打印选中的食谱，实际可替换为添加计划等逻辑
-        println("保存选中食谱: ${selectedRecipes.joinToString { it.name }}")
-        // 清空选中状态
-        selectedRecipeIds = emptySet()
+        return
     }
 
     Column(
@@ -113,11 +56,11 @@ fun RecipesScreen() {
             Text(text = "食谱灵感库", modifier = Modifier.padding(start = 10.dp), fontWeight = FontWeight.Bold, fontSize = 22.sp)
 
             // 按钮根据是否有选中项切换文本和功能
-            val buttonText = if (selectedRecipeIds.isNotEmpty()) "保存" else "+ 手动录入"
+            val buttonText = if (state.selectedRecipeIds.isNotEmpty()) "保存" else "+ 手动录入"
             Button(
                 onClick = {
-                    if (selectedRecipeIds.isNotEmpty()) {
-                        saveSelections()
+                    if (state.selectedRecipeIds.isNotEmpty()) {
+                        viewModel.handleIntent(RecipesIntent.SaveSelections)
                     } else {
                         // 手动录入逻辑（可根据需要实现）
                         println("手动录入")
@@ -145,12 +88,10 @@ fun RecipesScreen() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 MealType.values().forEach { mealType ->
-                    val isSelected = selectedMealType == mealType
+                    val isSelected = state.selectedMealType == mealType
                     Button(
                         onClick = {
-                            selectedMealType = mealType
-                            // 切换分类时清空选中状态
-                            selectedRecipeIds = emptySet()
+                            viewModel.handleIntent(RecipesIntent.ChangeMealType(mealType))
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -174,11 +115,11 @@ fun RecipesScreen() {
                     .weight(8f)
                     .fillMaxHeight()
             ) {
-                items(currentRecipes) { recipe ->
+                items(state.currentRecipes) { recipe ->
                     RecipeCard(
                         recipe = recipe,
-                        isSelected = recipe.id in selectedRecipeIds,
-                        onToggle = { toggleSelection(recipe.id) }
+                        isSelected = recipe.id in state.selectedRecipeIds,
+                        onToggle = { viewModel.handleIntent(RecipesIntent.ToggleSelection(recipe.id)) }
                     )
                 }
             }
@@ -210,45 +151,59 @@ fun RecipeCard(
             containerColor = if (isSelected) Color(0xFFFFF3E6) else Color.White
         )
     ) {
-        Column {
-            // 图片加载区
-            Box(
-                modifier = Modifier
-                    .height(96.dp)
-                    .fillMaxWidth()
-                    .background(Color.LightGray)
-            ) {
-                if (recipe.img != null) {
-                    AsyncImage(
-                        model = recipe.img,
-                        contentDescription = recipe.name,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+        // 使用 Box 堆叠图片和文字
+        Box(
+            modifier = Modifier
+                .height(140.dp) // 增加高度让图片更大一点
+                .fillMaxWidth()
+                .background(Color.LightGray)
+        ) {
+            // 底层：图片
+            if (recipe.img != null) {
+                AsyncImage(
+                    model = recipe.img,
+                    contentDescription = recipe.name,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
+
+            // 右上角：标签
+            if (recipe.tag.isNotEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .padding(6.dp)
+                        .background(Color.White.copy(alpha = 0.8f), RoundedCornerShape(8.dp))
+                        .align(Alignment.TopEnd)
+                ) {
+                    Text(
+                        text = recipe.tag,
+                        fontSize = 10.sp,
+                        color = Color(0xFFF97316),
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                     )
                 }
-
-                if (recipe.tag.isNotEmpty()) {
-                    Box(
-                        modifier = Modifier
-                            .padding(6.dp)
-                            .background(Color.White.copy(alpha = 0.8f), RoundedCornerShape(8.dp))
-                            .align(Alignment.TopEnd)
-                    ) {
-                        Text(recipe.tag, fontSize = 10.sp, color = Color(0xFFF97316))
-                    }
-                }
             }
-            Column(Modifier.padding(8.dp)) {
+
+            // 底部：半透明渐变背景 + 文字信息
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .fillMaxWidth()
+                    .background(Color.Black.copy(alpha = 0.5f)) // 半透明黑色背景，让白色文字更清晰
+                    .padding(8.dp)
+            ) {
                 Text(
                     recipe.name,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
+                    color = Color.White,
                     maxLines = 1
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(recipe.duration, fontSize = 10.sp, color = Color.Gray)
-                    Text(" | ", fontSize = 10.sp, color = Color.LightGray)
-                    Text(recipe.difficulty, fontSize = 10.sp, color = Color(0xFFF97316))
+                    Text(recipe.duration, fontSize = 10.sp, color = Color.White.copy(alpha = 0.8f))
+                    Text(" | ", fontSize = 10.sp, color = Color.White.copy(alpha = 0.5f))
+                    Text(recipe.difficulty, fontSize = 10.sp, color = Color(0xFFFFB366))
                 }
             }
         }
