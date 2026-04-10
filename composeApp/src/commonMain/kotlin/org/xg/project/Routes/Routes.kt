@@ -7,4 +7,5 @@ object Routes {
     const val Plan = "plan"
     const val History = "history"
     const val Profile = "profile"
+    const val ManualRecipeInput = "manual_recipe_input"
 }

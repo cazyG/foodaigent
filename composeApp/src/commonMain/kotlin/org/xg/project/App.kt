@@ -22,6 +22,7 @@ import org.xg.project.Routes.Routes
 import org.xg.project.di.appModule
 import org.xg.project.screen.HistoryScreen
 import org.xg.project.screen.IndexScreen
+import org.xg.project.screen.ManualRecipeInputScreen
 import org.xg.project.screen.PlanningScreen
 import org.xg.project.screen.ProfileScreen
 import org.xg.project.screen.RecipesScreen
@@ -70,10 +71,17 @@ fun App() {
                                 )
                             }
 
-                            Routes.Recipes -> NavEntry(key) { RecipesScreen() }
+                            Routes.Recipes -> NavEntry(key) { RecipesScreen(onNavigateToManualInput = { backStack.add(Routes.ManualRecipeInput) }) }
                             Routes.Plan -> NavEntry(key) { PlanningScreen() }
                             Routes.History -> NavEntry(key) { HistoryScreen() }
                             Routes.Profile -> NavEntry(key) { ProfileScreen() }
+                            Routes.ManualRecipeInput -> NavEntry(key) { ManualRecipeInputScreen(
+                                onBack = { backStack.removeLast() },
+                                onSave = { 
+                                    // 保存成功后返回上一页
+                                    backStack.removeLast()
+                                }
+                            ) }
                             else -> NavEntry(key) { Text("Unknown Route") }
                         }
                     }

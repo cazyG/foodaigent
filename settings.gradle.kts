@@ -40,18 +40,20 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
     repositories {
+        mavenCentral()
+        gradlePluginPortal()
         maven("https://maven.aliyun.com/repository/google")
         maven("https://maven.aliyun.com/repository/gradle-plugin")
         maven("https://maven.aliyun.com/repository/public")
-        mavenCentral()
     }
 }
 
 dependencyResolutionManagement {
     repositories {
+        mavenCentral()
+        maven("https://jitpack.io") // 添加JitPack仓库，用于一些第三方库
         maven("https://maven.aliyun.com/repository/google")
         maven("https://maven.aliyun.com/repository/public")
-        mavenCentral()
     }
 }
 
