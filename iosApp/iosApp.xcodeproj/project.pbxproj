@@ -8,7 +8,12 @@
 
 /* Begin PBXFileReference section */
 		0E9A409C5F5F00FBC099FD62 /* aigent.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = aigent.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3B8E6A1E6F5D4B2C8D9E7F0B /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
+
+/* Begin PBXBuildFile section */
+		3B8E6A1E6F5D4B2C8D9E7F0A /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B8E6A1E6F5D4B2C8D9E7F0B /* CoreLocation.framework */; };
+/* End PBXBuildFile section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
 		5BBF1237335970642F5E985A /* Exceptions for "iosApp" folder in "iosApp" target */ = {
@@ -41,6 +46,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3B8E6A1E6F5D4B2C8D9E7F0A /* CoreLocation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

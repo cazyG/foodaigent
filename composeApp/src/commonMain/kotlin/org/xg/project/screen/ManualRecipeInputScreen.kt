@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,34 +17,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import kotlinx.coroutines.launch
-import org.xg.project.data.remote.UploadService
-import org.xg.project.data.remote.httpClient
-import org.xg.project.domain.model.MealType
 import io.github.ismoy.imagepickerkmp.domain.config.GalleryConfig
 import io.github.ismoy.imagepickerkmp.features.imagepicker.config.ImagePickerKMPConfig
 import io.github.ismoy.imagepickerkmp.features.imagepicker.model.ImagePickerResult
 import io.github.ismoy.imagepickerkmp.features.imagepicker.ui.rememberImagePickerKMP
-
+import org.koin.compose.viewmodel.koinViewModel
+import org.xg.project.domain.model.MealType
+import org.xg.project.presentation.manualrecipeinput.ManualRecipeInputIntent
+import org.xg.project.presentation.manualrecipeinput.ManualRecipeInputViewModel
 
 @Composable
 fun ManualRecipeInputScreen(
     onBack: () -> Unit,
     onSave: () -> Unit
 ) {
-    var recipeName by remember { mutableStateOf("") }
-    var ingredients by remember { mutableStateOf("") }
-    var steps by remember { mutableStateOf("") }
-    var duration by remember { mutableStateOf("") }
-    var difficulty by remember { mutableStateOf("") }
-    var tag by remember { mutableStateOf("") }
-    var selectedMealType by remember { mutableStateOf(MealType.LUNCH) }
-    var selectedImagePath by remember { mutableStateOf<String?>(null) }
-    var isUploading by remember { mutableStateOf(false) }
-    var uploadedImageUrl by remember { mutableStateOf<String?>(null) }
-    
-    val uploadService = remember { UploadService(httpClient) }
-    val coroutineScope = rememberCoroutineScope()
+    val viewModel = koinViewModel<ManualRecipeInputViewModel>()
+    val state by viewModel.state.collectAsState()
     
     // 使用ImagePickerKMP 1.0.38版本的API
     val picker = rememberImagePickerKMP(
@@ -59,14 +49,20 @@ fun ManualRecipeInputScreen(
     when (result) {
         is ImagePickerResult.Success -> {
             // 获取选中的图片
-
             val image = result.photos.firstOrNull()
-            selectedImagePath = image?.uri
+            viewModel.handleIntent(ManualRecipeInputIntent.SelectImage(image?.uri))
         }
         is ImagePickerResult.Error -> {
             println("图片选择错误: ${result.exception.message}")
         }
         else -> {}
+    }
+
+    // 监听保存成功状态
+    LaunchedEffect(state.saveSuccess) {
+        if (state.saveSuccess) {
+            onSave()
+        }
     }
 
     Column(
@@ -87,45 +83,35 @@ fun ManualRecipeInputScreen(
                 onClick = onBack,
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFEDD5))
             ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "返回",
+                    tint = Color(0xFFF59E42),
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
                 Text("返回", color = Color(0xFFF59E42))
             }
             Text("手动录入食谱", fontWeight = FontWeight.Bold, fontSize = 20.sp)
             Button(
                 onClick = {
-                    if (recipeName.isNotEmpty() && ingredients.isNotEmpty() && steps.isNotEmpty()) {
-                        isUploading = true
-                        coroutineScope.launch {
-                            try {
-                                // 上传图片（如果有）
-                                if (selectedImagePath != null) {
-                                    val filename = "recipe.jpg"
-                                    val presignedUrlResponse = uploadService.getPresignedUrl(filename)
-                                    // 这里需要将图片文件转换为ByteArray，实际项目中需要根据ImagePickerKMP的API来实现
-                                    // 暂时使用空字节数组，实际项目中需要读取文件内容
-                                    val imageBytes = ByteArray(0) // 暂时使用空字节数组
-                                    val uploadResult = uploadService.uploadFile(
-                                        presignedUrlResponse.data.putUrl,
-                                        presignedUrlResponse.data.headers,
-                                        imageBytes
-                                    )
-                                    if (uploadResult.success) {
-                                        uploadedImageUrl = uploadResult.url
-                                    }
-                                }
-                                
-                                // 调用onSave回调
-                                onSave()
-                            } catch (e: Exception) {
-                                println("保存失败: ${e.message}")
-                            } finally {
-                                isUploading = false
-                            }
-                        }
-                    }
+                    viewModel.handleIntent(ManualRecipeInputIntent.SaveRecipe)
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF59E42))
             ) {
                 Text("保存", color = Color.White)
+            }
+        }
+
+        // 错误提示
+        if (state.error != null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.Red.copy(alpha = 0.1f))
+                    .padding(16.dp)
+            ) {
+                Text(state.error!!, color = Color.Red)
             }
         }
 
@@ -154,10 +140,10 @@ fun ManualRecipeInputScreen(
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    if (selectedImagePath != null) {
+                    if (state.selectedImagePath != null) {
                         AsyncImage(
-                            model = selectedImagePath,
-                            contentDescription = recipeName,
+                            model = state.selectedImagePath,
+                            contentDescription = state.recipeName,
                             modifier = Modifier.fillMaxSize()
                         )
                     } else {
@@ -173,8 +159,8 @@ fun ManualRecipeInputScreen(
 
             // 食谱名称
             OutlinedTextField(
-                value = recipeName,
-                onValueChange = { recipeName = it },
+                value = state.recipeName,
+                onValueChange = { viewModel.handleIntent(ManualRecipeInputIntent.UpdateRecipeName(it)) },
                 label = { Text("食谱名称") },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -198,10 +184,10 @@ fun ManualRecipeInputScreen(
                 ) {
                     MealType.values().forEach { mealType ->
                         Button(
-                            onClick = { selectedMealType = mealType },
+                            onClick = { viewModel.handleIntent(ManualRecipeInputIntent.SelectMealType(mealType)) },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (selectedMealType == mealType) Color(0xFFF59E42) else Color.White,
-                                contentColor = if (selectedMealType == mealType) Color.White else Color(0xFF4B5563)
+                                containerColor = if (state.selectedMealType == mealType) Color(0xFFF59E42) else Color.White,
+                                contentColor = if (state.selectedMealType == mealType) Color.White else Color(0xFF4B5563)
                             ),
                             modifier = Modifier.padding(4.dp)
                         ) {
@@ -213,8 +199,8 @@ fun ManualRecipeInputScreen(
 
             // 烹饪时间
             OutlinedTextField(
-                value = duration,
-                onValueChange = { duration = it },
+                value = state.duration,
+                onValueChange = { viewModel.handleIntent(ManualRecipeInputIntent.UpdateDuration(it)) },
                 label = { Text("烹饪时间") },
                 placeholder = { Text("例如：30分钟") },
                 modifier = Modifier
@@ -224,8 +210,8 @@ fun ManualRecipeInputScreen(
 
             // 难度
             OutlinedTextField(
-                value = difficulty,
-                onValueChange = { difficulty = it },
+                value = state.difficulty,
+                onValueChange = { viewModel.handleIntent(ManualRecipeInputIntent.UpdateDifficulty(it)) },
                 label = { Text("难度") },
                 placeholder = { Text("例如：中等难度") },
                 modifier = Modifier
@@ -235,8 +221,8 @@ fun ManualRecipeInputScreen(
 
             // 标签
             OutlinedTextField(
-                value = tag,
-                onValueChange = { tag = it },
+                value = state.tag,
+                onValueChange = { viewModel.handleIntent(ManualRecipeInputIntent.UpdateTag(it)) },
                 label = { Text("标签") },
                 placeholder = { Text("例如：家常菜") },
                 modifier = Modifier
@@ -246,8 +232,8 @@ fun ManualRecipeInputScreen(
 
             // 原材料
             OutlinedTextField(
-                value = ingredients,
-                onValueChange = { ingredients = it },
+                value = state.ingredients,
+                onValueChange = { viewModel.handleIntent(ManualRecipeInputIntent.UpdateIngredients(it)) },
                 label = { Text("原材料") },
                 placeholder = { Text("请输入原材料，每行一种") },
                 maxLines = 5,
@@ -258,8 +244,8 @@ fun ManualRecipeInputScreen(
 
             // 制作过程
             OutlinedTextField(
-                value = steps,
-                onValueChange = { steps = it },
+                value = state.steps,
+                onValueChange = { viewModel.handleIntent(ManualRecipeInputIntent.UpdateSteps(it)) },
                 label = { Text("制作过程") },
                 placeholder = { Text("请输入详细制作过程，每行一步") },
                 maxLines = 10,
@@ -269,8 +255,8 @@ fun ManualRecipeInputScreen(
             )
         }
 
-        // 上传中加载框
-        if (isUploading) {
+        // 加载框
+        if (state.isSaving || state.isUploading) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
