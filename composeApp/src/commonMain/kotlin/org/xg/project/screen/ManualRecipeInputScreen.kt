@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import io.github.ismoy.imagepickerkmp.domain.config.GalleryConfig
+import io.github.ismoy.imagepickerkmp.domain.extensions.loadBytes
 import io.github.ismoy.imagepickerkmp.features.imagepicker.config.ImagePickerKMPConfig
 import io.github.ismoy.imagepickerkmp.features.imagepicker.model.ImagePickerResult
 import io.github.ismoy.imagepickerkmp.features.imagepicker.ui.rememberImagePickerKMP
@@ -89,7 +90,16 @@ fun ManualRecipeInputScreen(
             is ImagePickerResult.Success -> {
                 // 获取选中的图片
                 val image = result.photos.firstOrNull()
+                print("测试-> ${image}")
+
+                // 使用ImagePickerKMP的扩展函数直接获取byte数组
+                val imageBytes = image?.loadBytes()
+                println("图片byte数组大小: ${imageBytes?.size}")
+
+                // 传递byte数组而不是URI
                 viewModel.handleIntent(ManualRecipeInputIntent.SelectImage(image?.uri))
+                // 选择图片后立即上传
+                viewModel.handleIntent(ManualRecipeInputIntent.UploadImage(imageBytes))
             }
             is ImagePickerResult.Error -> {
                 println("图片选择错误: ${result.exception.message}")
@@ -185,9 +195,9 @@ fun ManualRecipeInputScreen(
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    if (state.selectedImagePath != null) {
+                    if (state.uploadedImageUrl != null) {
                         AsyncImage(
-                            model = state.selectedImagePath,
+                            model = state.uploadedImageUrl,
                             contentDescription = state.recipeName,
                             modifier = Modifier.fillMaxSize()
                         )

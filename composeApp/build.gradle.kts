@@ -88,6 +88,8 @@ kotlin {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
             implementation(libs.ktor.client.okhttp)
+            // 添加SLF4J提供者以解决警告
+            implementation("org.slf4j:slf4j-simple:2.0.16")
         }
     }
 }

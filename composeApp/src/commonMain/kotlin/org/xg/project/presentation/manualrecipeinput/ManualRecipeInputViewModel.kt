@@ -28,10 +28,8 @@ class ManualRecipeInputViewModel(
             is ManualRecipeInputIntent.UpdateDifficulty -> updateDifficulty(intent.value)
             is ManualRecipeInputIntent.UpdateTag -> updateTag(intent.value)
             is ManualRecipeInputIntent.SelectMealType -> selectMealType(intent.mealType)
-            is ManualRecipeInputIntent.SelectImage -> {
-                selectImage(intent.imagePath)
-            }
-            ManualRecipeInputIntent.UploadImage -> uploadImage()
+            is ManualRecipeInputIntent.SelectImage -> selectImage(intent.uri)
+            is ManualRecipeInputIntent.UploadImage -> uploadImage(intent.imageBytes)
             ManualRecipeInputIntent.SaveRecipe -> saveRecipe()
             ManualRecipeInputIntent.ResetForm -> resetForm()
         }
@@ -65,59 +63,42 @@ class ManualRecipeInputViewModel(
         _state.value = _state.value.copy(selectedMealType = mealType)
     }
 
-    private fun selectImage(imagePath: String?) {
-        _state.value = _state.value.copy(selectedImagePath = imagePath)
+    private fun selectImage(uri: String?) {
+        _state.value = _state.value.copy(uploadedImageUrl = uri)
     }
 
-    private fun uploadImage() {
+    private fun uploadImage(imageBytes: ByteArray?) {
         viewModelScope.launch {
-            if (_state.value.selectedImagePath != null) {
-                _state.value = _state.value.copy(isUploading = true)
-                try {
-                    println("ManualRecipeInputViewModel: Starting image upload")
-                    println("ManualRecipeInputViewModel: Selected image path: ${_state.value.selectedImagePath}")
-                    
-                    val timeZone = TimeZone.currentSystemDefault()
-                    val filename = "${Clock.System.todayIn(timeZone).toString()}.jpg"
-                    println("ManualRecipeInputViewModel: Generated filename: $filename")
-                    
-                    val presignedUrlResponse = uploadService.getPresignedUrl(filename)
-                    println("ManualRecipeInputViewModel: Got presigned URL response")
-                    
-                    // 读取图片文件内容
-                    val imageBytes = readImageFile(_state.value.selectedImagePath)
-                    println("ManualRecipeInputViewModel: Image bytes size: ${imageBytes.size}")
-                    
-                    val uploadResult = uploadService.uploadFile(
-                        presignedUrlResponse.data.putUrl,
-                        presignedUrlResponse.data.getUrl,
-                        presignedUrlResponse.data.headers,
-                        imageBytes
-                    )
-                    
-                    if (uploadResult.success) {
-                        println("ManualRecipeInputViewModel: Upload success, URL: ${uploadResult.url}")
-                        _state.value = _state.value.copy(uploadedImageUrl = uploadResult.url)
-                    } else {
-                        println("ManualRecipeInputViewModel: Upload failed")
-                        _state.value = _state.value.copy(
-                            error = "图片上传失败: 服务器返回失败",
-                            isUploading = false
-                        )
-                    }
-                } catch (e: Exception) {
-                    println("ManualRecipeInputViewModel: Upload error: ${e.message}")
-                    e.printStackTrace()
+            _state.value = _state.value.copy(isUploading = true)
+            try {
+
+                val timeZone = TimeZone.currentSystemDefault()
+                val filename = "${Clock.System.todayIn(timeZone).toString()}.jpg"
+                val presignedUrlResponse = uploadService.getPresignedUrl(filename)
+
+                val uploadResult = uploadService.uploadFile(
+                    presignedUrlResponse.data.putUrl,
+                    presignedUrlResponse.data.getUrl,
+                    presignedUrlResponse.data.headers,
+                    imageBytes ?: ByteArray(0)
+                )
+
+                if (uploadResult.success) {
+                    _state.value = _state.value.copy(uploadedImageUrl = uploadResult.url)
+                } else {
                     _state.value = _state.value.copy(
-                        error = "图片上传失败: ${e.message}",
+                        error = "图片上传失败: 服务器返回失败",
                         isUploading = false
                     )
-                } finally {
-                    _state.value = _state.value.copy(isUploading = false)
-                    println("ManualRecipeInputViewModel: Upload process completed")
                 }
-            } else {
-                println("ManualRecipeInputViewModel: No image path selected, skipping upload")
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _state.value = _state.value.copy(
+                    error = "图片上传失败: ${e.message}",
+                    isUploading = false
+                )
+            } finally {
+                _state.value = _state.value.copy(isUploading = false)
             }
         }
     }
@@ -136,8 +117,7 @@ class ManualRecipeInputViewModel(
                 }
 
                 // 如果有选中的图片但尚未上传，则先上传图片
-                if (_state.value.selectedImagePath != null && _state.value.uploadedImageUrl == null) {
-                    uploadImage()
+                if ( _state.value.uploadedImageUrl == null) {
                     // 等待上传完成
                     while (_state.value.isUploading) {
                         kotlinx.coroutines.delay(100)
@@ -168,22 +148,5 @@ class ManualRecipeInputViewModel(
 
     private fun resetForm() {
         _state.value = ManualRecipeInputState()
-    }
-
-    private fun readImageFile(imagePath: String?): ByteArray {
-        if (imagePath == null) return ByteArray(0)
-        
-        try {
-            // 实际项目中需要根据平台实现文件读取
-            // 这里暂时返回空字节数组作为占位符
-            // 在实际实现中，需要：
-            // 1. 解析file:// URL
-            // 2. 读取文件内容为ByteArray
-            // 3. 处理可能的异常
-            return ByteArray(0)
-        } catch (e: Exception) {
-            println("ManualRecipeInputViewModel: Error reading image file: ${e.message}")
-            return ByteArray(0)
-        }
     }
 }
