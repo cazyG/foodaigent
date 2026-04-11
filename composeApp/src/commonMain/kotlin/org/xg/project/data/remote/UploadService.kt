@@ -40,11 +40,8 @@ class UploadService(private val httpClient: HttpClient) {
         println("UploadService: Getting presigned URL for filename: $filename")
         println("UploadService: Request URL: $baseUrl/admin/upload")
         try {
-            // 使用POST方法而不是GET方法
-            val response = httpClient.post("$baseUrl/admin/upload") {
-                contentType(ContentType.Application.Json)
-                setBody(mapOf("filename" to filename))
-            }
+            // 使用GET方法并在URL中传递filename参数
+            val response = httpClient.get("$baseUrl/api/generatePresignedUrl?filename=$filename")
             println("UploadService: Get presigned URL response status: ${response.status}")
             
             // 尝试读取原始响应内容

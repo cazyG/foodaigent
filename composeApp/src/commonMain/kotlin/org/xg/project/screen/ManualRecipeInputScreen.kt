@@ -2,18 +2,51 @@ package org.xg.project.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component1
+import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component2
+import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component3
+import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component4
+import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component5
+import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component6
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
@@ -34,6 +67,11 @@ fun ManualRecipeInputScreen(
     val viewModel = koinViewModel<ManualRecipeInputViewModel>()
     val state by viewModel.state.collectAsState()
     
+    // 焦点管理
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val (nameFocusRequester, durationFocusRequester, difficultyFocusRequester, tagFocusRequester, ingredientsFocusRequester, stepsFocusRequester) = FocusRequester.createRefs()
+    
     // 使用ImagePickerKMP 1.0.38版本的API
     val picker = rememberImagePickerKMP(
         config = ImagePickerKMPConfig(
@@ -46,16 +84,18 @@ fun ManualRecipeInputScreen(
     val result = picker.result
     
     // 处理图片选择结果
-    when (result) {
-        is ImagePickerResult.Success -> {
-            // 获取选中的图片
-            val image = result.photos.firstOrNull()
-            viewModel.handleIntent(ManualRecipeInputIntent.SelectImage(image?.uri))
+    LaunchedEffect(result) {
+        when (result) {
+            is ImagePickerResult.Success -> {
+                // 获取选中的图片
+                val image = result.photos.firstOrNull()
+                viewModel.handleIntent(ManualRecipeInputIntent.SelectImage(image?.uri))
+            }
+            is ImagePickerResult.Error -> {
+                println("图片选择错误: ${result.exception.message}")
+            }
+            else -> {}
         }
-        is ImagePickerResult.Error -> {
-            println("图片选择错误: ${result.exception.message}")
-        }
-        else -> {}
     }
 
     // 监听保存成功状态
@@ -95,6 +135,8 @@ fun ManualRecipeInputScreen(
             Text("手动录入食谱", fontWeight = FontWeight.Bold, fontSize = 20.sp)
             Button(
                 onClick = {
+                    focusManager.clearFocus()
+                    keyboardController?.hide()
                     viewModel.handleIntent(ManualRecipeInputIntent.SaveRecipe)
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF59E42))
@@ -121,6 +163,7 @@ fun ManualRecipeInputScreen(
                 .fillMaxSize()
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
+                .imePadding()
         ) {
             // 图片上传
             Card(
@@ -135,6 +178,8 @@ fun ManualRecipeInputScreen(
                         .fillMaxSize()
                         .background(Color.LightGray)
                         .clickable {
+                            focusManager.clearFocus()
+                            keyboardController?.hide()
                             // 使用ImagePickerKMP 1.0.38版本的API启动图片选择器
                             picker.launchGallery()
                         },
@@ -165,6 +210,9 @@ fun ManualRecipeInputScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
+                    .focusRequester(nameFocusRequester),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                keyboardActions = KeyboardActions(onNext = { durationFocusRequester.requestFocus() })
             )
 
             // 用餐类型
@@ -184,7 +232,10 @@ fun ManualRecipeInputScreen(
                 ) {
                     MealType.values().forEach { mealType ->
                         Button(
-                            onClick = { viewModel.handleIntent(ManualRecipeInputIntent.SelectMealType(mealType)) },
+                            onClick = { 
+                                viewModel.handleIntent(ManualRecipeInputIntent.SelectMealType(mealType))
+                                durationFocusRequester.requestFocus()
+                            },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = if (state.selectedMealType == mealType) Color(0xFFF59E42) else Color.White,
                                 contentColor = if (state.selectedMealType == mealType) Color.White else Color(0xFF4B5563)
@@ -206,6 +257,9 @@ fun ManualRecipeInputScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
+                    .focusRequester(durationFocusRequester),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                keyboardActions = KeyboardActions(onNext = { difficultyFocusRequester.requestFocus() })
             )
 
             // 难度
@@ -217,6 +271,9 @@ fun ManualRecipeInputScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
+                    .focusRequester(difficultyFocusRequester),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                keyboardActions = KeyboardActions(onNext = { tagFocusRequester.requestFocus() })
             )
 
             // 标签
@@ -228,6 +285,9 @@ fun ManualRecipeInputScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
+                    .focusRequester(tagFocusRequester),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                keyboardActions = KeyboardActions(onNext = { ingredientsFocusRequester.requestFocus() })
             )
 
             // 原材料
@@ -240,6 +300,9 @@ fun ManualRecipeInputScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
+                    .focusRequester(ingredientsFocusRequester),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                keyboardActions = KeyboardActions(onNext = { stepsFocusRequester.requestFocus() })
             )
 
             // 制作过程
@@ -252,6 +315,9 @@ fun ManualRecipeInputScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
+                    .focusRequester(stepsFocusRequester),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() })
             )
         }
 

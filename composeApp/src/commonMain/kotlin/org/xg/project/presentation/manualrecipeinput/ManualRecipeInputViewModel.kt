@@ -30,10 +30,6 @@ class ManualRecipeInputViewModel(
             is ManualRecipeInputIntent.SelectMealType -> selectMealType(intent.mealType)
             is ManualRecipeInputIntent.SelectImage -> {
                 selectImage(intent.imagePath)
-                // 选择图片后立即上传
-                if (intent.imagePath != null) {
-                    uploadImage()
-                }
             }
             ManualRecipeInputIntent.UploadImage -> uploadImage()
             ManualRecipeInputIntent.SaveRecipe -> saveRecipe()
@@ -88,9 +84,8 @@ class ManualRecipeInputViewModel(
                     val presignedUrlResponse = uploadService.getPresignedUrl(filename)
                     println("ManualRecipeInputViewModel: Got presigned URL response")
                     
-                    // 这里需要将图片文件转换为ByteArray，实际项目中需要根据ImagePickerKMP的API来实现
-                    // 暂时使用空字节数组，实际项目中需要读取文件内容
-                    val imageBytes = ByteArray(0) // 暂时使用空字节数组
+                    // 读取图片文件内容
+                    val imageBytes = readImageFile(_state.value.selectedImagePath)
                     println("ManualRecipeInputViewModel: Image bytes size: ${imageBytes.size}")
                     
                     val uploadResult = uploadService.uploadFile(
@@ -140,6 +135,20 @@ class ManualRecipeInputViewModel(
                     return@launch
                 }
 
+                // 如果有选中的图片但尚未上传，则先上传图片
+                if (_state.value.selectedImagePath != null && _state.value.uploadedImageUrl == null) {
+                    uploadImage()
+                    // 等待上传完成
+                    while (_state.value.isUploading) {
+                        kotlinx.coroutines.delay(100)
+                    }
+                    // 如果上传失败，直接返回
+                    if (_state.value.error != null) {
+                        _state.value = _state.value.copy(isSaving = false)
+                        return@launch
+                    }
+                }
+
                 // 保存食谱到数据库
                 // 这里需要实现保存食谱的逻辑，实际项目中需要调用相应的Repository方法
 
@@ -159,5 +168,22 @@ class ManualRecipeInputViewModel(
 
     private fun resetForm() {
         _state.value = ManualRecipeInputState()
+    }
+
+    private fun readImageFile(imagePath: String?): ByteArray {
+        if (imagePath == null) return ByteArray(0)
+        
+        try {
+            // 实际项目中需要根据平台实现文件读取
+            // 这里暂时返回空字节数组作为占位符
+            // 在实际实现中，需要：
+            // 1. 解析file:// URL
+            // 2. 读取文件内容为ByteArray
+            // 3. 处理可能的异常
+            return ByteArray(0)
+        } catch (e: Exception) {
+            println("ManualRecipeInputViewModel: Error reading image file: ${e.message}")
+            return ByteArray(0)
+        }
     }
 }
