@@ -2,7 +2,10 @@ package org.xg.project.data.repository
 
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import kotlinx.coroutines.delay
+import kotlinx.serialization.Serializable
 import org.xg.project.data.remote.httpClient
 import org.xg.project.domain.model.DailyMenuRecord
 import org.xg.project.domain.model.MealType
@@ -129,6 +132,66 @@ class FoodRepository {
             "酸" to 0.3f,
             "鲜" to 0.7f,
             "苦" to 0.1f
+        )
+    }
+
+    @Serializable
+    data class CreateRecipeRequest(
+        val name: String,
+        val ingredients: String,
+        val steps: String,
+        val duration: String,
+        val difficulty: String,
+        val tag: String,
+        val mealType: MealType,
+        val imageUrl: String?
+    )
+
+    @Serializable
+    data class CreateRecipeResponse(
+        val success: Boolean,
+        val recipeId: Int,
+        val message: String
+    )
+
+    suspend fun createRecipe(
+        name: String,
+        ingredients: String,
+        steps: String,
+        duration: String,
+        difficulty: String,
+        tag: String,
+        mealType: MealType,
+        imageUrl: String?
+    ): CreateRecipeResponse {
+        if (useRealNetwork) {
+            try {
+                val request = CreateRecipeRequest(
+                    name = name,
+                    ingredients = ingredients,
+                    steps = steps,
+                    duration = duration,
+                    difficulty = difficulty,
+                    tag = tag,
+                    mealType = mealType,
+                    imageUrl = imageUrl
+                )
+                
+                return httpClient.post("$baseUrl/recipes") {
+                    setBody(request)
+                }.body()
+            } catch (e: Exception) {
+                println("Network request failed for create recipe: ${e.message}")
+                throw e
+            }
+        }
+
+        // 模拟网络延迟和成功响应
+        delay(500)
+        return CreateRecipeResponse(
+            success = true,
+            recipeId = (System.currentTimeMillis() % 1000).toInt(),
+            message = "食谱创建成功"
         )
     }
 }

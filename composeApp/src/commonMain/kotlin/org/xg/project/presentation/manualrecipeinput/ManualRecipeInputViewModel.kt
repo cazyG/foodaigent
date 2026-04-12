@@ -8,13 +8,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.xg.project.data.remote.UploadService
 import org.xg.project.data.remote.httpClient
+import org.xg.project.data.repository.FoodRepository
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import org.xg.project.domain.model.MealType
 import kotlin.time.Clock
 
 class ManualRecipeInputViewModel(
-    private val uploadService: UploadService = UploadService(httpClient)
+    private val uploadService: UploadService = UploadService(httpClient),
+    private val foodRepository: FoodRepository = FoodRepository()
 ) : ViewModel() {
     private val _state = MutableStateFlow(ManualRecipeInputState())
     val state: StateFlow<ManualRecipeInputState> = _state.asStateFlow()
@@ -129,14 +131,30 @@ class ManualRecipeInputViewModel(
                     }
                 }
 
-                // 保存食谱到数据库
-                // 这里需要实现保存食谱的逻辑，实际项目中需要调用相应的Repository方法
-
-                // 保存成功
-                _state.value = _state.value.copy(
-                    saveSuccess = true,
-                    isSaving = false
+                // 保存食谱到服务器
+                val response = foodRepository.createRecipe(
+                    name = _state.value.recipeName,
+                    ingredients = _state.value.ingredients,
+                    steps = _state.value.steps,
+                    duration = _state.value.duration,
+                    difficulty = _state.value.difficulty,
+                    tag = _state.value.tag,
+                    mealType = _state.value.selectedMealType,
+                    imageUrl = _state.value.uploadedImageUrl
                 )
+
+                if (response.success) {
+                    // 保存成功
+                    _state.value = _state.value.copy(
+                        saveSuccess = true,
+                        isSaving = false
+                    )
+                } else {
+                    _state.value = _state.value.copy(
+                        error = "保存失败: ${response.message}",
+                        isSaving = false
+                    )
+                }
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     error = "保存失败: ${e.message}",
