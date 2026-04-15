@@ -11,6 +11,7 @@ import org.xg.project.data.remote.httpClient
 import org.xg.project.data.repository.FoodRepository
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
+import org.xg.project.domain.model.Ingredient
 import org.xg.project.domain.model.MealType
 import kotlin.time.Clock
 
@@ -24,7 +25,9 @@ class ManualRecipeInputViewModel(
     fun handleIntent(intent: ManualRecipeInputIntent) {
         when (intent) {
             is ManualRecipeInputIntent.UpdateRecipeName -> updateRecipeName(intent.value)
-            is ManualRecipeInputIntent.UpdateIngredients -> updateIngredients(intent.value)
+            is ManualRecipeInputIntent.AddIngredient -> addIngredient(intent.ingredient)
+            is ManualRecipeInputIntent.UpdateIngredient -> updateIngredient(intent.ingredient)
+            is ManualRecipeInputIntent.RemoveIngredient -> removeIngredient(intent.ingredient)
             is ManualRecipeInputIntent.UpdateSteps -> updateSteps(intent.value)
             is ManualRecipeInputIntent.UpdateDuration -> updateDuration(intent.value)
             is ManualRecipeInputIntent.UpdateDifficulty -> updateDifficulty(intent.value)
@@ -41,8 +44,20 @@ class ManualRecipeInputViewModel(
         _state.value = _state.value.copy(recipeName = value)
     }
 
-    private fun updateIngredients(value: String) {
-        _state.value = _state.value.copy(ingredients = value)
+    private fun addIngredient(ingredient: Ingredient) {
+        _state.value = _state.value.copy(ingredients = _state.value.ingredients + ingredient)
+    }
+
+    private fun updateIngredient(ingredient: Ingredient) {
+        _state.value = _state.value.copy(
+            ingredients = _state.value.ingredients.map {
+                if (it.id == ingredient.id) ingredient else it
+            }
+        )
+    }
+
+    private fun removeIngredient(ingredient: Ingredient) {
+        _state.value = _state.value.copy(ingredients = _state.value.ingredients.filter { it.id != ingredient.id })
     }
 
     private fun updateSteps(value: String) {
@@ -61,7 +76,7 @@ class ManualRecipeInputViewModel(
         _state.value = _state.value.copy(tag = value)
     }
 
-    private fun selectMealType(mealType: MealType) {
+    private fun selectMealType(mealType: String) {
         _state.value = _state.value.copy(selectedMealType = mealType)
     }
 
@@ -131,10 +146,12 @@ class ManualRecipeInputViewModel(
                     }
                 }
 
+                val ingredientsString = _state.value.ingredients.joinToString { "${it.name}, ${it.quantity}" }
+
                 // 保存食谱到服务器
                 val response = foodRepository.createRecipe(
                     name = _state.value.recipeName,
-                    ingredients = _state.value.ingredients,
+                    ingredients = ingredientsString,
                     steps = _state.value.steps,
                     duration = _state.value.duration,
                     difficulty = _state.value.difficulty,

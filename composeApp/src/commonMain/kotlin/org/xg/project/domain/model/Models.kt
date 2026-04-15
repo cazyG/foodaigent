@@ -22,11 +22,11 @@ data class DailyMenuRecord(
 )
 
 @Serializable
-enum class MealType(val title: String) {
-    BREAKFAST("早餐"),
-    LUNCH("午餐"),
-    DINNER("晚餐"),
-    SNACK("宵夜")
+enum class MealType(val title: String,name: String) {
+    BREAKFAST("早餐","BREAKFAST"),
+    LUNCH("午餐","LUNCH"),
+    DINNER("晚餐","DINNER"),
+    SNACK("宵夜","SNACK")
 }
 
 @Serializable

@@ -17,7 +17,7 @@ class FoodRepository {
     
     // 是否使用真实的 Ktor 网络请求，目前你可以将这个开关打开，并填写真实的 API 地址
     private val useRealNetwork = true
-    private val baseUrl = "http://localhost:8080/api/food"
+    private val baseUrl = "http://localhost:8080/api"
 
     suspend fun fetchDailyRecords(): List<DailyMenuRecord> {
         try {
@@ -54,7 +54,7 @@ class FoodRepository {
         val duration: String,
         val difficulty: String,
         val tag: String,
-        val mealType: MealType,
+        val mealType: String,
         val imageUrl: String?
     )
 
@@ -72,7 +72,7 @@ class FoodRepository {
         duration: String,
         difficulty: String,
         tag: String,
-        mealType: MealType,
+        mealType: String,
         imageUrl: String?
     ): CreateRecipeResponse {
         try {
@@ -87,7 +87,7 @@ class FoodRepository {
                 imageUrl = imageUrl
             )
             
-            return httpClient.post("$baseUrl/recipes") {
+            return httpClient.post("$baseUrl/recipe") {
                 setBody(request)
             }.body()
         } catch (e: Exception) {
