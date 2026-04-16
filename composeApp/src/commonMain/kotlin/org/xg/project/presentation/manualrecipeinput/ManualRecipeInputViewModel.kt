@@ -2,20 +2,19 @@ package org.xg.project.presentation.manualrecipeinput
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.xg.project.data.remote.UploadService
 import org.xg.project.data.remote.httpClient
 import org.xg.project.data.repository.FoodRepository
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import org.xg.project.domain.model.Ingredient
-import org.xg.project.domain.model.MealType
 import kotlin.time.Clock
 import kotlin.random.Random
 
@@ -23,14 +22,10 @@ class ManualRecipeInputViewModel(
     private val uploadService: UploadService = UploadService(httpClient),
     private val foodRepository: FoodRepository = FoodRepository()
 ) : ViewModel() {
-    @Serializable
-    private data class IngredientPayload(
-        val name: String,
-        val number: String
-    )
-
     private val _state = MutableStateFlow(ManualRecipeInputState())
     val state: StateFlow<ManualRecipeInputState> = _state.asStateFlow()
+    private val _uiEvent = MutableSharedFlow<ManualRecipeInputUiEvent>()
+    val uiEvent: SharedFlow<ManualRecipeInputUiEvent> = _uiEvent.asSharedFlow()
 
     fun handleIntent(intent: ManualRecipeInputIntent) {
         when (intent) {
@@ -45,7 +40,6 @@ class ManualRecipeInputViewModel(
             is ManualRecipeInputIntent.UpdateDifficulty -> updateDifficulty(intent.value)
             is ManualRecipeInputIntent.UpdateTag -> updateTag(intent.value)
             is ManualRecipeInputIntent.SelectMealType -> selectMealType(intent.mealType)
-            is ManualRecipeInputIntent.SelectImage -> selectImage(intent.uri)
             is ManualRecipeInputIntent.UploadImage -> uploadImage(intent.imageBytes)
             ManualRecipeInputIntent.SaveRecipe -> saveRecipe()
             ManualRecipeInputIntent.ResetForm -> resetForm()
@@ -109,10 +103,6 @@ class ManualRecipeInputViewModel(
         _state.value = _state.value.copy(selectedMealType = mealType)
     }
 
-    private fun selectImage(uri: String?) {
-        _state.value = _state.value.copy(uploadedImageUrl = uri)
-    }
-
     private fun uploadImage(imageBytes: ByteArray?) {
         viewModelScope.launch {
             _state.value = _state.value.copy(isUploading = true)
@@ -128,6 +118,7 @@ class ManualRecipeInputViewModel(
                     presignedUrlResponse.data.headers,
                     imageBytes ?: ByteArray(0)
                 )
+                print("${presignedUrlResponse.data}  ----  $uploadResult")
 
                 if (uploadResult.success) {
                     _state.value = _state.value.copy(uploadedImageUrl = uploadResult.url)
@@ -179,34 +170,17 @@ class ManualRecipeInputViewModel(
                     }
                 }
 
-                val ingredientsString = Json.encodeToString(
-                    _state.value.ingredients.map {
-                        IngredientPayload(
-                            name = it.name.trim(),
-                            number = it.quantity.trim()
-                        )
-                    }
-                )
-                val stepsString = Json.encodeToString(normalizedSteps)
+                val recipeDraft = _state.value.copy(steps = normalizedSteps).toRecipeDraft()
 
                 // 保存食谱到服务器
-                val response = foodRepository.createRecipe(
-                    name = _state.value.recipeName,
-                    ingredients = ingredientsString,
-                    steps = stepsString,
-                    duration = _state.value.duration,
-                    difficulty = _state.value.difficulty,
-                    tag = _state.value.tag,
-                    mealType = _state.value.selectedMealType,
-                    imageUrl = _state.value.uploadedImageUrl
-                )
+                val response = foodRepository.createRecipe(recipeDraft)
 
                 if (response.success) {
                     // 保存成功
                     _state.value = _state.value.copy(
-                        saveSuccess = true,
                         isSaving = false
                     )
+                    _uiEvent.emit(ManualRecipeInputUiEvent.SaveSuccess)
                 } else {
                     _state.value = _state.value.copy(
                         error = "保存失败: ${response.message}",

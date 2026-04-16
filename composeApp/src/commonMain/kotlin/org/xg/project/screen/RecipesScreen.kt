@@ -21,21 +21,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.window.Dialog
 
 import org.koin.compose.viewmodel.koinViewModel
 import org.xg.project.domain.model.MealType
 import org.xg.project.domain.model.Recipe
-import org.xg.project.presentation.recipes.RecipesViewModel
 import org.xg.project.presentation.recipes.RecipesIntent
-import org.xg.project.screen.ManualRecipeInputScreen
+import org.xg.project.presentation.recipes.RecipesViewModel
 
 @Composable
 fun RecipesScreen(
     viewModel: RecipesViewModel = koinViewModel(),
+    refreshTrigger: Int = 0,
     onNavigateToManualInput: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
+
+    LaunchedEffect(refreshTrigger) {
+        viewModel.handleIntent(RecipesIntent.LoadRecipes)
+    }
     
     if (state.isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

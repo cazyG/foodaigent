@@ -14,6 +14,5 @@ data class ManualRecipeInputState(
     val uploadedImageUrl: String? = null,
     val isUploading: Boolean = false,
     val isSaving: Boolean = false,
-    val error: String? = null,
-    val saveSuccess: Boolean = false
+    val error: String? = null
 )

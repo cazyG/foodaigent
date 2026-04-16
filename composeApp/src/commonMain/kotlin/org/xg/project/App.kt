@@ -11,6 +11,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavEntry
@@ -47,6 +48,7 @@ fun App() {
         content = {
             MaterialTheme {
                 val backStack = remember { mutableStateListOf(Routes.Home) }
+                val recipesRefreshKey = remember { mutableStateOf(0) }
                 val currentRoute = backStack.lastOrNull() ?: Routes.Home
                 val popBackStack = {
                     if (backStack.size > 1) {
@@ -94,7 +96,12 @@ fun App() {
                                 )
                             }
 
-                            Routes.Recipes -> NavEntry(key) { RecipesScreen(onNavigateToManualInput = { backStack.add(Routes.ManualRecipeInput) }) }
+                            Routes.Recipes -> NavEntry(key) {
+                                RecipesScreen(
+                                    refreshTrigger = recipesRefreshKey.value,
+                                    onNavigateToManualInput = { backStack.add(Routes.ManualRecipeInput) }
+                                )
+                            }
                             Routes.Plan -> NavEntry(key) { PlanningScreen() }
                             Routes.History -> NavEntry(key) { HistoryScreen() }
                             Routes.Profile -> NavEntry(key) { ProfileScreen() }
@@ -102,6 +109,7 @@ fun App() {
                                 onBack = popBackStack,
                                 onSave = { 
                                     // 保存成功后返回上一页
+                                    recipesRefreshKey.value += 1
                                     popBackStack()
                                 }
                             ) }

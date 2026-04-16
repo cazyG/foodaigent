@@ -6,11 +6,14 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import kotlinx.coroutines.delay
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.xg.project.data.remote.httpClient
 import org.xg.project.domain.model.DailyMenuRecord
 import org.xg.project.domain.model.MealType
 import org.xg.project.domain.model.MenuItemData
 import org.xg.project.domain.model.Recipe
+import org.xg.project.domain.model.RecipeDraft
 
 // 模拟网络请求数据层
 class FoodRepository {
@@ -65,28 +68,35 @@ class FoodRepository {
         val message: String
     )
 
-    suspend fun createRecipe(
-        name: String,
-        ingredients: String,
-        steps: String,
-        duration: String,
-        difficulty: String,
-        tag: String,
-        mealType: String,
-        imageUrl: String?
-    ): CreateRecipeResponse {
+    @Serializable
+    private data class IngredientPayload(
+        val name: String,
+        val number: String
+    )
+
+    private fun RecipeDraft.toCreateRecipeRequest(): CreateRecipeRequest {
+        return CreateRecipeRequest(
+            name = name,
+            ingredients = Json.encodeToString(
+                ingredients.map {
+                    IngredientPayload(
+                        name = it.name,
+                        number = it.quantity
+                    )
+                }
+            ),
+            steps = Json.encodeToString(steps),
+            duration = duration,
+            difficulty = difficulty,
+            tag = tag,
+            mealType = mealType.name,
+            imageUrl = imageUrl
+        )
+    }
+
+    suspend fun createRecipe(recipeDraft: RecipeDraft): CreateRecipeResponse {
         try {
-            val request = CreateRecipeRequest(
-                name = name,
-                ingredients = ingredients,
-                steps = steps,
-                duration = duration,
-                difficulty = difficulty,
-                tag = tag,
-                mealType = mealType,
-                imageUrl = imageUrl
-            )
-            
+            val request = recipeDraft.toCreateRecipeRequest()
             return httpClient.post("$baseUrl/recipe") {
                 setBody(request)
             }.body()

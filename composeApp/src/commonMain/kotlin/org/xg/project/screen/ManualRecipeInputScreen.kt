@@ -66,19 +66,36 @@ import io.github.ismoy.imagepickerkmp.domain.extensions.loadBytes
 import io.github.ismoy.imagepickerkmp.features.imagepicker.config.ImagePickerKMPConfig
 import io.github.ismoy.imagepickerkmp.features.imagepicker.model.ImagePickerResult
 import io.github.ismoy.imagepickerkmp.features.imagepicker.ui.rememberImagePickerKMP
+import kotlinx.coroutines.flow.collect
 import org.koin.compose.viewmodel.koinViewModel
 import org.xg.project.domain.model.Ingredient
 import org.xg.project.domain.model.MealType
 import org.xg.project.presentation.manualrecipeinput.ManualRecipeInputIntent
+import org.xg.project.presentation.manualrecipeinput.ManualRecipeInputUiEvent
 import org.xg.project.presentation.manualrecipeinput.ManualRecipeInputViewModel
+
+private val GlassBlue = Color(0xFF95B6FF)
+private val GlassBlueDark = Color(0xFF89A7FF)
+private val GlassBgTop = Color(0xFFF2F7FF)
+private val GlassBgBottom = Color(0xFFFAF4FF)
+private val GlassText = Color(0xFF475569)
+private val GlassDelete = Color(0xFFFFA0B4)
+private val GlassSurface = Color.White.copy(alpha = 0.14f)
+private val GlassSurfaceStrong = Color.White.copy(alpha = 0.2f)
+private val GlassStroke = Color.White.copy(alpha = 0.58f)
+private val FieldShape = RoundedCornerShape(14.dp)
+private val AppBarTextSize = 15.sp
+private val SectionTitleSize = 16.sp
+private val BodyTextSize = 14.sp
+private val HelperTextSize = 12.sp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManualRecipeInputScreen(
+    viewModel:ManualRecipeInputViewModel = koinViewModel<ManualRecipeInputViewModel>(),
     onBack: () -> Unit,
     onSave: () -> Unit
 ) {
-    val viewModel = koinViewModel<ManualRecipeInputViewModel>()
     val state by viewModel.state.collectAsState()
 
     // 焦点管理
@@ -87,13 +104,16 @@ fun ManualRecipeInputScreen(
     val (nameFocusRequester, durationFocusRequester, tagFocusRequester, stepsFocusRequester) = FocusRequester.createRefs()
 
     // 使用ImagePickerKMP 1.0.38版本的API
-    val picker = rememberImagePickerKMP(
-        config = ImagePickerKMPConfig(
+    val pickerConfig = remember {
+        ImagePickerKMPConfig(
             galleryConfig = GalleryConfig(
                 allowMultiple = false,
                 selectionLimit = 1
             )
         )
+    }
+    val picker = rememberImagePickerKMP(
+        config = pickerConfig
     )
     val result = picker.result
 
@@ -101,10 +121,10 @@ fun ManualRecipeInputScreen(
     LaunchedEffect(result) {
         when (result) {
             is ImagePickerResult.Success -> {
-                val image = result.photos.firstOrNull()
-                val imageBytes = image?.loadBytes()
-                viewModel.handleIntent(ManualRecipeInputIntent.SelectImage(image?.uri))
-                viewModel.handleIntent(ManualRecipeInputIntent.UploadImage(imageBytes))
+                val imageBytes = result.photos.firstOrNull()?.loadBytes()
+                if (imageBytes != null) {
+                    viewModel.handleIntent(ManualRecipeInputIntent.UploadImage(imageBytes))
+                }
             }
             is ImagePickerResult.Error -> {
                 println("图片选择错误: ${result.exception.message}")
@@ -113,28 +133,14 @@ fun ManualRecipeInputScreen(
         }
     }
 
-    // 监听保存成功状态
-    LaunchedEffect(state.saveSuccess) {
-        if (state.saveSuccess) {
-            onSave()
+    // 监听一次性UI事件
+    LaunchedEffect(viewModel) {
+        viewModel.uiEvent.collect { event ->
+            when (event) {
+                ManualRecipeInputUiEvent.SaveSuccess -> onSave()
+            }
         }
     }
-
-    // --- 毛玻璃主题色 ---
-    val GlassBlue = Color(0xFF95B6FF)
-    val GlassBlueDark = Color(0xFF89A7FF)
-    val GlassBgTop = Color(0xFFF2F7FF)
-    val GlassBgBottom = Color(0xFFFAF4FF)
-    val GlassText = Color(0xFF475569)
-    val GlassDelete = Color(0xFFFFA0B4)
-    val GlassSurface = Color.White.copy(alpha = 0.14f)
-    val GlassSurfaceStrong = Color.White.copy(alpha = 0.2f)
-    val GlassStroke = Color.White.copy(alpha = 0.58f)
-    val FieldShape = RoundedCornerShape(14.dp)
-    val AppBarTextSize = 15.sp
-    val SectionTitleSize = 16.sp
-    val BodyTextSize = 14.sp
-    val HelperTextSize = 12.sp
 
     Box(
         modifier = Modifier
@@ -725,6 +731,7 @@ fun ManualRecipeInputScreen(
                             shape = RoundedCornerShape(16.dp)
                         )
                         .clickable {
+                            if (state.isUploading) return@clickable
                             focusManager.clearFocus()
                             keyboardController?.hide()
                             picker.launchGallery()
@@ -755,6 +762,10 @@ fun ManualRecipeInputScreen(
                             )
                             Text("(可选)", color = GlassText.copy(alpha = 0.6f), fontSize = HelperTextSize)
                         }
+                    }
+
+                    if (state.isUploading) {
+                        CircularProgressIndicator(color = GlassBlue)
                     }
                 }
             }
