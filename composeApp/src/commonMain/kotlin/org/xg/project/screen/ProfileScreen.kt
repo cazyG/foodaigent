@@ -19,7 +19,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
-import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
@@ -30,7 +29,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -58,7 +56,7 @@ fun ProfileScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFFCFAF2))
+            .background(GlassStyle.BgGradient)
             .verticalScroll(scrollState)
     ) {
         // 顶部间距
@@ -103,8 +101,8 @@ fun ProfileScreen(
                 .padding(horizontal = 16.dp)
                 .height(50.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color.White,
-                contentColor = Color(0xFFEF4444)
+                containerColor = Color.White.copy(alpha = 0.20f),
+                contentColor = GlassStyle.Danger
             ),
             shape = RoundedCornerShape(32.dp)
         ) {
@@ -125,11 +123,13 @@ fun UserInfoCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 16.dp)
+            .glassPanelStrong(RoundedCornerShape(32.dp)),
         shape = RoundedCornerShape(32.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
-        Row(
+        GlassHighlight {
+            Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(20.dp),
@@ -140,7 +140,7 @@ fun UserInfoCard(
                 modifier = Modifier
                     .size(70.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFFF3F4F6))
+                    .background(Color.White.copy(alpha = 0.16f))
             ) {
                 if (avatarUrl != null) {
                     AsyncImage(
@@ -169,12 +169,12 @@ fun UserInfoCard(
                     text = name,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1F2937)
+                    color = GlassStyle.TextPrimary
                 )
                 Text(
                     text = bio,
                     fontSize = 13.sp,
-                    color = Color(0xFF6B7280),
+                    color = GlassStyle.TextSecondary,
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }
@@ -184,8 +184,8 @@ fun UserInfoCard(
                 onClick = onEditClick,
                 shape = RoundedCornerShape(24.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFF3F4F6),
-                    contentColor = Color(0xFFF59E42)
+                    containerColor = Color.White.copy(alpha = 0.18f),
+                    contentColor = GlassStyle.TextPrimary
                 )
             ) {
                 Icon(
@@ -196,6 +196,7 @@ fun UserInfoCard(
                 Spacer(modifier = Modifier.width(4.dp))
                 Text("编辑", fontSize = 13.sp)
             }
+        }
         }
     }
 }
@@ -209,9 +210,10 @@ fun StatsCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 16.dp)
+            .glassPanel(RoundedCornerShape(32.dp)),
         shape = RoundedCornerShape(32.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
         Row(
             modifier = Modifier
@@ -222,17 +224,17 @@ fun StatsCard(
             StatItem(
                 value = totalOrders.toString(),
                 label = "累计点餐",
-                color = Color(0xFFF59E42)
+                color = GlassStyle.TextPrimary
             )
             StatItem(
                 value = totalReviews.toString(),
                 label = "评价次数",
-                color = Color(0xFF10B981)
+                color = GlassStyle.TextPrimary
             )
             StatItem(
                 value = ((averageStars * 10).toInt() / 10f).toString(),
                 label = "平均星级",
-                color = Color(0xFFFBBF24)
+                color = GlassStyle.TextPrimary
             )
         }
     }
@@ -254,7 +256,7 @@ fun StatItem(
         Text(
             text = label,
             fontSize = 13.sp,
-            color = Color(0xFF6B7280),
+            color = GlassStyle.TextSecondary,
             modifier = Modifier.padding(top = 4.dp)
         )
     }
@@ -267,9 +269,10 @@ fun PreferenceCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 16.dp)
+            .glassPanel(RoundedCornerShape(32.dp)),
         shape = RoundedCornerShape(32.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
         Column(
             modifier = Modifier
@@ -280,7 +283,7 @@ fun PreferenceCard(
                 text = "饮食偏好",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1F2937)
+                color = GlassStyle.TextPrimary
             )
 
             if (tasteRadarData.isNotEmpty()) {
@@ -294,7 +297,7 @@ fun PreferenceCard(
                 Text(
                     text = "暂无偏好设置，去添加",
                     fontSize = 14.sp,
-                    color = Color(0xFF9CA3AF)
+                    color = GlassStyle.TextSecondary
                 )
             }
         }
@@ -306,9 +309,10 @@ fun SettingsList() {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 16.dp)
+            .glassPanel(RoundedCornerShape(32.dp)),
         shape = RoundedCornerShape(32.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
         Column(
             modifier = Modifier
@@ -350,20 +354,20 @@ fun SettingsItem(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = Color(0xFFF59E42),
+            tint = GlassStyle.TextPrimary,
             modifier = Modifier.size(24.dp)
         )
         Spacer(modifier = Modifier.width(16.dp))
         Text(
             text = title,
             fontSize = 16.sp,
-            color = Color(0xFF374151),
+            color = GlassStyle.TextPrimary,
             modifier = Modifier.weight(1f)
         )
         Icon(
             imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
             contentDescription = null,
-            tint = Color(0xFF9CA3AF),
+            tint = GlassStyle.TextSecondary,
             modifier = Modifier.size(16.dp)
         )
     }

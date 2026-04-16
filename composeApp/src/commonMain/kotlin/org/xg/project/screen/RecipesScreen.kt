@@ -15,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,18 +47,18 @@ fun RecipesScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFFCFAF2))
+            .background(GlassStyle.BgGradient)
     ) {
         // 顶部栏：标题 + 按钮（固定）
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color.White)
+                .background(GlassStyle.SurfaceStrong)
                 .padding( 4.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "食谱灵感库", modifier = Modifier.padding(start = 10.dp), fontWeight = FontWeight.Bold, fontSize = 22.sp)
+            Text(text = "食谱灵感库", modifier = Modifier.padding(start = 10.dp), fontWeight = FontWeight.Bold, fontSize = 22.sp, color = GlassStyle.TextPrimary)
 
             // 按钮根据是否有选中项切换文本和功能
             val buttonText = if (state.selectedRecipeIds.isNotEmpty()) "保存" else "+ 手动录入"
@@ -70,23 +71,24 @@ fun RecipesScreen(
                         onNavigateToManualInput()
                     }
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFEDD5))
+                colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.24f))
             ) {
-                Text(buttonText, color = Color(0xFFF59E42))
+                Text(buttonText, color = GlassStyle.TextPrimary)
             }
         }
 
-        // 下方主体区域：左侧分类栏 + 右侧食谱网格（比例 2:8）
+        // 下方主体区域：左侧分类栏 + 右侧食谱网格（比例 2.6:7.4）
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)  // 填充剩余高度
         ) {
-            // 左侧分类栏 (权重2)
+            // 左侧分类栏 (权重2.6)
             Column(
                 modifier = Modifier
-                    .weight(2f)
+                    .weight(2.6f)
                     .fillMaxHeight()
+                    .glassPanel(RoundedCornerShape(24.dp))
                     .verticalScroll(rememberScrollState())
                     .padding(vertical = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -99,10 +101,10 @@ fun RecipesScreen(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 4.dp, vertical = 6.dp),
+                            .padding(horizontal = 2.dp, vertical = 6.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isSelected) Color(0xFFF59E42) else Color.White,
-                            contentColor = if (isSelected) Color.White else Color(0xFF4B5563)
+                            containerColor = if (isSelected) Color.White.copy(alpha = 0.28f) else Color.White.copy(alpha = 0.16f),
+                            contentColor = if (isSelected) GlassStyle.TextPrimary else GlassStyle.TextSecondary
                         ),
                         shape = RoundedCornerShape(16.dp)
                     ) {
@@ -116,7 +118,8 @@ fun RecipesScreen(
                 columns = GridCells.Fixed(2),
                 contentPadding = PaddingValues(all = 12.dp),
                 modifier = Modifier
-                    .weight(8f)
+                    .weight(7.4f)
+                    .glassPanel(RoundedCornerShape(24.dp))
                     .fillMaxHeight()
             ) {
                 items(state.currentRecipes) { recipe ->
@@ -145,14 +148,15 @@ fun RecipeCard(
             .then(
                 // 如果选中，添加金色边框
                 if (isSelected) Modifier.border(
-                    width = 2.dp,
-                    color = Color(0xFFF59E42),
+                    width = 1.5.dp,
+                    color = GlassStyle.Stroke,
                     shape = RoundedCornerShape(24.dp)
                 ) else Modifier
-            ),
+            )
+            .glassPanel(RoundedCornerShape(24.dp)),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) Color(0xFFFFF3E6) else Color.White
+            containerColor = Color.Transparent
         )
     ) {
         // 使用 Box 堆叠图片和文字
@@ -160,7 +164,7 @@ fun RecipeCard(
             modifier = Modifier
                 .height(140.dp) // 增加高度让图片更大一点
                 .fillMaxWidth()
-                .background(Color.LightGray)
+                .background(Color.White.copy(alpha = 0.15f))
         ) {
             // 底层：图片
             if (recipe.img != null) {
@@ -177,13 +181,13 @@ fun RecipeCard(
                 Box(
                     modifier = Modifier
                         .padding(6.dp)
-                        .background(Color.White.copy(alpha = 0.8f), RoundedCornerShape(8.dp))
+                        .background(Color.White.copy(alpha = 0.38f), RoundedCornerShape(8.dp))
                         .align(Alignment.TopEnd)
                 ) {
                     Text(
                         text = recipe.tag,
                         fontSize = 10.sp,
-                        color = Color(0xFFF97316),
+                        color = GlassStyle.TextPrimary,
                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                     )
                 }
@@ -194,20 +198,27 @@ fun RecipeCard(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
                     .fillMaxWidth()
-                    .background(Color.Black.copy(alpha = 0.5f)) // 半透明黑色背景，让白色文字更清晰
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.White.copy(alpha = 0.36f)
+                            )
+                        )
+                    )
                     .padding(8.dp)
             ) {
                 Text(
                     recipe.name,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
-                    color = Color.White,
+                    color = GlassStyle.TextPrimary,
                     maxLines = 1
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(recipe.duration, fontSize = 10.sp, color = Color.White.copy(alpha = 0.8f))
-                    Text(" | ", fontSize = 10.sp, color = Color.White.copy(alpha = 0.5f))
-                    Text(recipe.difficulty, fontSize = 10.sp, color = Color(0xFFFFB366))
+                    Text(recipe.duration, fontSize = 10.sp, color = GlassStyle.TextSecondary)
+                    Text(" | ", fontSize = 10.sp, color = GlassStyle.TextSecondary.copy(alpha = 0.6f))
+                    Text(recipe.difficulty, fontSize = 10.sp, color = GlassStyle.TextPrimary)
                 }
             }
         }

@@ -2,6 +2,7 @@ package org.xg.project.screen
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,24 +52,30 @@ fun HistoryScreen(
     val scrollState = rememberScrollState()
 
     Column(
-        modifier = Modifier.fillMaxSize().background(Color(0xFFFCFAF2)).verticalScroll(scrollState)
+        modifier = Modifier.fillMaxSize().background(GlassStyle.BgGradient).verticalScroll(scrollState)
     ) {
         // 顶部栏
-        Box(Modifier.fillMaxWidth().background(Color.White).padding(24.dp)) {
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .background(GlassStyle.SurfaceStrong)
+                .border(1.dp, GlassStyle.Stroke, RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp))
+                .padding(24.dp)
+        ) {
             Column {
-                Text("饮食记忆", fontWeight = FontWeight.Bold, fontSize = 22.sp)
-                Text("2026年累计点餐 86 次", fontSize = 12.sp, color = Color.Gray)
+                Text("饮食记忆", fontWeight = FontWeight.Bold, fontSize = 22.sp, color = GlassStyle.TextPrimary)
+                Text("2026年累计点餐 86 次", fontSize = 12.sp, color = GlassStyle.TextSecondary)
             }
         }
 
         if (state.isLoading) {
             Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Color(0xFFF59E42))
+                CircularProgressIndicator(color = GlassStyle.AccentStrong)
             }
         } else {
             // 历史记录
             Spacer(Modifier.height(16.dp))
-            Text("饮食记录流", fontWeight = FontWeight.Bold, color = Color.Gray, modifier = Modifier.padding(16.dp, 4.dp, 0.dp, 4.dp))
+            Text("饮食记录流", fontWeight = FontWeight.Bold, color = GlassStyle.TextSecondary, modifier = Modifier.padding(16.dp, 4.dp, 0.dp, 4.dp))
 
             Column {
                 state.dailyRecords.forEach { record ->
@@ -83,13 +91,20 @@ fun HistoryScreen(
 fun MealRecord(
     record: DailyMenuRecord
 ) {
-    Card(Modifier.padding(start = 32.dp, end = 16.dp, bottom = 12.dp), shape = RoundedCornerShape(32.dp)) {
-        Column(Modifier.padding(16.dp)) {
+    Card(
+        Modifier
+            .padding(start = 32.dp, end = 16.dp, bottom = 12.dp)
+            .glassPanel(RoundedCornerShape(32.dp)),
+        shape = RoundedCornerShape(32.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+    ) {
+        GlassHighlight {
+            Column(Modifier.padding(16.dp)) {
             Row(
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(record.date, color = Color.Gray, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text(record.date, color = GlassStyle.TextSecondary, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                 if (record.stars > 0) {
                     Row {
                         val fullStars = record.stars.toInt()
@@ -102,19 +117,19 @@ fun MealRecord(
 
             // 展示各个餐段的数据
             if (record.breakfast.isNotEmpty()) {
-                Text("早餐：${record.breakfast.joinToString("，") { it.name }}", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                Text("早餐：${record.breakfast.joinToString("，") { it.name }}", fontSize = 14.sp, color = GlassStyle.TextPrimary, fontWeight = FontWeight.Medium)
             }
             if (record.lunch.isNotEmpty()) {
-                Text("午餐：${record.lunch.joinToString("，") { it.name }}", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                Text("午餐：${record.lunch.joinToString("，") { it.name }}", fontSize = 14.sp, color = GlassStyle.TextPrimary, fontWeight = FontWeight.Medium)
             }
             if (record.dinner.isNotEmpty()) {
-                Text("晚餐：${record.dinner.joinToString("，") { it.name }}", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                Text("晚餐：${record.dinner.joinToString("，") { it.name }}", fontSize = 14.sp, color = GlassStyle.TextPrimary, fontWeight = FontWeight.Medium)
             }
             if (record.snack.isNotEmpty()) {
-                Text("宵夜：${record.snack.joinToString("，") { it.name }}", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                Text("宵夜：${record.snack.joinToString("，") { it.name }}", fontSize = 14.sp, color = GlassStyle.TextPrimary, fontWeight = FontWeight.Medium)
             }
 
-            if (record.comment.isNotEmpty()) Text(record.comment, fontSize = 13.sp, color = Color.Gray, modifier = Modifier.padding(top = 6.dp))
+            if (record.comment.isNotEmpty()) Text(record.comment, fontSize = 13.sp, color = GlassStyle.TextSecondary, modifier = Modifier.padding(top = 6.dp))
             if (record.imgUrl != null) {
                 Spacer(Modifier.height(12.dp))
                 AsyncImage(
@@ -124,6 +139,7 @@ fun MealRecord(
                     contentScale = ContentScale.Crop
                 )
             }
+        }
         }
     }
 }

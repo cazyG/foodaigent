@@ -6,7 +6,7 @@ import org.xg.project.domain.model.MealType
 data class ManualRecipeInputState(
     val recipeName: String = "",
     val ingredients: List<Ingredient> = emptyList(),
-    val steps: String = "",
+    val steps: List<String> = emptyList(),
     val duration: String = "",
     val difficulty: String = "",
     val tag: String = "",

@@ -1,6 +1,5 @@
 package org.xg.project.screen
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -49,12 +48,14 @@ fun TabBar(
     )
 
     Card(
-        Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
+        Modifier
+            .padding(horizontal = 8.dp, vertical = 8.dp)
             .fillMaxWidth()
-            .height(70.dp),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(48.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.85f)),
+            .height(70.dp)
+            .glassPanelStrong(RoundedCornerShape(16.dp)),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(0.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
     ) {
         Row(
             Modifier.fillMaxSize().padding(horizontal = 14.dp),

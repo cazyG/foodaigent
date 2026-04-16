@@ -2,6 +2,7 @@ package org.xg.project.screen
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -52,7 +53,7 @@ fun IndexScreen(
 
     if (state.isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = Color(0xFFF59E42))
+            CircularProgressIndicator(color = GlassStyle.AccentStrong)
         }
         return
     }
@@ -68,12 +69,15 @@ fun IndexScreen(
     Column(
         Modifier
             .fillMaxSize()
-            .background(Color(0xFFFCFAF2))
+            .background(GlassStyle.BgGradient)
             .verticalScroll(scrollState)
     ) {
         // 顶部栏
         Row(
-            Modifier.fillMaxWidth().background(Color.White),
+            Modifier
+                .fillMaxWidth()
+                .background(GlassStyle.SurfaceStrong)
+                .border(1.dp, GlassStyle.Stroke, RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp)),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -83,19 +87,19 @@ fun IndexScreen(
             ) {
                 Box(
                     Modifier
-                        .background(Color(0xFFFBBF24), RoundedCornerShape(12.dp))
+                        .glassPanelStrong(RoundedCornerShape(12.dp))
                         .padding(8.dp)
                 ) {
-                    Text("黄小厨", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    Text("黄小厨", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = GlassStyle.TextPrimary)
                 }
             }
-            Text("${today.year}年${today.month.number}月${today.day}日", color = Color(0xFFF59E42))
+            Text("${today.year}年${today.month.number}月${today.day}日", color = GlassStyle.TextPrimary)
         }
 
         // 早餐、午餐、晚餐、宵夜根据内容自适应高度，整体可滚动
         MenuSection(
             title = "早餐",
-            titleColor = Color(0xFF39EC51),
+            titleColor = GlassStyle.TextPrimary,
             menus = todayRecord.breakfast,
             modifier = Modifier.wrapContentSize(),
             showReviewButton = state.canReviewBreakfast,
@@ -123,7 +127,7 @@ fun IndexScreen(
 
         MenuSection(
             title = "宵夜",
-            titleColor = Color(0xFF9C27B0),
+            titleColor = GlassStyle.TextPrimary,
             menus = todayRecord.snack,
             modifier = Modifier.wrapContentSize(),
             showReviewButton = state.canReviewSnack,
@@ -164,7 +168,7 @@ fun MenuSection(
                 Text(
                     "去评价 >",
                     fontSize = 14.sp,
-                    color = Color(0xFF6366F1),
+                    color = GlassStyle.AccentStrong,
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier
                         .clickable { onReviewClick() }
@@ -185,7 +189,8 @@ fun MenuSection(
             ) {
                 Card(
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = titleColor.copy(alpha = 0.1f))
+                    colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+                    modifier = Modifier.glassPanelStrong(RoundedCornerShape(16.dp))
                 ) {
                     Text(
                         "➕ 去添加计划",
@@ -234,8 +239,9 @@ fun MenuCard(
     labelColor: Color = Color(0xFF60A5FA)
 ) {
     Card(
-        modifier = Modifier,
-        shape = RoundedCornerShape(24.dp)
+        modifier = Modifier.glassPanel(RoundedCornerShape(24.dp)),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
         Column(Modifier.padding(12.dp)) {
             Row(
@@ -243,13 +249,13 @@ fun MenuCard(
             ) {
                 Box(
                     Modifier
-                        .background(labelColor.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
+                        .background(Color.White.copy(alpha = 0.20f), RoundedCornerShape(8.dp))
                         .padding(horizontal = 8.dp, vertical = 2.dp)
                 ) { Text(meal, color = labelColor, fontSize = 12.sp) }
-                Text(chef, fontSize = 12.sp, color = Color.Gray)
+                Text(chef, fontSize = 12.sp, color = GlassStyle.TextSecondary)
             }
-            Text(name, fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.padding(top = 4.dp))
-            if (desc.isNotEmpty()) Text(desc, fontSize = 12.sp, color = Color.Gray, modifier = Modifier.padding(top = 2.dp))
+            Text(name, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = GlassStyle.TextPrimary, modifier = Modifier.padding(top = 4.dp))
+            if (desc.isNotEmpty()) Text(desc, fontSize = 12.sp, color = GlassStyle.TextSecondary, modifier = Modifier.padding(top = 2.dp))
         }
     }
 }

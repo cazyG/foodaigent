@@ -48,6 +48,11 @@ fun App() {
             MaterialTheme {
                 val backStack = remember { mutableStateListOf(Routes.Home) }
                 val currentRoute = backStack.lastOrNull() ?: Routes.Home
+                val popBackStack = {
+                    if (backStack.size > 1) {
+                        backStack.removeAt(backStack.lastIndex)
+                    }
+                }
                 Scaffold(
                     modifier = Modifier.statusBarsPadding(),
                     bottomBar = {
@@ -94,10 +99,10 @@ fun App() {
                             Routes.History -> NavEntry(key) { HistoryScreen() }
                             Routes.Profile -> NavEntry(key) { ProfileScreen() }
                             Routes.ManualRecipeInput -> NavEntry(key) { ManualRecipeInputScreen(
-                                onBack = { backStack.removeLast() },
+                                onBack = popBackStack,
                                 onSave = { 
                                     // 保存成功后返回上一页
-                                    backStack.removeLast()
+                                    popBackStack()
                                 }
                             ) }
                             else -> NavEntry(key) { Text("Unknown Route") }

@@ -6,6 +6,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.xg.project.data.remote.UploadService
 import org.xg.project.data.remote.httpClient
 import org.xg.project.data.repository.FoodRepository
@@ -14,11 +17,18 @@ import kotlinx.datetime.todayIn
 import org.xg.project.domain.model.Ingredient
 import org.xg.project.domain.model.MealType
 import kotlin.time.Clock
+import kotlin.random.Random
 
 class ManualRecipeInputViewModel(
     private val uploadService: UploadService = UploadService(httpClient),
     private val foodRepository: FoodRepository = FoodRepository()
 ) : ViewModel() {
+    @Serializable
+    private data class IngredientPayload(
+        val name: String,
+        val number: String
+    )
+
     private val _state = MutableStateFlow(ManualRecipeInputState())
     val state: StateFlow<ManualRecipeInputState> = _state.asStateFlow()
 
@@ -28,7 +38,9 @@ class ManualRecipeInputViewModel(
             is ManualRecipeInputIntent.AddIngredient -> addIngredient(intent.ingredient)
             is ManualRecipeInputIntent.UpdateIngredient -> updateIngredient(intent.ingredient)
             is ManualRecipeInputIntent.RemoveIngredient -> removeIngredient(intent.ingredient)
-            is ManualRecipeInputIntent.UpdateSteps -> updateSteps(intent.value)
+            ManualRecipeInputIntent.AddStep -> addStep()
+            is ManualRecipeInputIntent.UpdateStep -> updateStep(intent.index, intent.value)
+            is ManualRecipeInputIntent.RemoveStep -> removeStep(intent.index)
             is ManualRecipeInputIntent.UpdateDuration -> updateDuration(intent.value)
             is ManualRecipeInputIntent.UpdateDifficulty -> updateDifficulty(intent.value)
             is ManualRecipeInputIntent.UpdateTag -> updateTag(intent.value)
@@ -45,7 +57,10 @@ class ManualRecipeInputViewModel(
     }
 
     private fun addIngredient(ingredient: Ingredient) {
-        _state.value = _state.value.copy(ingredients = _state.value.ingredients + ingredient)
+        val ingredientWithUniqueId = ingredient.copy(
+            id = "${Clock.System.now().toEpochMilliseconds()}-${Random.nextInt()}"
+        )
+        _state.value = _state.value.copy(ingredients = _state.value.ingredients + ingredientWithUniqueId)
     }
 
     private fun updateIngredient(ingredient: Ingredient) {
@@ -60,8 +75,22 @@ class ManualRecipeInputViewModel(
         _state.value = _state.value.copy(ingredients = _state.value.ingredients.filter { it.id != ingredient.id })
     }
 
-    private fun updateSteps(value: String) {
-        _state.value = _state.value.copy(steps = value)
+    private fun addStep() {
+        _state.value = _state.value.copy(steps = _state.value.steps + "")
+    }
+
+    private fun updateStep(index: Int, value: String) {
+        _state.value = _state.value.copy(
+            steps = _state.value.steps.mapIndexed { i, step ->
+                if (i == index) value else step
+            }
+        )
+    }
+
+    private fun removeStep(index: Int) {
+        _state.value = _state.value.copy(
+            steps = _state.value.steps.filterIndexed { i, _ -> i != index }
+        )
     }
 
     private fun updateDuration(value: String) {
@@ -125,7 +154,11 @@ class ManualRecipeInputViewModel(
             _state.value = _state.value.copy(isSaving = true, error = null)
             try {
                 // 验证表单
-                if (_state.value.recipeName.isEmpty() || _state.value.ingredients.isEmpty() || _state.value.steps.isEmpty()) {
+                val normalizedSteps = _state.value.steps
+                    .map { it.trim() }
+                    .filter { it.isNotEmpty() }
+
+                if (_state.value.recipeName.isEmpty() || _state.value.ingredients.isEmpty() || normalizedSteps.isEmpty()) {
                     _state.value = _state.value.copy(
                         error = "食谱名称、原材料和制作过程不能为空",
                         isSaving = false
@@ -146,13 +179,21 @@ class ManualRecipeInputViewModel(
                     }
                 }
 
-                val ingredientsString = _state.value.ingredients.joinToString { "${it.name}, ${it.quantity}" }
+                val ingredientsString = Json.encodeToString(
+                    _state.value.ingredients.map {
+                        IngredientPayload(
+                            name = it.name.trim(),
+                            number = it.quantity.trim()
+                        )
+                    }
+                )
+                val stepsString = Json.encodeToString(normalizedSteps)
 
                 // 保存食谱到服务器
                 val response = foodRepository.createRecipe(
                     name = _state.value.recipeName,
                     ingredients = ingredientsString,
-                    steps = _state.value.steps,
+                    steps = stepsString,
                     duration = _state.value.duration,
                     difficulty = _state.value.difficulty,
                     tag = _state.value.tag,

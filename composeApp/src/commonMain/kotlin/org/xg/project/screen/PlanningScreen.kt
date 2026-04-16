@@ -27,9 +27,11 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -52,15 +55,23 @@ fun PlanningScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFFCFAF2))
+            .background(GlassStyle.BgGradient)
             .verticalScroll(state),
     ) {
         // 步骤1：选择日期
         SectionTitle("第一步：选择日期")
-        Card(Modifier.padding(horizontal = 16.dp), shape = RoundedCornerShape(40.dp)) {
-            Row(Modifier.padding(20.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("2026年03月30日", fontWeight = FontWeight.Bold)
-                Icon(Icons.Default.CalendarToday, contentDescription = null, tint = Color(0xFFF59E42))
+        Card(
+            Modifier
+                .padding(horizontal = 16.dp)
+                .glassPanelStrong(RoundedCornerShape(40.dp)),
+            shape = RoundedCornerShape(40.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+        ) {
+            GlassHighlight {
+                Row(Modifier.padding(20.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("2026年03月30日", fontWeight = FontWeight.Bold, color = GlassStyle.TextPrimary)
+                    Icon(Icons.Default.CalendarToday, contentDescription = null, tint = GlassStyle.AccentStrong)
+                }
             }
         }
 
@@ -76,7 +87,21 @@ fun PlanningScreen() {
 
         // 步骤3：挑选菜品
         SectionTitle("第三步：挑选菜品")
-        TextField(value = "", onValueChange = {}, placeholder = { Text("从食谱库快速添加...") }, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp))
+        TextField(
+            value = "",
+            onValueChange = {},
+            placeholder = { Text("从食谱库快速添加...") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .glassPanel(RoundedCornerShape(16.dp)),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
+            )
+        )
         Spacer(Modifier.height(16.dp))
         // 推荐菜品（省略实际搜索）
         DishOptionCard("清炖排骨汤", "适合感冒/滋补，约1.5小时", selected = false)
@@ -88,9 +113,9 @@ fun PlanningScreen() {
         Button(
             onClick = {},
             Modifier.fillMaxWidth().padding(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF97316))
+            colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.24f))
         ) {
-            Text("生成计划（由${selectedRole}发起)", fontWeight = FontWeight.Bold)
+            Text("生成计划（由${selectedRole}发起)", fontWeight = FontWeight.Bold, color = GlassStyle.TextPrimary)
         }
         Spacer(Modifier.height(96.dp))
     }
@@ -100,18 +125,20 @@ fun PlanningScreen() {
 @Composable
 fun ToggleButtonGroup(options: List<String>, selected: String, onSelect: (String) -> Unit) {
     Row(
-        Modifier.background(Color(0xFFF3F4F6), RoundedCornerShape(16.dp)).padding(4.dp)
+        Modifier
+            .glassPanel(RoundedCornerShape(16.dp))
+            .padding(4.dp)
     ) {
         options.forEach {
             val isSelected = it == selected
             Box(
                 Modifier
                     .clip(RoundedCornerShape(12.dp))
-                    .background(if (isSelected) Color(0xFFF97316) else Color.Transparent)
+                    .background(if (isSelected) Color.White.copy(alpha = 0.30f) else Color.Transparent)
                     .clickable { onSelect(it) }
                     .padding(vertical = 6.dp, horizontal = 20.dp)
             ) {
-                Text(it, color = if (isSelected) Color.White else Color(0xFF4B5563), fontWeight = FontWeight.Bold)
+                Text(it, color = if (isSelected) GlassStyle.TextPrimary else GlassStyle.TextSecondary, fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -124,25 +151,30 @@ fun DishOptionCard(name: String, tip: String, selected: Boolean) {
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 4.dp)
             .border(
-                if (selected) BorderStroke(2.dp, Color(0xFFF97316)) else BorderStroke(1.dp, Color(0xFFFFEDD5)),
+                if (selected) BorderStroke(1.5.dp, GlassStyle.Stroke) else BorderStroke(1.dp, GlassStyle.Stroke.copy(alpha = 0.8f)),
                 shape = RoundedCornerShape(24.dp)
-            ), shape = RoundedCornerShape(24.dp)
+            )
+            .glassPanel(RoundedCornerShape(24.dp)),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
-        Row(Modifier.padding(12.dp)) {
+        GlassHighlight {
+            Row(Modifier.padding(12.dp)) {
             Box(
-                Modifier.size(48.dp).background(Color.Gray, RoundedCornerShape(16.dp))
+                Modifier.size(48.dp).background(Color.White.copy(alpha = 0.18f), RoundedCornerShape(16.dp))
             ) { /* 图片占位 */ }
             Column(Modifier.padding(start = 12.dp)) {
-                Text(name, fontWeight = FontWeight.Bold, color = if (selected) Color(0xFFF97316) else Color.Black)
-                Text(tip, fontSize = 10.sp, color = if (selected) Color(0xFFF97316) else Color.Gray)
+                Text(name, fontWeight = FontWeight.Bold, color = GlassStyle.TextPrimary)
+                Text(tip, fontSize = 10.sp, color = GlassStyle.TextSecondary)
             }
             Spacer(Modifier.weight(1f))
             Icon(
                 if (selected) Icons.Default.Check else Icons.Default.Add, contentDescription = null,
-                tint = if (selected) Color.White else Color(0xFFF97316),
+                tint = GlassStyle.TextPrimary,
                 modifier = Modifier
-                    .background(if (selected) Color(0xFFF97316) else Color(0xFFFFEDD5), RoundedCornerShape(50)).padding(6.dp)
+                    .background(Color.White.copy(alpha = 0.22f), RoundedCornerShape(50)).padding(6.dp)
             )
+        }
         }
     }
 }
