@@ -3,12 +3,14 @@ package org.xg.project.screen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -92,7 +95,7 @@ private val HelperTextSize = 12.sp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManualRecipeInputScreen(
-    viewModel:ManualRecipeInputViewModel = koinViewModel<ManualRecipeInputViewModel>(),
+    viewModel: ManualRecipeInputViewModel = koinViewModel<ManualRecipeInputViewModel>(),
     onBack: () -> Unit,
     onSave: () -> Unit
 ) {
@@ -126,9 +129,11 @@ fun ManualRecipeInputScreen(
                     viewModel.handleIntent(ManualRecipeInputIntent.UploadImage(imageBytes))
                 }
             }
+
             is ImagePickerResult.Error -> {
                 println("图片选择错误: ${result.exception.message}")
             }
+
             else -> {}
         }
     }
@@ -142,633 +147,752 @@ fun ManualRecipeInputScreen(
         }
     }
 
-    Box(
+    Scaffold(
+        containerColor = Color.Transparent,
         modifier = Modifier
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
                     colors = listOf(GlassBgTop, GlassBgBottom)
                 )
-            )
-    ) {
-        Scaffold(
-            containerColor = Color.Transparent,
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text(
-                            text = "手动录入食谱",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                            color = GlassText
-                        )
-                    },
-                    navigationIcon = {
-                        TextButton(
-                            onClick = onBack,
-                            modifier = Modifier.sizeIn(minHeight = 36.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "返回",
-                                tint = GlassText,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(modifier = Modifier.width(2.dp))
-                            Text("返回", color = GlassText, fontWeight = FontWeight.Medium, fontSize = AppBarTextSize)
-                        }
-                    },
-                    actions = {
-                        TextButton(
-                            onClick = {
-                                focusManager.clearFocus()
-                                keyboardController?.hide()
-                                viewModel.handleIntent(ManualRecipeInputIntent.SaveRecipe)
-                            },
-                            modifier = Modifier.sizeIn(minHeight = 36.dp)
-                        ) {
-                            Text("保存", color = GlassText, fontWeight = FontWeight.Medium, fontSize = AppBarTextSize)
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = GlassSurfaceStrong,
-                        titleContentColor = GlassText,
-                        navigationIconContentColor = GlassText,
-                        actionIconContentColor = GlassText
+            ),
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "手动录入食谱",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        color = GlassText
                     )
-                )
-            }
-        ) { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-                    .fillMaxSize()
-                    .imePadding()
-            ) {
-                // 错误提示
-                if (state.error != null) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 12.dp)
-                            .background(
-                                color = Color(0xFFFF5A6F).copy(alpha = 0.16f),
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .border(
-                                width = 1.dp,
-                                color = Color.White.copy(alpha = 0.35f),
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .padding(14.dp)
+                },
+                navigationIcon = {
+                    TextButton(
+                        onClick = onBack,
+                        modifier = Modifier.sizeIn(minHeight = 36.dp)
                     ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "返回",
+                            tint = GlassText,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(2.dp))
                         Text(
-                            text = state.error!!,
-                            color = Color(0xFFB00020),
-                            fontSize = BodyTextSize
+                            "返回",
+                            color = GlassText,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = AppBarTextSize
                         )
                     }
-                }
-
-                // 主体内容
-                Column(
+                },
+                actions = {
+                    TextButton(
+                        onClick = {
+                            focusManager.clearFocus()
+                            keyboardController?.hide()
+                            viewModel.handleIntent(ManualRecipeInputIntent.SaveRecipe)
+                        },
+                        modifier = Modifier.sizeIn(minHeight = 36.dp)
+                    ) {
+                        Text(
+                            "保存",
+                            color = GlassText,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = AppBarTextSize
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = GlassSurfaceStrong,
+                    titleContentColor = GlassText,
+                    navigationIconContentColor = GlassText,
+                    actionIconContentColor = GlassText
+                )
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .imePadding()
+        ) {
+            // 错误提示
+            if (state.error != null) {
+                Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .shadow(6.dp, RoundedCornerShape(20.dp), ambientColor = Color.White.copy(alpha = 0.24f), spotColor = Color.Black.copy(alpha = 0.07f))
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp)
                         .background(
-                            color = GlassSurface,
-                            shape = RoundedCornerShape(20.dp)
+                            color = Color(0xFFFF5A6F).copy(alpha = 0.16f),
+                            shape = RoundedCornerShape(12.dp)
                         )
                         .border(
                             width = 1.dp,
-                            color = GlassStroke,
-                            shape = RoundedCornerShape(20.dp)
+                            color = Color.White.copy(alpha = 0.35f),
+                            shape = RoundedCornerShape(12.dp)
                         )
-                        .padding(16.dp)
+                        .padding(14.dp)
                 ) {
-            // 食谱名称
-            OutlinedTextField(
-                value = state.recipeName,
-                onValueChange = { viewModel.handleIntent(ManualRecipeInputIntent.UpdateRecipeName(it)) },
-                label = { Text("食谱名称") },
-                shape = FieldShape,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color.White.copy(alpha = 0.66f),
-                    unfocusedBorderColor = Color.White.copy(alpha = 0.5f),
-                    focusedLabelColor = GlassText.copy(alpha = 0.75f),
-                    unfocusedLabelColor = GlassText.copy(alpha = 0.55f),
-                    focusedContainerColor = Color.White.copy(alpha = 0.06f),
-                    unfocusedContainerColor = Color.White.copy(alpha = 0.04f)
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-                    .focusRequester(nameFocusRequester),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                keyboardActions = KeyboardActions(onNext = { durationFocusRequester.requestFocus() })
-            )
+                    Text(
+                        text = state.error!!,
+                        color = Color(0xFFB00020),
+                        fontSize = BodyTextSize
+                    )
+                }
+            }
 
-            // 用餐类型（宽屏一行四个，窄屏自动两行）
+            // 主体内容
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .shadow(
+                        6.dp,
+                        RoundedCornerShape(20.dp),
+                        ambientColor = Color.White.copy(alpha = 0.24f),
+                        spotColor = Color.Black.copy(alpha = 0.07f)
+                    )
+                    .background(
+                        color = GlassSurface,
+                        shape = RoundedCornerShape(20.dp)
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = GlassStroke,
+                        shape = RoundedCornerShape(20.dp)
+                    )
+                    .padding(16.dp)
             ) {
-                Text(
-                    "用餐类型",
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = SectionTitleSize,
-                    color = GlassText,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                // 食谱名称
+                OutlinedTextField(
+                    value = state.recipeName,
+                    onValueChange = {
+                        viewModel.handleIntent(
+                            ManualRecipeInputIntent.UpdateRecipeName(
+                                it
+                            )
+                        )
+                    },
+                    label = { Text("食谱名称") },
+                    shape = FieldShape,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color.White.copy(alpha = 0.66f),
+                        unfocusedBorderColor = Color.White.copy(alpha = 0.5f),
+                        focusedLabelColor = GlassText.copy(alpha = 0.75f),
+                        unfocusedLabelColor = GlassText.copy(alpha = 0.55f),
+                        focusedContainerColor = Color.White.copy(alpha = 0.06f),
+                        unfocusedContainerColor = Color.White.copy(alpha = 0.04f)
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                        .focusRequester(nameFocusRequester),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                    keyboardActions = KeyboardActions(
+                        onNext = { durationFocusRequester.requestFocus() },
+                        onDone = {
+                            focusManager.clearFocus()
+                            keyboardController?.hide()
+                        }
+                    )
                 )
 
-                BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-                    val isWideScreen = maxWidth >= 520.dp
-                    val columns = if (isWideScreen) 4 else 2
-                    val mealTypeRows = MealType.values().toList().chunked(columns)
+                // 标签
+                OutlinedTextField(
+                    value = state.tag,
+                    onValueChange = { viewModel.handleIntent(ManualRecipeInputIntent.UpdateTag(it)) },
+                    label = { Text("标签") },
+                    placeholder = { Text("例如：家常菜") },
+                    shape = FieldShape,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color.White.copy(alpha = 0.66f),
+                        unfocusedBorderColor = Color.White.copy(alpha = 0.5f),
+                        focusedLabelColor = GlassText.copy(alpha = 0.75f),
+                        unfocusedLabelColor = GlassText.copy(alpha = 0.55f),
+                        focusedContainerColor = Color.White.copy(alpha = 0.06f),
+                        unfocusedContainerColor = Color.White.copy(alpha = 0.04f)
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                        .focusRequester(tagFocusRequester),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                    keyboardActions = KeyboardActions(
+                        onNext = { stepsFocusRequester.requestFocus() },
+                        onDone = {
+                            focusManager.clearFocus()
+                            keyboardController?.hide()
+                        }
+                    )
+                )
 
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        mealTypeRows.forEach { mealTypeRow ->
+                // 用餐类型（宽屏一行四个，窄屏自动两行）
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                ) {
+                    Text(
+                        "用餐类型",
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = SectionTitleSize,
+                        color = GlassText,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
+                    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                        val isWideScreen = maxWidth >= 520.dp
+                        val columns = if (isWideScreen) 4 else 2
+                        val mealTypeRows = MealType.values().toList().chunked(columns)
+
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            mealTypeRows.forEach { mealTypeRow ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    mealTypeRow.forEach { mealType ->
+                                        val isSelected = state.selectedMealType == mealType.name
+                                        Button(
+                                            onClick = {
+                                                viewModel.handleIntent(
+                                                    ManualRecipeInputIntent.SelectMealType(
+                                                        mealType.name
+                                                    )
+                                                )
+                                                durationFocusRequester.requestFocus()
+                                            },
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = if (isSelected) Color.White.copy(
+                                                    alpha = 0.34f
+                                                ) else Color.White.copy(alpha = 0.16f),
+                                                contentColor = GlassText.copy(alpha = if (isSelected) 0.92f else 0.78f)
+                                            ),
+                                            shape = RoundedCornerShape(16.dp),
+                                            modifier = Modifier.weight(1f)
+                                        ) {
+                                            Text(
+                                                text = mealType.title,
+                                                fontSize = BodyTextSize,
+                                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
+                                            )
+                                        }
+                                    }
+                                    repeat(columns - mealTypeRow.size) {
+                                        Spacer(modifier = Modifier.weight(1f))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 烹饪时间
+                val selectedDurationMinutes = state.duration
+                    .filter { it.isDigit() }
+                    .toIntOrNull()
+                    ?.coerceIn(5, 180) ?: 0
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                        .focusRequester(durationFocusRequester)
+                        .focusable()
+                ) {
+                    Text(
+                        text = "烹饪时间",
+                        color = GlassText.copy(alpha = 0.75f),
+                        fontSize = BodyTextSize,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                color = Color.White.copy(alpha = 0.06f),
+                                shape = FieldShape
+                            )
+                            .border(
+                                width = 1.dp,
+                                color = Color.White.copy(alpha = 0.5f),
+                                shape = FieldShape
+                            )
+                            .padding(vertical = 14.dp, horizontal = 16.dp)
+                    ) {
+                        val updateDurationMinutes: (Int) -> Unit = { delta ->
+                            val next = (selectedDurationMinutes + delta).coerceIn(5, 180)
+                            if (next != selectedDurationMinutes) {
+                                viewModel.handleIntent(ManualRecipeInputIntent.UpdateDuration("${next}分钟"))
+                            }
+                        }
+
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Text(
+                                text = "${selectedDurationMinutes}分钟",
+                                color = GlassText.copy(alpha = 0.92f),
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                mealTypeRow.forEach { mealType ->
-                                    val isSelected = state.selectedMealType == mealType.name
-                                    Button(
-                                        onClick = {
-                                            viewModel.handleIntent(ManualRecipeInputIntent.SelectMealType(mealType.name))
-                                            durationFocusRequester.requestFocus()
-                                        },
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = if (isSelected) Color.White.copy(alpha = 0.34f) else Color.White.copy(alpha = 0.16f),
-                                            contentColor = GlassText.copy(alpha = if (isSelected) 0.92f else 0.78f)
-                                        ),
-                                        shape = RoundedCornerShape(16.dp),
-                                        modifier = Modifier.weight(1f)
-                                    ) {
-                                        Text(
-                                            text = mealType.title,
-                                            fontSize = BodyTextSize,
-                                            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
+                                Button(
+                                    onClick = { updateDurationMinutes(10) },
+                                    modifier = Modifier.weight(1f),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color.White.copy(
+                                            alpha = 0.18f
                                         )
-                                    }
+                                    ),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Text(
+                                        "+10分钟",
+                                        color = GlassText.copy(alpha = 0.9f),
+                                        fontSize = BodyTextSize
+                                    )
                                 }
-                                repeat(columns - mealTypeRow.size) {
-                                    Spacer(modifier = Modifier.weight(1f))
+                                Button(
+                                    onClick = { updateDurationMinutes(5) },
+                                    modifier = Modifier.weight(1f),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color.White.copy(
+                                            alpha = 0.18f
+                                        )
+                                    ),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Text(
+                                        "+5分钟",
+                                        color = GlassText.copy(alpha = 0.9f),
+                                        fontSize = BodyTextSize
+                                    )
+                                }
+                                Button(
+                                    onClick = { updateDurationMinutes(-5) },
+                                    modifier = Modifier.weight(1f),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color.White.copy(
+                                            alpha = 0.18f
+                                        )
+                                    ),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Text(
+                                        "-5分钟",
+                                        color = GlassText.copy(alpha = 0.9f),
+                                        fontSize = BodyTextSize
+                                    )
                                 }
                             }
                         }
                     }
                 }
-            }
 
-            // 烹饪时间
-            val selectedDurationMinutes = state.duration
-                .filter { it.isDigit() }
-                .toIntOrNull()
-                ?.coerceIn(5, 180) ?: 30
+                // 难度
+                val selectedDifficultyStars = state.difficulty
+                    .filter { it.isDigit() }
+                    .toIntOrNull()
+                    ?.coerceIn(1, 5) ?: 0
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-                    .focusRequester(durationFocusRequester)
-            ) {
-                Text(
-                    text = "烹饪时间",
-                    color = GlassText.copy(alpha = 0.75f),
-                    fontSize = BodyTextSize,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-
-                Box(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(
-                            color = Color.White.copy(alpha = 0.06f),
-                            shape = FieldShape
-                        )
-                        .border(
-                            width = 1.dp,
-                            color = Color.White.copy(alpha = 0.5f),
-                            shape = FieldShape
-                        )
-                        .padding(vertical = 14.dp, horizontal = 16.dp)
-                ) {
-                    val updateDurationMinutes: (Int) -> Unit = { delta ->
-                        val next = (selectedDurationMinutes + delta).coerceIn(5, 180)
-                        if (next != selectedDurationMinutes) {
-                            viewModel.handleIntent(ManualRecipeInputIntent.UpdateDuration("${next}分钟"))
-                        }
-                    }
-
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Text(
-                            text = "${selectedDurationMinutes}分钟",
-                            color = GlassText.copy(alpha = 0.92f),
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Button(
-                                onClick = { updateDurationMinutes(10) },
-                                modifier = Modifier.weight(1f),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.18f)),
-                                shape = RoundedCornerShape(12.dp)
-                            ) {
-                                Text("+10分钟", color = GlassText.copy(alpha = 0.9f), fontSize = BodyTextSize)
-                            }
-                            Button(
-                                onClick = { updateDurationMinutes(5) },
-                                modifier = Modifier.weight(1f),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.18f)),
-                                shape = RoundedCornerShape(12.dp)
-                            ) {
-                                Text("+5分钟", color = GlassText.copy(alpha = 0.9f), fontSize = BodyTextSize)
-                            }
-                            Button(
-                                onClick = { updateDurationMinutes(-5) },
-                                modifier = Modifier.weight(1f),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.18f)),
-                                shape = RoundedCornerShape(12.dp)
-                            ) {
-                                Text("-5分钟", color = GlassText.copy(alpha = 0.9f), fontSize = BodyTextSize)
-                            }
-                        }
-                    }
-                }
-            }
-
-            // 难度
-            val selectedDifficultyStars = state.difficulty
-                .filter { it.isDigit() }
-                .toIntOrNull()
-                ?.coerceIn(1, 5) ?: 0
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-            ) {
-                Text(
-                    text = "难度",
-                    color = GlassText.copy(alpha = 0.75f),
-                    fontSize = BodyTextSize,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    (1..5).forEach { star ->
-                        Text(
-                            text = if (star <= selectedDifficultyStars) "★" else "☆",
-                            color = if (star <= selectedDifficultyStars) Color(0xFFFFC107) else GlassText.copy(alpha = 0.5f),
-                            fontSize = 28.sp,
-                            modifier = Modifier
-                                .clickable {
-                                    val nextDifficulty = if (star == selectedDifficultyStars) "" else "${star}星"
-                                    viewModel.handleIntent(ManualRecipeInputIntent.UpdateDifficulty(nextDifficulty))
-                                }
-                                .padding(horizontal = 2.dp, vertical = 4.dp)
-                        )
-                    }
-                }
-            }
-
-            // 标签
-            OutlinedTextField(
-                value = state.tag,
-                onValueChange = { viewModel.handleIntent(ManualRecipeInputIntent.UpdateTag(it)) },
-                label = { Text("标签") },
-                placeholder = { Text("例如：家常菜") },
-                shape = FieldShape,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color.White.copy(alpha = 0.66f),
-                    unfocusedBorderColor = Color.White.copy(alpha = 0.5f),
-                    focusedLabelColor = GlassText.copy(alpha = 0.75f),
-                    unfocusedLabelColor = GlassText.copy(alpha = 0.55f),
-                    focusedContainerColor = Color.White.copy(alpha = 0.06f),
-                    unfocusedContainerColor = Color.White.copy(alpha = 0.04f)
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-                    .focusRequester(tagFocusRequester),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                keyboardActions = KeyboardActions(onNext = { stepsFocusRequester.requestFocus() })
-            )
-
-            // 原材料
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(bottom = 16.dp)
                 ) {
                     Text(
-                        text = "原材料",
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = SectionTitleSize,
-                        color = GlassText,
-                        modifier = Modifier.weight(1f)
+                        text = "难度",
+                        color = GlassText.copy(alpha = 0.75f),
+                        fontSize = BodyTextSize,
+                        modifier = Modifier.padding(bottom = 8.dp)
                     )
-
-                    Button(
-                        onClick = {
-                            viewModel.handleIntent(ManualRecipeInputIntent.AddIngredient(Ingredient("1", "", "")))
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.18f)),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Edit,
-                            contentDescription = "添加",
-                            tint = GlassText.copy(alpha = 0.86f),
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            "添加",
-                            color = GlassText.copy(alpha = 0.9f),
-                            fontWeight = FontWeight.Medium,
-                            fontSize = BodyTextSize
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(12.dp))
-
-                val ingredientNameFocusRequesters = remember(state.ingredients.size) {
-                    List(state.ingredients.size) { FocusRequester() }
-                }
-                val ingredientQuantityFocusRequesters = remember(state.ingredients.size) {
-                    List(state.ingredients.size) { FocusRequester() }
-                }
-
-                state.ingredients.forEachIndexed { index, ingredient ->
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        OutlinedTextField(
-                            value = ingredient.name,
-                            label = { Text("材料名称") },
-                            shape = FieldShape,
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = Color.White.copy(alpha = 0.66f),
-                                unfocusedBorderColor = Color.White.copy(alpha = 0.5f),
-                                focusedLabelColor = GlassText.copy(alpha = 0.75f),
-                                unfocusedLabelColor = GlassText.copy(alpha = 0.55f),
-                                focusedContainerColor = Color.White.copy(alpha = 0.06f),
-                                unfocusedContainerColor = Color.White.copy(alpha = 0.04f)
-                            ),
-                            onValueChange = {
-                                viewModel.handleIntent(ManualRecipeInputIntent.UpdateIngredient(ingredient.copy(name = it)))
-                            },
-                            modifier = Modifier
-                                .weight(2f)
-                                .focusRequester(ingredientNameFocusRequesters[index]),
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                            keyboardActions = KeyboardActions(onNext = {
-                                if (index < ingredientQuantityFocusRequesters.size) {
-                                    ingredientQuantityFocusRequesters[index].requestFocus()
-                                }
-                            })
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        OutlinedTextField(
-                            label = { Text("数量") },
-                            value = ingredient.quantity,
-                            shape = FieldShape,
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = Color.White.copy(alpha = 0.66f),
-                                unfocusedBorderColor = Color.White.copy(alpha = 0.5f),
-                                focusedLabelColor = GlassText.copy(alpha = 0.75f),
-                                unfocusedLabelColor = GlassText.copy(alpha = 0.55f),
-                                focusedContainerColor = Color.White.copy(alpha = 0.06f),
-                                unfocusedContainerColor = Color.White.copy(alpha = 0.04f)
-                            ),
-                            onValueChange = {
-                                viewModel.handleIntent(ManualRecipeInputIntent.UpdateIngredient(ingredient.copy(quantity = it)))
-                            },
-                            modifier = Modifier
-                                .weight(1f)
-                                .focusRequester(ingredientQuantityFocusRequesters[index]),
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                            keyboardActions = KeyboardActions(onNext = {
-                                if (index < state.ingredients.size - 1) {
-                                    ingredientNameFocusRequesters[index + 1].requestFocus()
-                                } else {
-                                    stepsFocusRequester.requestFocus()
-                                }
-                            })
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        IconButton(
-                            onClick = {
-                                viewModel.handleIntent(ManualRecipeInputIntent.RemoveIngredient(ingredient))
-                            },
-                            modifier = Modifier.weight(0.3f)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Delete,
-                                contentDescription = "删除",
-                                tint = GlassDelete,
-                                modifier = Modifier.size(28.dp)
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-            }
-
-            // 制作过程
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "制作过程",
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = SectionTitleSize,
-                        color = GlassText,
-                        modifier = Modifier.weight(1f)
-                    )
-
-                    Button(
-                        onClick = { viewModel.handleIntent(ManualRecipeInputIntent.AddStep) },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.18f)),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Edit,
-                            contentDescription = "添加步骤",
-                            tint = GlassText.copy(alpha = 0.86f),
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            "添加",
-                            color = GlassText.copy(alpha = 0.9f),
-                            fontWeight = FontWeight.Medium,
-                            fontSize = BodyTextSize
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                val stepFocusRequesters = remember(state.steps.size) {
-                    List(state.steps.size) { FocusRequester() }
-                }
-
-                state.steps.forEachIndexed { index, step ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        OutlinedTextField(
-                            value = step,
-                            onValueChange = {
-                                viewModel.handleIntent(ManualRecipeInputIntent.UpdateStep(index, it))
-                            },
-                            label = { Text("步骤 ${index + 1}") },
-                            placeholder = { Text("请输入步骤内容") },
-                            shape = FieldShape,
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = Color.White.copy(alpha = 0.66f),
-                                unfocusedBorderColor = Color.White.copy(alpha = 0.5f),
-                                focusedLabelColor = GlassText.copy(alpha = 0.75f),
-                                unfocusedLabelColor = GlassText.copy(alpha = 0.55f),
-                                focusedContainerColor = Color.White.copy(alpha = 0.06f),
-                                unfocusedContainerColor = Color.White.copy(alpha = 0.04f)
-                            ),
-                            modifier = Modifier
-                                .weight(2f)
-                                .focusRequester(
-                                    if (index == 0) stepsFocusRequester else stepFocusRequesters[index]
-                                ),
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(
-                                imeAction = if (index < state.steps.size - 1) ImeAction.Next else ImeAction.Done
-                            ),
-                            keyboardActions = KeyboardActions(
-                                onNext = {
-                                    if (index < state.steps.size - 1) {
-                                        stepFocusRequesters[index + 1].requestFocus()
-                                    }
-                                },
-                                onDone = {
-                                    focusManager.clearFocus()
-                                    keyboardController?.hide()
-                                }
-                            )
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        IconButton(
-                            onClick = { viewModel.handleIntent(ManualRecipeInputIntent.RemoveStep(index)) },
-                            modifier = Modifier.weight(0.3f)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Delete,
-                                contentDescription = "删除步骤",
-                                tint = GlassDelete,
-                                modifier = Modifier.size(28.dp)
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-            }
-
-            // 图片上传
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .padding(bottom = 24.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.2f))
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.verticalGradient(
-                                colors = listOf(
-                                    Color.White.copy(alpha = 0.20f),
-                                    Color.Transparent
-                                )
-                            )
-                        )
-                        .border(
-                            width = 1.dp,
-                            color = GlassStroke,
-                            shape = RoundedCornerShape(16.dp)
-                        )
-                        .clickable {
-                            if (state.isUploading) return@clickable
-                            focusManager.clearFocus()
-                            keyboardController?.hide()
-                            picker.launchGallery()
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (state.uploadedImageUrl != null) {
-                        AsyncImage(
-                            model = state.uploadedImageUrl,
-                            contentDescription = state.recipeName,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    } else {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.PlaylistAdd,
-                                contentDescription = "上传图片",
-                                tint = GlassBlue.copy(alpha = 0.7f),
-                                modifier = Modifier.size(32.dp).padding(bottom = 8.dp)
-                            )
+                        (1..5).forEach { star ->
                             Text(
-                                "点击上传图片",
+                                text = if (star <= selectedDifficultyStars) "★" else "☆",
+                                color = if (star <= selectedDifficultyStars) Color(0xFFFFC107) else GlassText.copy(
+                                    alpha = 0.5f
+                                ),
+                                fontSize = 28.sp,
+                                modifier = Modifier
+                                    .clickable {
+                                        val nextDifficulty =
+                                            if (star == selectedDifficultyStars) "" else "${star}星"
+                                        viewModel.handleIntent(
+                                            ManualRecipeInputIntent.UpdateDifficulty(
+                                                nextDifficulty
+                                            )
+                                        )
+                                    }
+                                    .padding(horizontal = 2.dp, vertical = 4.dp)
+                            )
+                        }
+                    }
+                }
+
+                // 原材料
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "原材料",
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = SectionTitleSize,
+                            color = GlassText,
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        Button(
+                            onClick = {
+                                viewModel.handleIntent(
+                                    ManualRecipeInputIntent.AddIngredient(
+                                        Ingredient("1", "", "")
+                                    )
+                                )
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.White.copy(
+                                    alpha = 0.18f
+                                )
+                            ),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Edit,
+                                contentDescription = "添加",
+                                tint = GlassText.copy(alpha = 0.86f),
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                "添加",
                                 color = GlassText.copy(alpha = 0.9f),
-                                fontWeight = FontWeight.SemiBold,
+                                fontWeight = FontWeight.Medium,
                                 fontSize = BodyTextSize
                             )
-                            Text("(可选)", color = GlassText.copy(alpha = 0.6f), fontSize = HelperTextSize)
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    val ingredientNameFocusRequesters = remember(state.ingredients.size) {
+                        List(state.ingredients.size) { FocusRequester() }
+                    }
+                    val ingredientQuantityFocusRequesters = remember(state.ingredients.size) {
+                        List(state.ingredients.size) { FocusRequester() }
+                    }
+
+                    state.ingredients.forEachIndexed { index, ingredient ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            OutlinedTextField(
+                                value = ingredient.name,
+                                label = { Text("材料名称") },
+                                shape = FieldShape,
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = Color.White.copy(alpha = 0.66f),
+                                    unfocusedBorderColor = Color.White.copy(alpha = 0.5f),
+                                    focusedLabelColor = GlassText.copy(alpha = 0.75f),
+                                    unfocusedLabelColor = GlassText.copy(alpha = 0.55f),
+                                    focusedContainerColor = Color.White.copy(alpha = 0.06f),
+                                    unfocusedContainerColor = Color.White.copy(alpha = 0.04f)
+                                ),
+                                onValueChange = {
+                                    viewModel.handleIntent(
+                                        ManualRecipeInputIntent.UpdateIngredient(
+                                            ingredient.copy(name = it)
+                                        )
+                                    )
+                                },
+                                modifier = Modifier
+                                    .weight(2f)
+                                    .focusRequester(ingredientNameFocusRequesters[index]),
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                                keyboardActions = KeyboardActions(
+                                    onNext = {
+                                        if (index < ingredientQuantityFocusRequesters.size) {
+                                            ingredientQuantityFocusRequesters[index].requestFocus()
+                                        }
+                                    },
+                                    onDone = {
+                                        focusManager.clearFocus()
+                                        keyboardController?.hide()
+                                    }
+                                )
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            OutlinedTextField(
+                                label = { Text("数量") },
+                                value = ingredient.quantity,
+                                shape = FieldShape,
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = Color.White.copy(alpha = 0.66f),
+                                    unfocusedBorderColor = Color.White.copy(alpha = 0.5f),
+                                    focusedLabelColor = GlassText.copy(alpha = 0.75f),
+                                    unfocusedLabelColor = GlassText.copy(alpha = 0.55f),
+                                    focusedContainerColor = Color.White.copy(alpha = 0.06f),
+                                    unfocusedContainerColor = Color.White.copy(alpha = 0.04f)
+                                ),
+                                onValueChange = {
+                                    viewModel.handleIntent(
+                                        ManualRecipeInputIntent.UpdateIngredient(
+                                            ingredient.copy(quantity = it)
+                                        )
+                                    )
+                                },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .focusRequester(ingredientQuantityFocusRequesters[index]),
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                                keyboardActions = KeyboardActions(
+                                    onNext = {
+                                        if (index < state.ingredients.size - 1) {
+                                            ingredientNameFocusRequesters[index + 1].requestFocus()
+                                        } else {
+                                            stepsFocusRequester.requestFocus()
+                                        }
+                                    },
+                                    onDone = {
+                                        focusManager.clearFocus()
+                                        keyboardController?.hide()
+                                    }
+                                )
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            IconButton(
+                                onClick = {
+                                    viewModel.handleIntent(
+                                        ManualRecipeInputIntent.RemoveIngredient(
+                                            ingredient
+                                        )
+                                    )
+                                },
+                                modifier = Modifier.weight(0.3f)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Delete,
+                                    contentDescription = "删除",
+                                    tint = GlassDelete,
+                                    modifier = Modifier.size(28.dp)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+                }
+
+                // 制作过程
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "制作过程",
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = SectionTitleSize,
+                            color = GlassText,
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        Button(
+                            onClick = { viewModel.handleIntent(ManualRecipeInputIntent.AddStep) },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.White.copy(
+                                    alpha = 0.18f
+                                )
+                            ),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Edit,
+                                contentDescription = "添加步骤",
+                                tint = GlassText.copy(alpha = 0.86f),
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                "添加",
+                                color = GlassText.copy(alpha = 0.9f),
+                                fontWeight = FontWeight.Medium,
+                                fontSize = BodyTextSize
+                            )
                         }
                     }
 
-                    if (state.isUploading) {
-                        CircularProgressIndicator(color = GlassBlue)
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    val stepFocusRequesters = remember(state.steps.size) {
+                        List(state.steps.size) { FocusRequester() }
+                    }
+
+                    state.steps.forEachIndexed { index, step ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            OutlinedTextField(
+                                value = step,
+                                onValueChange = {
+                                    viewModel.handleIntent(
+                                        ManualRecipeInputIntent.UpdateStep(
+                                            index,
+                                            it
+                                        )
+                                    )
+                                },
+                                label = { Text("步骤 ${index + 1}") },
+                                placeholder = { Text("请输入步骤内容") },
+                                shape = FieldShape,
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = Color.White.copy(alpha = 0.66f),
+                                    unfocusedBorderColor = Color.White.copy(alpha = 0.5f),
+                                    focusedLabelColor = GlassText.copy(alpha = 0.75f),
+                                    unfocusedLabelColor = GlassText.copy(alpha = 0.55f),
+                                    focusedContainerColor = Color.White.copy(alpha = 0.06f),
+                                    unfocusedContainerColor = Color.White.copy(alpha = 0.04f)
+                                ),
+                                modifier = Modifier
+                                    .weight(2f)
+                                    .focusRequester(
+                                        if (index == 0) stepsFocusRequester else stepFocusRequesters[index]
+                                    ),
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(
+                                    imeAction = if (index < state.steps.size - 1) ImeAction.Next else ImeAction.Done
+                                ),
+                                keyboardActions = KeyboardActions(
+                                    onNext = {
+                                        if (index < state.steps.size - 1) {
+                                            stepFocusRequesters[index + 1].requestFocus()
+                                        }
+                                    },
+                                    onDone = {
+                                        focusManager.clearFocus()
+                                        keyboardController?.hide()
+                                    }
+                                )
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            IconButton(
+                                onClick = {
+                                    viewModel.handleIntent(
+                                        ManualRecipeInputIntent.RemoveStep(
+                                            index
+                                        )
+                                    )
+                                },
+                                modifier = Modifier.weight(0.3f)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Delete,
+                                    contentDescription = "删除步骤",
+                                    tint = GlassDelete,
+                                    modifier = Modifier.size(28.dp)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
                     }
                 }
-            }
+
+                // 图片上传
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .padding(bottom = 24.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.2f))
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                Brush.verticalGradient(
+                                    colors = listOf(
+                                        Color.White.copy(alpha = 0.20f),
+                                        Color.Transparent
+                                    )
+                                )
+                            )
+                            .border(
+                                width = 1.dp,
+                                color = GlassStroke,
+                                shape = RoundedCornerShape(16.dp)
+                            )
+                            .clickable {
+                                if (state.isUploading) return@clickable
+                                focusManager.clearFocus()
+                                keyboardController?.hide()
+                                picker.launchGallery()
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (state.uploadedImageUrl != null) {
+                            AsyncImage(
+                                model = state.uploadedImageUrl,
+                                contentDescription = state.recipeName,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        } else {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.PlaylistAdd,
+                                    contentDescription = "上传图片",
+                                    tint = GlassBlue.copy(alpha = 0.7f),
+                                    modifier = Modifier.size(32.dp).padding(bottom = 8.dp)
+                                )
+                                Text(
+                                    "点击上传图片",
+                                    color = GlassText.copy(alpha = 0.9f),
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = BodyTextSize
+                                )
+                                Text(
+                                    "(可选)",
+                                    color = GlassText.copy(alpha = 0.6f),
+                                    fontSize = HelperTextSize
+                                )
+                            }
+                        }
+
+                        if (state.isUploading) {
+                            CircularProgressIndicator(color = GlassBlue)
+                        }
+                    }
                 }
             }
         }

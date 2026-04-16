@@ -18,8 +18,6 @@ import org.xg.project.domain.model.RecipeDraft
 // 模拟网络请求数据层
 class FoodRepository {
     
-    // 是否使用真实的 Ktor 网络请求，目前你可以将这个开关打开，并填写真实的 API 地址
-    private val useRealNetwork = true
     private val baseUrl = "http://localhost:8080/api"
 
     suspend fun fetchDailyRecords(): List<DailyMenuRecord> {
@@ -81,7 +79,7 @@ class FoodRepository {
                 ingredients.map {
                     IngredientPayload(
                         name = it.name,
-                        number = it.quantity
+                        number = it.number
                     )
                 }
             ),

@@ -56,7 +56,13 @@ fun App() {
                     }
                 }
                 Scaffold(
-                    modifier = Modifier.statusBarsPadding(),
+                    modifier = Modifier.then(
+                        if (currentRoute != Routes.ManualRecipeInput) {
+                            Modifier.statusBarsPadding()
+                        } else {
+                            Modifier
+                        }
+                    ),
                     bottomBar = {
                         if (currentRoute != Routes.ManualRecipeInput) {
                             TabBar(
