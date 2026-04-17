@@ -5,6 +5,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -13,6 +14,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
@@ -31,6 +35,30 @@ import org.xg.project.screen.ProfileScreen
 import org.xg.project.screen.RecipesScreen
 import org.xg.project.screen.TabBar
 
+private data class ScreenChrome(
+    val showBottomBar: Boolean,
+    val applyStatusBarsPadding: Boolean
+)
+
+private fun Routes.chrome(): ScreenChrome {
+    return when (this) {
+        Routes.ManualRecipeInput -> ScreenChrome(showBottomBar = false, applyStatusBarsPadding = false)
+        else -> ScreenChrome(showBottomBar = true, applyStatusBarsPadding = true)
+    }
+}
+
+private fun routesStackSaver(defaultRoot: Routes) = listSaver<SnapshotStateList<Routes>, String>(
+    save = { stack -> stack.map { it.id } },
+    restore = { ids ->
+        val restored = ids.mapNotNull { Routes.fromId(it) }
+        mutableStateListOf<Routes>().apply {
+            addAll(
+                if (restored.isNotEmpty()) restored else listOf(defaultRoot)
+            )
+        }
+    }
+)
+
 @Composable
 fun App() {
     // Coil3 初始化网络请求组件
@@ -47,39 +75,60 @@ fun App() {
         configuration = koinConfiguration(declaration = { modules(appModule) }),
         content = {
             MaterialTheme {
-                val backStack = remember { mutableStateListOf(Routes.Home) }
+                val homeStack = rememberSaveable(saver = routesStackSaver(Routes.Home)) { mutableStateListOf(Routes.Home) }
+                val recipesStack = rememberSaveable(saver = routesStackSaver(Routes.Recipes)) { mutableStateListOf(Routes.Recipes) }
+                val historyStack = rememberSaveable(saver = routesStackSaver(Routes.History)) { mutableStateListOf(Routes.History) }
+                val profileStack = rememberSaveable(saver = routesStackSaver(Routes.Profile)) { mutableStateListOf(Routes.Profile) }
+                val currentTabId = rememberSaveable { mutableStateOf(Routes.Home.id) }
                 val recipesRefreshKey = remember { mutableStateOf(0) }
-                val currentRoute = backStack.lastOrNull() ?: Routes.Home
+                val currentTab = Routes.fromId(currentTabId.value) ?: Routes.Home
+                val activeStack = when (currentTab) {
+                    Routes.Home -> homeStack
+                    Routes.Recipes -> recipesStack
+                    Routes.History -> historyStack
+                    Routes.Profile -> profileStack
+                    else -> homeStack
+                }
+                val currentRoute = activeStack.lastOrNull() ?: currentTab
+                val chrome = currentRoute.chrome()
                 val popBackStack = {
-                    if (backStack.size > 1) {
-                        backStack.removeAt(backStack.lastIndex)
+                    if (activeStack.size > 1) {
+                        activeStack.removeAt(activeStack.lastIndex)
+                    } else if (currentTab != Routes.Home) {
+                        currentTabId.value = Routes.Home.id
                     }
                 }
+                PlatformBackHandler(
+                    enabled = activeStack.size > 1 || currentTab != Routes.Home,
+                    onBack = popBackStack
+                )
                 Scaffold(
                     modifier = Modifier.then(
-                        if (currentRoute != Routes.ManualRecipeInput) {
+                        if (chrome.applyStatusBarsPadding) {
                             Modifier.statusBarsPadding()
                         } else {
                             Modifier
                         }
                     ),
                     bottomBar = {
-                        if (currentRoute != Routes.ManualRecipeInput) {
+                        if (chrome.showBottomBar) {
                             TabBar(
-                                activeRoute = currentRoute,
+                                activeRoute = currentTab,
                                 onTabClick = { route ->
-                                    if (currentRoute != route) {
-                                        backStack.clear()
-                                        backStack.add(route)
+                                    if (currentTab == route) {
+                                        activeStack.clear()
+                                        activeStack.add(route)
+                                        return@TabBar
                                     }
+                                    currentTabId.value = route.id
                                 }
                             )
                         }
                     }
                 ) { innerPadding ->
                     NavDisplay(
-                        backStack = backStack,
-//                        modifier = Modifier.padding(innerPadding),
+                        backStack = activeStack,
+                        modifier = Modifier.padding(innerPadding),
                         transitionSpec = {
                             slideInHorizontally {
                                 it
@@ -98,28 +147,28 @@ fun App() {
                         when (key) {
                             Routes.Home -> NavEntry(key) {
                                 IndexScreen(
-                                    onAddPlan = { backStack.add(Routes.Recipes) }
+                                    onAddPlan = { currentTabId.value = Routes.Recipes.id }
                                 )
                             }
 
                             Routes.Recipes -> NavEntry(key) {
                                 RecipesScreen(
                                     refreshTrigger = recipesRefreshKey.value,
-                                    onNavigateToManualInput = { backStack.add(Routes.ManualRecipeInput) }
+                                    onNavigateToManualInput = { activeStack.add(Routes.ManualRecipeInput) }
                                 )
                             }
-                            Routes.Plan -> NavEntry(key) { PlanningScreen() }
                             Routes.History -> NavEntry(key) { HistoryScreen() }
                             Routes.Profile -> NavEntry(key) { ProfileScreen() }
-                            Routes.ManualRecipeInput -> NavEntry(key) { ManualRecipeInputScreen(
-                                onBack = popBackStack,
-                                onSave = { 
-                                    // 保存成功后返回上一页
-                                    recipesRefreshKey.value += 1
-                                    popBackStack()
-                                }
-                            ) }
-                            else -> NavEntry(key) { Text("Unknown Route") }
+                            Routes.Plan -> NavEntry(key) { PlanningScreen() }
+                            Routes.ManualRecipeInput -> NavEntry(key) {
+                                ManualRecipeInputScreen(
+                                    onBack = popBackStack,
+                                    onSave = {
+                                        recipesRefreshKey.value += 1
+                                        popBackStack()
+                                    }
+                                )
+                            }
                         }
                     }
                 }

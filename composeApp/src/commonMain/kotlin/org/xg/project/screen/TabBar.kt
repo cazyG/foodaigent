@@ -31,12 +31,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import org.xg.project.Routes.Routes
 
-data class TabItem(val label: String, val icon: ImageVector, val route: String)
+data class TabItem(val label: String, val icon: ImageVector, val route: Routes)
 
 @Composable
 fun TabBar(
-    activeRoute: String,
-    onTabClick: (String) -> Unit
+    activeRoute: Routes,
+    onTabClick: (Routes) -> Unit
 ) {
 
     val items = listOf(
