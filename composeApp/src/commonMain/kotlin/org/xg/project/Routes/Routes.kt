@@ -2,7 +2,7 @@ package org.xg.project.Routes
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import org.jetbrains.androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.NavKey
 
 @Serializable
 sealed class AppRoute : NavKey {

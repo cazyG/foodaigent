@@ -6,8 +6,8 @@ import androidx.savedstate.serialization.SavedStateConfiguration
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
-import org.jetbrains.androidx.navigation3.runtime.NavKey
-import org.jetbrains.androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.rememberNavBackStack
 import org.xg.project.Routes.AppRoute
 import org.xg.project.Routes.BottomTabRoute
 import org.xg.project.Routes.RecipesInternalRoute
@@ -26,7 +26,6 @@ val appSavedStateConfiguration = SavedStateConfiguration {
 }
 
 @Composable
-inline fun <reified T : Any> rememberAppNavBackStack(vararg initialDestinations: T): SnapshotStateList<Any> {
-    val initialList = initialDestinations.map { it as Any }.toTypedArray()
-    return rememberNavBackStack(appSavedStateConfiguration, *initialList)
+fun rememberAppNavBackStack(vararg initialDestinations: NavKey): SnapshotStateList<NavKey> {
+    return rememberNavBackStack(appSavedStateConfiguration, *initialDestinations)
 }
