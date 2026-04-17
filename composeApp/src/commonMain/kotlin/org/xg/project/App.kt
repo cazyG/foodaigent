@@ -18,7 +18,8 @@ import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
-import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.entry
 import androidx.navigation3.ui.NavDisplay
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
@@ -98,10 +99,6 @@ fun App() {
                         currentTabId.value = Routes.Home.id
                     }
                 }
-                PlatformBackHandler(
-                    enabled = activeStack.size > 1 || currentTab != Routes.Home,
-                    onBack = popBackStack
-                )
                 Scaffold(
                     modifier = Modifier.then(
                         if (chrome.applyStatusBarsPadding) {
@@ -129,6 +126,7 @@ fun App() {
                     NavDisplay(
                         backStack = activeStack,
                         modifier = Modifier.padding(innerPadding),
+                        onBack = popBackStack,
                         transitionSpec = {
                             slideInHorizontally {
                                 it
@@ -142,25 +140,23 @@ fun App() {
                             } + fadeIn() togetherWith slideOutHorizontally {
                                 it
                             } + fadeOut()
-                        }
-                    ) { key ->
-                        when (key) {
-                            Routes.Home -> NavEntry(key) {
+                        },
+                        entryProvider = entryProvider {
+                            entry<Routes.Home> {
                                 IndexScreen(
                                     onAddPlan = { currentTabId.value = Routes.Recipes.id }
                                 )
                             }
-
-                            Routes.Recipes -> NavEntry(key) {
+                            entry<Routes.Recipes> {
                                 RecipesScreen(
                                     refreshTrigger = recipesRefreshKey.value,
                                     onNavigateToManualInput = { activeStack.add(Routes.ManualRecipeInput) }
                                 )
                             }
-                            Routes.History -> NavEntry(key) { HistoryScreen() }
-                            Routes.Profile -> NavEntry(key) { ProfileScreen() }
-                            Routes.Plan -> NavEntry(key) { PlanningScreen() }
-                            Routes.ManualRecipeInput -> NavEntry(key) {
+                            entry<Routes.History> { HistoryScreen() }
+                            entry<Routes.Profile> { ProfileScreen() }
+                            entry<Routes.Plan> { PlanningScreen() }
+                            entry<Routes.ManualRecipeInput> {
                                 ManualRecipeInputScreen(
                                     onBack = popBackStack,
                                     onSave = {
@@ -170,7 +166,7 @@ fun App() {
                                 )
                             }
                         }
-                    }
+                    )
                 }
             }
         })
