@@ -2,6 +2,7 @@ package org.xg.project
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.navigation3.runtime.NavBackStack
 import androidx.savedstate.serialization.SavedStateConfiguration
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
@@ -26,6 +27,6 @@ val appSavedStateConfiguration = SavedStateConfiguration {
 }
 
 @Composable
-fun rememberAppNavBackStack(vararg initialDestinations: NavKey): SnapshotStateList<NavKey> {
+fun rememberAppNavBackStack(vararg initialDestinations: NavKey): NavBackStack<NavKey> {
     return rememberNavBackStack(appSavedStateConfiguration, *initialDestinations)
 }
