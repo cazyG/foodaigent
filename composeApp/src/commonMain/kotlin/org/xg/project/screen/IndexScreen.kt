@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -36,14 +37,13 @@ import org.xg.project.domain.model.DailyMenuRecord
 import org.xg.project.domain.model.MenuItemData
 import org.xg.project.presentation.index.IndexViewModel
 import org.xg.project.presentation.index.IndexIntent
-import org.xg.project.Routes.AppRoute
+import org.xg.project.Routes.BottomTabRoute
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun IndexScreen(
-    activeTab: AppRoute,
-    onTabClick: (AppRoute) -> Unit,
-    onAddPlan: () -> Unit,   // 点击“去添加计划”时触发，用于跳转到点餐页面
+    onSelectTab: (BottomTabRoute) -> Unit,
+    onNavigateToDetail: (Int) -> Unit,
     viewModel: IndexViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -62,10 +62,7 @@ fun IndexScreen(
         snack = emptyList()
     )
 
-    AppScaffold(
-        activeTab = activeTab,
-        onTabClick = onTabClick
-    ) { innerPadding ->
+    Scaffold { innerPadding ->
         if (state.isLoading) {
             Box(
                 modifier = Modifier.fillMaxSize().padding(innerPadding),
@@ -73,7 +70,7 @@ fun IndexScreen(
             ) {
                 CircularProgressIndicator(color = GlassStyle.AccentStrong)
             }
-            return@AppScaffold
+            return@Scaffold
         }
 
         Column(
@@ -99,12 +96,15 @@ fun IndexScreen(
                         Modifier
                             .glassPanelStrong(RoundedCornerShape(12.dp))
                             .padding(8.dp)
+                            .clickable { onNavigateToDetail(1) }
                     ) {
                         Text("黄小厨", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = GlassStyle.TextPrimary)
                     }
                 }
                 Text("${today.year}年${today.month.number}月${today.day}日", color = GlassStyle.TextPrimary)
             }
+
+            val openSearch = { onSelectTab(BottomTabRoute.Search) }
 
             MenuSection(
                 title = "早餐",
@@ -113,7 +113,7 @@ fun IndexScreen(
                 modifier = Modifier.wrapContentSize(),
                 showReviewButton = state.canReviewBreakfast,
                 onReviewClick = { /* TODO */ },
-                onAddPlan = onAddPlan
+                onAddPlan = openSearch
             )
 
             MenuSection(
@@ -122,7 +122,7 @@ fun IndexScreen(
                 modifier = Modifier.wrapContentSize(),
                 showReviewButton = state.canReviewLunch,
                 onReviewClick = { /* TODO */ },
-                onAddPlan = onAddPlan
+                onAddPlan = openSearch
             )
 
             MenuSection(
@@ -131,7 +131,7 @@ fun IndexScreen(
                 modifier = Modifier.wrapContentSize(),
                 showReviewButton = state.canReviewDinner,
                 onReviewClick = { /* TODO */ },
-                onAddPlan = onAddPlan
+                onAddPlan = openSearch
             )
 
             MenuSection(
@@ -141,7 +141,7 @@ fun IndexScreen(
                 modifier = Modifier.wrapContentSize(),
                 showReviewButton = state.canReviewSnack,
                 onReviewClick = { /* TODO */ },
-                onAddPlan = onAddPlan
+                onAddPlan = openSearch
             )
         }
     }

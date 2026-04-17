@@ -38,26 +38,21 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.collectAsState
 import org.koin.compose.viewmodel.koinViewModel
 import org.xg.project.domain.model.DailyMenuRecord
 import org.xg.project.presentation.history.HistoryViewModel
 import org.xg.project.presentation.history.HistoryIntent
-import org.xg.project.Routes.AppRoute
 
 @Composable
 fun HistoryScreen(
-    activeTab: AppRoute,
-    onTabClick: (AppRoute) -> Unit,
     viewModel: HistoryViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
     val scrollState = rememberScrollState()
 
-    AppScaffold(
-        activeTab = activeTab,
-        onTabClick = onTabClick
-    ) { innerPadding ->
+    Scaffold { innerPadding ->
         Column(
             modifier = Modifier.fillMaxSize().background(GlassStyle.BgGradient).padding(innerPadding).verticalScroll(scrollState)
         ) {

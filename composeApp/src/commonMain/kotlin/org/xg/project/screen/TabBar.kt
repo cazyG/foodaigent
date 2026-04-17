@@ -20,31 +20,27 @@ import androidx.compose.ui.unit.sp
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Book
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import org.xg.project.Routes.AppRoute
+import org.xg.project.Routes.BottomTabRoute
 
-data class TabItem(val label: String, val icon: ImageVector, val route: AppRoute)
+private data class TabItem(val label: String, val icon: ImageVector, val route: BottomTabRoute)
 
 @Composable
-fun TabBar(
-    activeRoute: AppRoute,
-    onTabClick: (AppRoute) -> Unit
+fun BottomTabBar(
+    activeTab: BottomTabRoute,
+    onTabClick: (BottomTabRoute) -> Unit
 ) {
 
     val items = listOf(
-        TabItem("首页", Icons.Default.Home, AppRoute.Home),
-        TabItem("食谱库", Icons.Default.Book, AppRoute.Recipes),
-//        TabItem("点菜", Icons.Default.AddCircle, AppRoute.Plan),
-        TabItem("历史", Icons.Default.History, AppRoute.History),
-        TabItem("我的", Icons.Default.Person, AppRoute.Profile),
+        TabItem("首页", Icons.Default.Home, BottomTabRoute.Home),
+        TabItem("搜索", Icons.Default.Book, BottomTabRoute.Search),
+        TabItem("我的", Icons.Default.Person, BottomTabRoute.Profile),
     )
 
     Card(
@@ -63,7 +59,7 @@ fun TabBar(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             items.forEach { tab ->
-                val isActive = tab.route == activeRoute
+                val isActive = tab.route == activeTab
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,

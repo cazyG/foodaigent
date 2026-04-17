@@ -1,32 +1,33 @@
 package org.xg.project
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.savedstate.serialization.SavedStateConfiguration
-import androidx.savedstate.serialization.serializersModule
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
+import org.jetbrains.androidx.navigation3.runtime.NavKey
+import org.jetbrains.androidx.navigation3.runtime.rememberNavBackStack
 import org.xg.project.Routes.AppRoute
+import org.xg.project.Routes.BottomTabRoute
+import org.xg.project.Routes.HomeInternalRoute
+import org.xg.project.Routes.SearchInternalRoute
 
-// Creates the required serialization configuration for open polymorphism
-private val config = SavedStateConfiguration {
+val appSavedStateConfiguration = SavedStateConfiguration {
     serializersModule = SerializersModule {
-        polymorphic(Any::class) {
-            subclass(AppRoute.Home::class, AppRoute.Home.serializer())
-            subclass(AppRoute.Recipes::class, AppRoute.Recipes.serializer())
-            subclass(AppRoute.Plan::class, AppRoute.Plan.serializer())
-            subclass(AppRoute.History::class, AppRoute.History.serializer())
-            subclass(AppRoute.Profile::class, AppRoute.Profile.serializer())
-            subclass(AppRoute.ManualRecipeInput::class, AppRoute.ManualRecipeInput.serializer())
+        polymorphic(NavKey::class) {
+            subclass(AppRoute.Main::class, AppRoute.Main.serializer())
+            subclass(BottomTabRoute.Home::class, BottomTabRoute.Home.serializer())
+            subclass(BottomTabRoute.Search::class, BottomTabRoute.Search.serializer())
+            subclass(BottomTabRoute.Profile::class, BottomTabRoute.Profile.serializer())
+            subclass(HomeInternalRoute.List::class, HomeInternalRoute.List.serializer())
+            subclass(HomeInternalRoute.Detail::class, HomeInternalRoute.Detail.serializer())
+            subclass(SearchInternalRoute.Main::class, SearchInternalRoute.Main.serializer())
         }
     }
 }
 
 @Composable
-fun rememberAppNavBackStack(initialDestination: AppRoute): SnapshotStateList<Any> {
-    return rememberNavBackStack(config, initialDestination)
+fun rememberAppNavBackStack(vararg initialDestinations: NavKey): SnapshotStateList<NavKey> {
+    return rememberNavBackStack(appSavedStateConfiguration, *initialDestinations)
 }
-

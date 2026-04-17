@@ -32,6 +32,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,21 +46,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.xg.project.Routes.AppRoute
 
 @Composable
-fun PlanningScreen(
-    activeTab: AppRoute,
-    onTabClick: (AppRoute) -> Unit
-) {
+fun PlanningScreen() {
     var selectedRole by remember { mutableStateOf("丈夫") }
     var selectedMeal by remember { mutableStateOf("午餐") }
     val state = rememberScrollState()
 
-    AppScaffold(
-        activeTab = activeTab,
-        onTabClick = onTabClick
-    ) { innerPadding ->
+    Scaffold { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()

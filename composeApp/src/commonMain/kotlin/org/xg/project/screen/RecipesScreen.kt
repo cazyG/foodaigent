@@ -27,15 +27,12 @@ import org.xg.project.domain.model.MealType
 import org.xg.project.domain.model.Recipe
 import org.xg.project.presentation.recipes.RecipesIntent
 import org.xg.project.presentation.recipes.RecipesViewModel
-import org.xg.project.Routes.AppRoute
 
 @Composable
 fun RecipesScreen(
-    activeTab: AppRoute,
-    onTabClick: (AppRoute) -> Unit,
     viewModel: RecipesViewModel = koinViewModel(),
     refreshTrigger: Int = 0,
-    onNavigateToManualInput: () -> Unit
+    onNavigateToManualInput: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -43,15 +40,12 @@ fun RecipesScreen(
         viewModel.handleIntent(RecipesIntent.LoadRecipes)
     }
     
-    AppScaffold(
-        activeTab = activeTab,
-        onTabClick = onTabClick
-    ) { innerPadding ->
+    Scaffold { innerPadding ->
         if (state.isLoading) {
             Box(modifier = Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = Color(0xFFF59E42))
             }
-            return@AppScaffold
+            return@Scaffold
         }
 
         Column(

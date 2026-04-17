@@ -2,28 +2,44 @@ package org.xg.project.Routes
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.jetbrains.androidx.navigation3.runtime.NavKey
 
 @Serializable
-sealed class AppRoute {
-    @Serializable @SerialName("home")
-    data object Home : AppRoute()
+sealed class AppRoute : NavKey {
+    @Serializable
+    @SerialName("main")
+    data object Main : AppRoute()
+}
 
-    @Serializable @SerialName("recipes")
-    data object Recipes : AppRoute()
+@Serializable
+sealed class BottomTabRoute : NavKey {
+    @Serializable
+    @SerialName("tab_home")
+    data object Home : BottomTabRoute()
 
-    @Serializable @SerialName("plan")
-    data object Plan : AppRoute()
+    @Serializable
+    @SerialName("tab_search")
+    data object Search : BottomTabRoute()
 
-    @Serializable @SerialName("history")
-    data object History : AppRoute()
+    @Serializable
+    @SerialName("tab_profile")
+    data object Profile : BottomTabRoute()
+}
 
-    @Serializable @SerialName("profile")
-    data object Profile : AppRoute()
+@Serializable
+sealed class HomeInternalRoute : NavKey {
+    @Serializable
+    @SerialName("home_list")
+    data object List : HomeInternalRoute()
 
-    @Serializable @SerialName("manual_recipe_input")
-    data object ManualRecipeInput : AppRoute()
+    @Serializable
+    @SerialName("home_detail")
+    data class Detail(val id: Int) : HomeInternalRoute()
+}
 
-    companion object {
-        val tabRoots: List<AppRoute> = listOf(Home, Recipes, History, Profile)
-    }
+@Serializable
+sealed class SearchInternalRoute : NavKey {
+    @Serializable
+    @SerialName("search_main")
+    data object Main : SearchInternalRoute()
 }

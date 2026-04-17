@@ -45,21 +45,16 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import org.koin.compose.viewmodel.koinViewModel
 import org.xg.project.presentation.profile.ProfileViewModel
-import org.xg.project.Routes.AppRoute
+import androidx.compose.material3.Scaffold
 
 @Composable
 fun ProfileScreen(
-    activeTab: AppRoute,
-    onTabClick: (AppRoute) -> Unit,
     viewModel: ProfileViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
     val scrollState = rememberScrollState()
 
-    AppScaffold(
-        activeTab = activeTab,
-        onTabClick = onTabClick
-    ) { innerPadding ->
+    Scaffold { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
