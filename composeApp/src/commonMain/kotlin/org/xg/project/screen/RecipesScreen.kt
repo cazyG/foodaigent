@@ -27,9 +27,12 @@ import org.xg.project.domain.model.MealType
 import org.xg.project.domain.model.Recipe
 import org.xg.project.presentation.recipes.RecipesIntent
 import org.xg.project.presentation.recipes.RecipesViewModel
+import org.xg.project.Routes.Routes
 
 @Composable
 fun RecipesScreen(
+    activeTab: Routes,
+    onTabClick: (Routes) -> Unit,
     viewModel: RecipesViewModel = koinViewModel(),
     refreshTrigger: Int = 0,
     onNavigateToManualInput: () -> Unit
@@ -40,97 +43,97 @@ fun RecipesScreen(
         viewModel.handleIntent(RecipesIntent.LoadRecipes)
     }
     
-    if (state.isLoading) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = Color(0xFFF59E42))
-        }
-        return
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(GlassStyle.BgGradient)
-    ) {
-        // 顶部栏：标题 + 按钮（固定）
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(GlassStyle.SurfaceStrong)
-                .padding( 4.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(text = "食谱灵感库", modifier = Modifier.padding(start = 10.dp), fontWeight = FontWeight.Bold, fontSize = 22.sp, color = GlassStyle.TextPrimary)
-
-            // 按钮根据是否有选中项切换文本和功能
-            val buttonText = if (state.selectedRecipeIds.isNotEmpty()) "保存" else "+ 手动录入"
-            Button(
-                onClick = {
-                    if (state.selectedRecipeIds.isNotEmpty()) {
-                        viewModel.handleIntent(RecipesIntent.SaveSelections)
-                    } else {
-                        // 使用路由导航到手动录入页面
-                        onNavigateToManualInput()
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.24f))
-            ) {
-                Text(buttonText, color = GlassStyle.TextPrimary)
+    AppScaffold(
+        activeTab = activeTab,
+        onTabClick = onTabClick
+    ) { innerPadding ->
+        if (state.isLoading) {
+            Box(modifier = Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = Color(0xFFF59E42))
             }
+            return@AppScaffold
         }
 
-        // 下方主体区域：左侧分类栏 + 右侧食谱网格（比例 2.6:7.4）
-        Row(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)  // 填充剩余高度
+                .fillMaxSize()
+                .background(GlassStyle.BgGradient)
+                .padding(innerPadding)
         ) {
-            // 左侧分类栏 (权重2.6)
-            Column(
+            Row(
                 modifier = Modifier
-                    .weight(2.6f)
-                    .fillMaxHeight()
-                    .glassPanel(RoundedCornerShape(24.dp))
-                    .verticalScroll(rememberScrollState())
-                    .padding(vertical = 16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxWidth()
+                    .background(GlassStyle.SurfaceStrong)
+                    .padding(4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                MealType.values().forEach { mealType ->
-                    val isSelected = state.selectedMealType == mealType
-                    Button(
-                        onClick = {
-                            viewModel.handleIntent(RecipesIntent.ChangeMealType(mealType))
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 2.dp, vertical = 6.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isSelected) Color.White.copy(alpha = 0.28f) else Color.White.copy(alpha = 0.16f),
-                            contentColor = if (isSelected) GlassStyle.TextPrimary else GlassStyle.TextSecondary
-                        ),
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Text(mealType.title, fontSize = 16.sp, fontWeight = FontWeight.Medium)
-                    }
+                Text(text = "食谱灵感库", modifier = Modifier.padding(start = 10.dp), fontWeight = FontWeight.Bold, fontSize = 22.sp, color = GlassStyle.TextPrimary)
+
+                val buttonText = if (state.selectedRecipeIds.isNotEmpty()) "保存" else "+ 手动录入"
+                Button(
+                    onClick = {
+                        if (state.selectedRecipeIds.isNotEmpty()) {
+                            viewModel.handleIntent(RecipesIntent.SaveSelections)
+                        } else {
+                            onNavigateToManualInput()
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.24f))
+                ) {
+                    Text(buttonText, color = GlassStyle.TextPrimary)
                 }
             }
 
-            // 右侧食谱网格 (权重8)
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                contentPadding = PaddingValues(all = 12.dp),
+            Row(
                 modifier = Modifier
-                    .weight(7.4f)
-                    .glassPanel(RoundedCornerShape(24.dp))
-                    .fillMaxHeight()
+                    .fillMaxWidth()
+                    .weight(1f)
             ) {
-                items(state.currentRecipes) { recipe ->
-                    RecipeCard(
-                        recipe = recipe,
-                        isSelected = recipe.id in state.selectedRecipeIds,
-                        onToggle = { viewModel.handleIntent(RecipesIntent.ToggleSelection(recipe.id)) }
-                    )
+                Column(
+                    modifier = Modifier
+                        .weight(2.6f)
+                        .fillMaxHeight()
+                        .glassPanel(RoundedCornerShape(24.dp))
+                        .verticalScroll(rememberScrollState())
+                        .padding(vertical = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    MealType.values().forEach { mealType ->
+                        val isSelected = state.selectedMealType == mealType
+                        Button(
+                            onClick = {
+                                viewModel.handleIntent(RecipesIntent.ChangeMealType(mealType))
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 2.dp, vertical = 6.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (isSelected) Color.White.copy(alpha = 0.28f) else Color.White.copy(alpha = 0.16f),
+                                contentColor = if (isSelected) GlassStyle.TextPrimary else GlassStyle.TextSecondary
+                            ),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Text(mealType.title, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                        }
+                    }
+                }
+
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    contentPadding = PaddingValues(all = 12.dp),
+                    modifier = Modifier
+                        .weight(7.4f)
+                        .glassPanel(RoundedCornerShape(24.dp))
+                        .fillMaxHeight()
+                ) {
+                    items(state.currentRecipes) { recipe ->
+                        RecipeCard(
+                            recipe = recipe,
+                            isSelected = recipe.id in state.selectedRecipeIds,
+                            onToggle = { viewModel.handleIntent(RecipesIntent.ToggleSelection(recipe.id)) }
+                        )
+                    }
                 }
             }
         }

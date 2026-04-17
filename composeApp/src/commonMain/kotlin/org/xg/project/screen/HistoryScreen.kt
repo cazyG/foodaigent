@@ -43,46 +43,51 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.xg.project.domain.model.DailyMenuRecord
 import org.xg.project.presentation.history.HistoryViewModel
 import org.xg.project.presentation.history.HistoryIntent
+import org.xg.project.Routes.Routes
 
 @Composable
 fun HistoryScreen(
+    activeTab: Routes,
+    onTabClick: (Routes) -> Unit,
     viewModel: HistoryViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
     val scrollState = rememberScrollState()
 
-    Column(
-        modifier = Modifier.fillMaxSize().background(GlassStyle.BgGradient).verticalScroll(scrollState)
-    ) {
-        // 顶部栏
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .background(GlassStyle.SurfaceStrong)
-                .border(1.dp, GlassStyle.Stroke, RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp))
-                .padding(24.dp)
+    AppScaffold(
+        activeTab = activeTab,
+        onTabClick = onTabClick
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier.fillMaxSize().background(GlassStyle.BgGradient).padding(innerPadding).verticalScroll(scrollState)
         ) {
-            Column {
-                Text("饮食记忆", fontWeight = FontWeight.Bold, fontSize = 22.sp, color = GlassStyle.TextPrimary)
-                Text("2026年累计点餐 86 次", fontSize = 12.sp, color = GlassStyle.TextSecondary)
-            }
-        }
-
-        if (state.isLoading) {
-            Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = GlassStyle.AccentStrong)
-            }
-        } else {
-            // 历史记录
-            Spacer(Modifier.height(16.dp))
-            Text("饮食记录流", fontWeight = FontWeight.Bold, color = GlassStyle.TextSecondary, modifier = Modifier.padding(16.dp, 4.dp, 0.dp, 4.dp))
-
-            Column {
-                state.dailyRecords.forEach { record ->
-                    MealRecord(record = record)
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .background(GlassStyle.SurfaceStrong)
+                    .border(1.dp, GlassStyle.Stroke, RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp))
+                    .padding(24.dp)
+            ) {
+                Column {
+                    Text("饮食记忆", fontWeight = FontWeight.Bold, fontSize = 22.sp, color = GlassStyle.TextPrimary)
+                    Text("2026年累计点餐 86 次", fontSize = 12.sp, color = GlassStyle.TextSecondary)
                 }
             }
-            Spacer(Modifier.height(96.dp))
+
+            if (state.isLoading) {
+                Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = GlassStyle.AccentStrong)
+                }
+            } else {
+                Spacer(Modifier.height(16.dp))
+                Text("饮食记录流", fontWeight = FontWeight.Bold, color = GlassStyle.TextSecondary, modifier = Modifier.padding(16.dp, 4.dp, 0.dp, 4.dp))
+
+                Column {
+                    state.dailyRecords.forEach { record ->
+                        MealRecord(record = record)
+                    }
+                }
+            }
         }
     }
 }

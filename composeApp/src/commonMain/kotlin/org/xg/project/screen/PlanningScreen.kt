@@ -45,81 +45,85 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.xg.project.Routes.Routes
 
 @Composable
-fun PlanningScreen() {
+fun PlanningScreen(
+    activeTab: Routes,
+    onTabClick: (Routes) -> Unit
+) {
     var selectedRole by remember { mutableStateOf("丈夫") }
     var selectedMeal by remember { mutableStateOf("午餐") }
     val state = rememberScrollState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(GlassStyle.BgGradient)
-            .verticalScroll(state),
-    ) {
-        // 步骤1：选择日期
-        SectionTitle("第一步：选择日期")
-        Card(
-            Modifier
-                .padding(horizontal = 16.dp)
-                .glassPanelStrong(RoundedCornerShape(40.dp)),
-            shape = RoundedCornerShape(40.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+    AppScaffold(
+        activeTab = activeTab,
+        onTabClick = onTabClick
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(GlassStyle.BgGradient)
+                .padding(innerPadding)
+                .verticalScroll(state),
         ) {
-            GlassHighlight {
-                Row(Modifier.padding(20.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("2026年03月30日", fontWeight = FontWeight.Bold, color = GlassStyle.TextPrimary)
-                    Icon(Icons.Default.CalendarToday, contentDescription = null, tint = GlassStyle.AccentStrong)
+            SectionTitle("第一步：选择日期")
+            Card(
+                Modifier
+                    .padding(horizontal = 16.dp)
+                    .glassPanelStrong(RoundedCornerShape(40.dp)),
+                shape = RoundedCornerShape(40.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+            ) {
+                GlassHighlight {
+                    Row(Modifier.padding(20.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text("2026年03月30日", fontWeight = FontWeight.Bold, color = GlassStyle.TextPrimary)
+                        Icon(Icons.Default.CalendarToday, contentDescription = null, tint = GlassStyle.AccentStrong)
+                    }
                 }
             }
-        }
 
-        // 步骤2：选择餐次
-        SectionTitle("第二步：选择餐次")
-        Row(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            ToggleButtonGroup(
-                options = listOf("午餐", "晚餐"),
-                selected = selectedMeal,
-                onSelect = { selectedMeal = it }
+            SectionTitle("第二步：选择餐次")
+            Row(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                ToggleButtonGroup(
+                    options = listOf("午餐", "晚餐"),
+                    selected = selectedMeal,
+                    onSelect = { selectedMeal = it }
+                )
+            }
+
+            SectionTitle("第三步：挑选菜品")
+            TextField(
+                value = "",
+                onValueChange = {},
+                placeholder = { Text("从食谱库快速添加...") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .glassPanel(RoundedCornerShape(16.dp)),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
+                )
             )
-        }
+            Spacer(Modifier.height(16.dp))
+            DishOptionCard("清炖排骨汤", "适合感冒/滋补，约1.5小时", selected = false)
+            DishOptionCard("地三鲜", "家常热门，下饭菜", selected = false)
+            DishOptionCard("红烧肉", "老公爱吃，已选择", selected = true)
 
-        // 步骤3：挑选菜品
-        SectionTitle("第三步：挑选菜品")
-        TextField(
-            value = "",
-            onValueChange = {},
-            placeholder = { Text("从食谱库快速添加...") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .glassPanel(RoundedCornerShape(16.dp)),
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
-            )
-        )
-        Spacer(Modifier.height(16.dp))
-        // 推荐菜品（省略实际搜索）
-        DishOptionCard("清炖排骨汤", "适合感冒/滋补，约1.5小时", selected = false)
-        DishOptionCard("地三鲜", "家常热门，下饭菜", selected = false)
-        DishOptionCard("红烧肉", "老公爱吃，已选择", selected = true)
-
-        // 生成计划
-        Spacer(Modifier.height(32.dp))
-        Button(
-            onClick = {},
-            Modifier.fillMaxWidth().padding(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.24f))
-        ) {
-            Text("生成计划（由${selectedRole}发起)", fontWeight = FontWeight.Bold, color = GlassStyle.TextPrimary)
+            Spacer(Modifier.height(32.dp))
+            Button(
+                onClick = {},
+                Modifier.fillMaxWidth().padding(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.24f))
+            ) {
+                Text("生成计划（由${selectedRole}发起)", fontWeight = FontWeight.Bold, color = GlassStyle.TextPrimary)
+            }
+            Spacer(Modifier.height(32.dp))
         }
-        Spacer(Modifier.height(96.dp))
     }
-//    TabBar(active = "点菜")
 }
 
 @Composable

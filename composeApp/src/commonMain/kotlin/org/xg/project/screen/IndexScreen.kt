@@ -36,10 +36,13 @@ import org.xg.project.domain.model.DailyMenuRecord
 import org.xg.project.domain.model.MenuItemData
 import org.xg.project.presentation.index.IndexViewModel
 import org.xg.project.presentation.index.IndexIntent
+import org.xg.project.Routes.Routes
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun IndexScreen(
+    activeTab: Routes,
+    onTabClick: (Routes) -> Unit,
     onAddPlan: () -> Unit,   // 点击“去添加计划”时触发，用于跳转到点餐页面
     viewModel: IndexViewModel = koinViewModel()
 ) {
@@ -51,13 +54,6 @@ fun IndexScreen(
 
     val scrollState = rememberScrollState()
 
-    if (state.isLoading) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = GlassStyle.AccentStrong)
-        }
-        return
-    }
-
     val todayRecord = state.todayRecord ?: DailyMenuRecord(
         date = "${today.year}.${today.month.number}.${today.day} (今天)",
         breakfast = emptyList(),
@@ -66,74 +62,88 @@ fun IndexScreen(
         snack = emptyList()
     )
 
-    Column(
-        Modifier
-            .fillMaxSize()
-            .background(GlassStyle.BgGradient)
-            .verticalScroll(scrollState)
-    ) {
-        // 顶部栏
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .background(GlassStyle.SurfaceStrong)
-                .border(1.dp, GlassStyle.Stroke, RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp)),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(
-                modifier = Modifier.padding(top = 6.dp, start = 10.dp),
-                verticalAlignment = Alignment.CenterVertically
+    AppScaffold(
+        activeTab = activeTab,
+        onTabClick = onTabClick
+    ) { innerPadding ->
+        if (state.isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize().padding(innerPadding),
+                contentAlignment = Alignment.Center
             ) {
-                Box(
-                    Modifier
-                        .glassPanelStrong(RoundedCornerShape(12.dp))
-                        .padding(8.dp)
-                ) {
-                    Text("黄小厨", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = GlassStyle.TextPrimary)
-                }
+                CircularProgressIndicator(color = GlassStyle.AccentStrong)
             }
-            Text("${today.year}年${today.month.number}月${today.day}日", color = GlassStyle.TextPrimary)
+            return@AppScaffold
         }
 
-        // 早餐、午餐、晚餐、宵夜根据内容自适应高度，整体可滚动
-        MenuSection(
-            title = "早餐",
-            titleColor = GlassStyle.TextPrimary,
-            menus = todayRecord.breakfast,
-            modifier = Modifier.wrapContentSize(),
-            showReviewButton = state.canReviewBreakfast,
-            onReviewClick = { /* TODO */ },
-            onAddPlan = onAddPlan
-        )
+        Column(
+            Modifier
+                .fillMaxSize()
+                .background(GlassStyle.BgGradient)
+                .padding(innerPadding)
+                .verticalScroll(scrollState)
+        ) {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .background(GlassStyle.SurfaceStrong)
+                    .border(1.dp, GlassStyle.Stroke, RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp)),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    modifier = Modifier.padding(top = 6.dp, start = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        Modifier
+                            .glassPanelStrong(RoundedCornerShape(12.dp))
+                            .padding(8.dp)
+                    ) {
+                        Text("黄小厨", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = GlassStyle.TextPrimary)
+                    }
+                }
+                Text("${today.year}年${today.month.number}月${today.day}日", color = GlassStyle.TextPrimary)
+            }
 
-        MenuSection(
-            title = "午餐",
-            menus = todayRecord.lunch,
-            modifier = Modifier.wrapContentSize(),
-            showReviewButton = state.canReviewLunch,
-            onReviewClick = { /* TODO */ },
-            onAddPlan = onAddPlan
-        )
+            MenuSection(
+                title = "早餐",
+                titleColor = GlassStyle.TextPrimary,
+                menus = todayRecord.breakfast,
+                modifier = Modifier.wrapContentSize(),
+                showReviewButton = state.canReviewBreakfast,
+                onReviewClick = { /* TODO */ },
+                onAddPlan = onAddPlan
+            )
 
-        MenuSection(
-            title = "晚餐",
-            menus = todayRecord.dinner,
-            modifier = Modifier.wrapContentSize(),
-            showReviewButton = state.canReviewDinner,
-            onReviewClick = { /* TODO */ },
-            onAddPlan = onAddPlan
-        )
+            MenuSection(
+                title = "午餐",
+                menus = todayRecord.lunch,
+                modifier = Modifier.wrapContentSize(),
+                showReviewButton = state.canReviewLunch,
+                onReviewClick = { /* TODO */ },
+                onAddPlan = onAddPlan
+            )
 
-        MenuSection(
-            title = "宵夜",
-            titleColor = GlassStyle.TextPrimary,
-            menus = todayRecord.snack,
-            modifier = Modifier.wrapContentSize(),
-            showReviewButton = state.canReviewSnack,
-            onReviewClick = { /* TODO */ },
-            onAddPlan = onAddPlan
-        )
+            MenuSection(
+                title = "晚餐",
+                menus = todayRecord.dinner,
+                modifier = Modifier.wrapContentSize(),
+                showReviewButton = state.canReviewDinner,
+                onReviewClick = { /* TODO */ },
+                onAddPlan = onAddPlan
+            )
+
+            MenuSection(
+                title = "宵夜",
+                titleColor = GlassStyle.TextPrimary,
+                menus = todayRecord.snack,
+                modifier = Modifier.wrapContentSize(),
+                showReviewButton = state.canReviewSnack,
+                onReviewClick = { /* TODO */ },
+                onAddPlan = onAddPlan
+            )
+        }
     }
 }
 

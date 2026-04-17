@@ -45,71 +45,74 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import org.koin.compose.viewmodel.koinViewModel
 import org.xg.project.presentation.profile.ProfileViewModel
+import org.xg.project.Routes.Routes
 
 @Composable
 fun ProfileScreen(
+    activeTab: Routes,
+    onTabClick: (Routes) -> Unit,
     viewModel: ProfileViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
     val scrollState = rememberScrollState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(GlassStyle.BgGradient)
-            .verticalScroll(scrollState)
-    ) {
-        // 顶部间距
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // 用户信息卡片
-        UserInfoCard(
-            name = state.userName,
-            avatarUrl = state.avatarUrl,
-            bio = state.bio,
-            onEditClick = { /* 跳转编辑资料页面 */ }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // 数据统计卡片
-        StatsCard(
-            totalOrders = state.totalOrders,
-            totalReviews = state.totalReviews,
-            averageStars = state.averageStars
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // 饮食偏好卡片
-        PreferenceCard(
-            tasteRadarData = state.tasteRadarData
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // 设置选项列表
-        SettingsList()
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // 登出按钮
-        Button(
-            onClick = { /* 处理登出逻辑 */ },
+    AppScaffold(
+        activeTab = activeTab,
+        onTabClick = onTabClick
+    ) { innerPadding ->
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .height(50.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.White.copy(alpha = 0.20f),
-                contentColor = GlassStyle.Danger
-            ),
-            shape = RoundedCornerShape(32.dp)
+                .fillMaxSize()
+                .background(GlassStyle.BgGradient)
+                .padding(innerPadding)
+                .verticalScroll(scrollState)
         ) {
-            Text("退出登录", fontSize = 16.sp, fontWeight = FontWeight.Medium)
-        }
+            Spacer(modifier = Modifier.height(16.dp))
 
-        Spacer(modifier = Modifier.height(32.dp))
+            UserInfoCard(
+                name = state.userName,
+                avatarUrl = state.avatarUrl,
+                bio = state.bio,
+                onEditClick = { /* 跳转编辑资料页面 */ }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            StatsCard(
+                totalOrders = state.totalOrders,
+                totalReviews = state.totalReviews,
+                averageStars = state.averageStars
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            PreferenceCard(
+                tasteRadarData = state.tasteRadarData
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            SettingsList()
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(
+                onClick = { /* 处理登出逻辑 */ },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .height(50.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.White.copy(alpha = 0.20f),
+                    contentColor = GlassStyle.Danger
+                ),
+                shape = RoundedCornerShape(32.dp)
+            ) {
+                Text("退出登录", fontSize = 16.sp, fontWeight = FontWeight.Medium)
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+        }
     }
 }
 
