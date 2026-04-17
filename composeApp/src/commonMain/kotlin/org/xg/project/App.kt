@@ -23,12 +23,12 @@ import org.koin.compose.KoinApplication
 import org.koin.dsl.koinConfiguration
 import org.xg.project.Routes.AppRoute
 import org.xg.project.Routes.BottomTabRoute
-import org.xg.project.Routes.HomeInternalRoute
-import org.xg.project.Routes.SearchInternalRoute
+import org.xg.project.Routes.RecipesInternalRoute
 import org.xg.project.di.appModule
 import org.xg.project.screen.BottomTabBar
-import org.xg.project.screen.HomeDetailScreen
+import org.xg.project.screen.HistoryScreen
 import org.xg.project.screen.IndexScreen
+import org.xg.project.screen.ManualRecipeInputScreen
 import org.xg.project.screen.ProfileScreen
 import org.xg.project.screen.RecipesScreen
 
@@ -75,14 +75,17 @@ fun App() {
 @Composable
 private fun BottomNavDisplay() {
     val selectedTab = rememberSaveable { mutableStateOf<BottomTabRoute>(BottomTabRoute.Home) }
-    val homeBackStack = rememberAppNavBackStack(HomeInternalRoute.List)
-    val searchBackStack = rememberAppNavBackStack(SearchInternalRoute.Main)
+    val homeBackStack = rememberAppNavBackStack(BottomTabRoute.Home)
+    val recipesBackStack = rememberAppNavBackStack(BottomTabRoute.Recipes)
+    val historyBackStack = rememberAppNavBackStack(BottomTabRoute.History)
     val profileBackStack = rememberAppNavBackStack(BottomTabRoute.Profile)
     val activeBackStack = when (selectedTab.value) {
         BottomTabRoute.Home -> homeBackStack
-        BottomTabRoute.Search -> searchBackStack
+        BottomTabRoute.Recipes -> recipesBackStack
+        BottomTabRoute.History -> historyBackStack
         BottomTabRoute.Profile -> profileBackStack
     }
+    val recipesRefreshKey = remember { mutableStateOf(0) }
     val popActiveBackStack = {
         if (activeBackStack.size > 1) {
             activeBackStack.removeAt(activeBackStack.lastIndex)
@@ -103,25 +106,31 @@ private fun BottomNavDisplay() {
             modifier = Modifier.padding(innerPadding),
             onBack = popActiveBackStack,
             entryProvider = entryProvider {
-                entry<HomeInternalRoute.List> {
+                entry<BottomTabRoute.Home> {
                     IndexScreen(
-                        onSelectTab = { selectedTab.value = it },
-                        onNavigateToDetail = { id ->
-                            homeBackStack.add(HomeInternalRoute.Detail(id = id))
+                        onAddPlan = {
+                            selectedTab.value = BottomTabRoute.Recipes
+                            recipesBackStack.clear()
+                            recipesBackStack.add(BottomTabRoute.Recipes)
                         }
                     )
                 }
-                entry<HomeInternalRoute.Detail> { backStackEntry ->
-                    HomeDetailScreen(
-                        id = backStackEntry.key.id,
-                        onNavigateBack = {
+                entry<BottomTabRoute.Recipes> {
+                    RecipesScreen(
+                        refreshTrigger = recipesRefreshKey.value,
+                        onNavigateToManualInput = { recipesBackStack.add(RecipesInternalRoute.ManualRecipeInput) }
+                    )
+                }
+                entry<RecipesInternalRoute.ManualRecipeInput> {
+                    ManualRecipeInputScreen(
+                        onBack = popActiveBackStack,
+                        onSave = {
+                            recipesRefreshKey.value += 1
                             popActiveBackStack()
                         }
                     )
                 }
-                entry<SearchInternalRoute.Main> {
-                    RecipesScreen()
-                }
+                entry<BottomTabRoute.History> { HistoryScreen() }
                 entry<BottomTabRoute.Profile> {
                     ProfileScreen()
                 }

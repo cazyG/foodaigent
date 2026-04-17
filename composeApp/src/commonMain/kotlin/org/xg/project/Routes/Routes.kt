@@ -18,8 +18,12 @@ sealed class BottomTabRoute : NavKey {
     data object Home : BottomTabRoute()
 
     @Serializable
-    @SerialName("tab_search")
-    data object Search : BottomTabRoute()
+    @SerialName("tab_recipes")
+    data object Recipes : BottomTabRoute()
+
+    @Serializable
+    @SerialName("tab_history")
+    data object History : BottomTabRoute()
 
     @Serializable
     @SerialName("tab_profile")
@@ -27,19 +31,8 @@ sealed class BottomTabRoute : NavKey {
 }
 
 @Serializable
-sealed class HomeInternalRoute : NavKey {
+sealed class RecipesInternalRoute : NavKey {
     @Serializable
-    @SerialName("home_list")
-    data object List : HomeInternalRoute()
-
-    @Serializable
-    @SerialName("home_detail")
-    data class Detail(val id: Int) : HomeInternalRoute()
-}
-
-@Serializable
-sealed class SearchInternalRoute : NavKey {
-    @Serializable
-    @SerialName("search_main")
-    data object Main : SearchInternalRoute()
+    @SerialName("manual_recipe_input")
+    data object ManualRecipeInput : RecipesInternalRoute()
 }

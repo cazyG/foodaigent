@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
@@ -39,7 +40,8 @@ fun BottomTabBar(
 
     val items = listOf(
         TabItem("首页", Icons.Default.Home, BottomTabRoute.Home),
-        TabItem("搜索", Icons.Default.Book, BottomTabRoute.Search),
+        TabItem("食谱库", Icons.Default.Book, BottomTabRoute.Recipes),
+        TabItem("历史", Icons.Default.History, BottomTabRoute.History),
         TabItem("我的", Icons.Default.Person, BottomTabRoute.Profile),
     )
 

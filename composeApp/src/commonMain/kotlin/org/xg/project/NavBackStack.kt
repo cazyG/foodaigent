@@ -10,19 +10,17 @@ import org.jetbrains.androidx.navigation3.runtime.NavKey
 import org.jetbrains.androidx.navigation3.runtime.rememberNavBackStack
 import org.xg.project.Routes.AppRoute
 import org.xg.project.Routes.BottomTabRoute
-import org.xg.project.Routes.HomeInternalRoute
-import org.xg.project.Routes.SearchInternalRoute
+import org.xg.project.Routes.RecipesInternalRoute
 
 val appSavedStateConfiguration = SavedStateConfiguration {
     serializersModule = SerializersModule {
         polymorphic(NavKey::class) {
             subclass(AppRoute.Main::class, AppRoute.Main.serializer())
             subclass(BottomTabRoute.Home::class, BottomTabRoute.Home.serializer())
-            subclass(BottomTabRoute.Search::class, BottomTabRoute.Search.serializer())
+            subclass(BottomTabRoute.Recipes::class, BottomTabRoute.Recipes.serializer())
+            subclass(BottomTabRoute.History::class, BottomTabRoute.History.serializer())
             subclass(BottomTabRoute.Profile::class, BottomTabRoute.Profile.serializer())
-            subclass(HomeInternalRoute.List::class, HomeInternalRoute.List.serializer())
-            subclass(HomeInternalRoute.Detail::class, HomeInternalRoute.Detail.serializer())
-            subclass(SearchInternalRoute.Main::class, SearchInternalRoute.Main.serializer())
+            subclass(RecipesInternalRoute.ManualRecipeInput::class, RecipesInternalRoute.ManualRecipeInput.serializer())
         }
     }
 }

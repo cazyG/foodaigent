@@ -37,13 +37,11 @@ import org.xg.project.domain.model.DailyMenuRecord
 import org.xg.project.domain.model.MenuItemData
 import org.xg.project.presentation.index.IndexViewModel
 import org.xg.project.presentation.index.IndexIntent
-import org.xg.project.Routes.BottomTabRoute
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun IndexScreen(
-    onSelectTab: (BottomTabRoute) -> Unit,
-    onNavigateToDetail: (Int) -> Unit,
+    onAddPlan: () -> Unit,
     viewModel: IndexViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -96,7 +94,6 @@ fun IndexScreen(
                         Modifier
                             .glassPanelStrong(RoundedCornerShape(12.dp))
                             .padding(8.dp)
-                            .clickable { onNavigateToDetail(1) }
                     ) {
                         Text("黄小厨", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = GlassStyle.TextPrimary)
                     }
@@ -104,7 +101,7 @@ fun IndexScreen(
                 Text("${today.year}年${today.month.number}月${today.day}日", color = GlassStyle.TextPrimary)
             }
 
-            val openSearch = { onSelectTab(BottomTabRoute.Search) }
+            val openRecipes = { onAddPlan() }
 
             MenuSection(
                 title = "早餐",
@@ -113,7 +110,7 @@ fun IndexScreen(
                 modifier = Modifier.wrapContentSize(),
                 showReviewButton = state.canReviewBreakfast,
                 onReviewClick = { /* TODO */ },
-                onAddPlan = openSearch
+                onAddPlan = openRecipes
             )
 
             MenuSection(
@@ -122,7 +119,7 @@ fun IndexScreen(
                 modifier = Modifier.wrapContentSize(),
                 showReviewButton = state.canReviewLunch,
                 onReviewClick = { /* TODO */ },
-                onAddPlan = openSearch
+                onAddPlan = openRecipes
             )
 
             MenuSection(
@@ -131,7 +128,7 @@ fun IndexScreen(
                 modifier = Modifier.wrapContentSize(),
                 showReviewButton = state.canReviewDinner,
                 onReviewClick = { /* TODO */ },
-                onAddPlan = openSearch
+                onAddPlan = openRecipes
             )
 
             MenuSection(
@@ -141,7 +138,7 @@ fun IndexScreen(
                 modifier = Modifier.wrapContentSize(),
                 showReviewButton = state.canReviewSnack,
                 onReviewClick = { /* TODO */ },
-                onAddPlan = openSearch
+                onAddPlan = openRecipes
             )
         }
     }
