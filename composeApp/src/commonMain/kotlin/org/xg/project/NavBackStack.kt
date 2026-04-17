@@ -26,6 +26,7 @@ val appSavedStateConfiguration = SavedStateConfiguration {
 }
 
 @Composable
-fun rememberAppNavBackStack(vararg initialDestinations: NavKey): SnapshotStateList<NavKey> {
-    return rememberNavBackStack(appSavedStateConfiguration, *initialDestinations)
+inline fun <reified T : Any> rememberAppNavBackStack(vararg initialDestinations: T): SnapshotStateList<Any> {
+    val initialList = initialDestinations.map { it as Any }.toTypedArray()
+    return rememberNavBackStack(appSavedStateConfiguration, *initialList)
 }

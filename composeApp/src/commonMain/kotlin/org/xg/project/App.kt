@@ -21,6 +21,7 @@ import coil3.compose.setSingletonImageLoaderFactory
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import org.koin.compose.KoinApplication
 import org.koin.dsl.koinConfiguration
+import org.jetbrains.androidx.navigation3.runtime.rememberNavBackStack
 import org.xg.project.Routes.AppRoute
 import org.xg.project.Routes.BottomTabRoute
 import org.xg.project.Routes.RecipesInternalRoute
