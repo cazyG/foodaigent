@@ -95,6 +95,64 @@ this is about food Menu
 //             implementation("org.jetbrains.compose.navigation:navigation-compose:1.6.0")
 //             implementation("io.coil-kt.coil3:coil-compose:3.0.0-alpha10")
 //             implementation("io.coil-kt.coil3:coil-network-ktor:3.0.0-alpha10")
-//         }
-//     }
 // }
+
+## 项目结构 (App Source)
+
+以下是本项目 `composeApp/src/commonMain/kotlin/org/xg/project` 目录下的核心文件树形结构：
+
+```text
+composeApp/src/commonMain/kotlin/org/xg/project
+├── App.kt                          // Compose 顶层入口，配置了 Navigation 3 的多栈路由 (MainNavDisplay & BottomNavDisplay)
+├── Greeting.kt                     // Kotlin Multiplatform 默认欢迎示例
+├── NavBackStack.kt                 // Navigation 3 自定义 `rememberAppNavBackStack` 及序列化配置 (Polymorphic Serialization)
+├── Platform.kt                     // KMP 平台相关接口定义
+├── PlatformBackHandler.kt          // 各平台返回键处理封装
+├── Routes                          // 路由定义层 (基于 @Serializable sealed class)
+│   └── Routes.kt
+├── data                            // 数据层
+│   ├── remote                      // 网络请求与 API
+│   │   ├── HttpPlatform.kt
+│   │   ├── KtorClient.kt
+│   │   └── UploadService.kt
+│   └── repository                  // 数据仓库实现
+│       └── FoodRepository.kt
+├── di                              // 依赖注入层 (Koin)
+│   └── AppModule.kt
+├── domain                          // 领域层 (业务模型与用例)
+│   ├── model                       // 核心实体类
+│   │   ├── Ingredient.kt
+│   │   ├── Models.kt
+│   │   └── RecipeDraft.kt
+│   └── usecase                     // 业务用例
+│       └── CheckMealReviewEligibilityUseCase.kt
+├── presentation                    // 表现层 (MVI / MVVM 架构架构)
+│   ├── history
+│   │   ├── HistoryContract.kt
+│   │   └── HistoryViewModel.kt
+│   ├── index
+│   │   ├── IndexContract.kt
+│   │   └── IndexViewModel.kt
+│   ├── manualrecipeinput
+│   │   ├── ManualRecipeInputIntent.kt
+│   │   ├── ManualRecipeInputMappers.kt
+│   │   ├── ManualRecipeInputState.kt
+│   │   ├── ManualRecipeInputUiEvent.kt
+│   │   └── ManualRecipeInputViewModel.kt
+│   ├── profile
+│   │   ├── ProfileContract.kt
+│   │   └── ProfileViewModel.kt
+│   └── recipes
+│       ├── RecipesContract.kt
+│       └── RecipesViewModel.kt
+└── screen                          // UI 视图层 (Jetpack Compose 界面)
+    ├── GlassStyle.kt               // 玻璃拟物化风格统一定义
+    ├── HistoryScreen.kt            // 历史记录页面
+    ├── IndexScreen.kt              // 首页 (今日点餐记录流)
+    ├── ManualRecipeInputScreen.kt  // 手动录入食谱二级页面
+    ├── PlanningScreen.kt           // 点餐/计划页面
+    ├── ProfileScreen.kt            // 个人中心页面
+    ├── RadarChart.kt               // 自定义口味雷达图组件
+    ├── RecipesScreen.kt            // 食谱灵感库页面
+    └── TabBar.kt                   // 底部 TabBar 组件 (BottomTabBar)
+```
