@@ -36,13 +36,13 @@ import org.xg.project.domain.model.DailyMenuRecord
 import org.xg.project.domain.model.MenuItemData
 import org.xg.project.presentation.index.IndexViewModel
 import org.xg.project.presentation.index.IndexIntent
-import org.xg.project.Routes.Routes
+import org.xg.project.Routes.AppRoute
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun IndexScreen(
-    activeTab: Routes,
-    onTabClick: (Routes) -> Unit,
+    activeTab: AppRoute,
+    onTabClick: (AppRoute) -> Unit,
     onAddPlan: () -> Unit,   // 点击“去添加计划”时触发，用于跳转到点餐页面
     viewModel: IndexViewModel = koinViewModel()
 ) {

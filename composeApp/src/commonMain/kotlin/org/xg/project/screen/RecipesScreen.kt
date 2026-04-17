@@ -27,12 +27,12 @@ import org.xg.project.domain.model.MealType
 import org.xg.project.domain.model.Recipe
 import org.xg.project.presentation.recipes.RecipesIntent
 import org.xg.project.presentation.recipes.RecipesViewModel
-import org.xg.project.Routes.Routes
+import org.xg.project.Routes.AppRoute
 
 @Composable
 fun RecipesScreen(
-    activeTab: Routes,
-    onTabClick: (Routes) -> Unit,
+    activeTab: AppRoute,
+    onTabClick: (AppRoute) -> Unit,
     viewModel: RecipesViewModel = koinViewModel(),
     refreshTrigger: Int = 0,
     onNavigateToManualInput: () -> Unit

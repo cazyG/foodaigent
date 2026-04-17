@@ -43,12 +43,12 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.xg.project.domain.model.DailyMenuRecord
 import org.xg.project.presentation.history.HistoryViewModel
 import org.xg.project.presentation.history.HistoryIntent
-import org.xg.project.Routes.Routes
+import org.xg.project.Routes.AppRoute
 
 @Composable
 fun HistoryScreen(
-    activeTab: Routes,
-    onTabClick: (Routes) -> Unit,
+    activeTab: AppRoute,
+    onTabClick: (AppRoute) -> Unit,
     viewModel: HistoryViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()

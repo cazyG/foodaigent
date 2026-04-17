@@ -5,12 +5,12 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import org.xg.project.Routes.Routes
+import org.xg.project.Routes.AppRoute
 
 @Composable
 fun AppScaffold(
-    activeTab: Routes,
-    onTabClick: (Routes) -> Unit,
+    activeTab: AppRoute,
+    onTabClick: (AppRoute) -> Unit,
     showBottomBar: Boolean = true,
     applyStatusBarsPadding: Boolean = true,
     content: @Composable (PaddingValues) -> Unit

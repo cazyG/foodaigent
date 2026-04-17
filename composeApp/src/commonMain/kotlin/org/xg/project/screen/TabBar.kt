@@ -29,22 +29,22 @@ import androidx.compose.material3.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import org.xg.project.Routes.Routes
+import org.xg.project.Routes.AppRoute
 
-data class TabItem(val label: String, val icon: ImageVector, val route: Routes)
+data class TabItem(val label: String, val icon: ImageVector, val route: AppRoute)
 
 @Composable
 fun TabBar(
-    activeRoute: Routes,
-    onTabClick: (Routes) -> Unit
+    activeRoute: AppRoute,
+    onTabClick: (AppRoute) -> Unit
 ) {
 
     val items = listOf(
-        TabItem("首页", Icons.Default.Home, Routes.Home),
-        TabItem("食谱库", Icons.Default.Book, Routes.Recipes),
-//        TabItem("点菜", Icons.Default.AddCircle, Routes.Plan),
-        TabItem("历史", Icons.Default.History, Routes.History),
-        TabItem("我的", Icons.Default.Person, Routes.Profile),
+        TabItem("首页", Icons.Default.Home, AppRoute.Home),
+        TabItem("食谱库", Icons.Default.Book, AppRoute.Recipes),
+//        TabItem("点菜", Icons.Default.AddCircle, AppRoute.Plan),
+        TabItem("历史", Icons.Default.History, AppRoute.History),
+        TabItem("我的", Icons.Default.Person, AppRoute.Profile),
     )
 
     Card(

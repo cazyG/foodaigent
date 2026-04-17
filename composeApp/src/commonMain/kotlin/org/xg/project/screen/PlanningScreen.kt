@@ -45,12 +45,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.xg.project.Routes.Routes
+import org.xg.project.Routes.AppRoute
 
 @Composable
 fun PlanningScreen(
-    activeTab: Routes,
-    onTabClick: (Routes) -> Unit
+    activeTab: AppRoute,
+    onTabClick: (AppRoute) -> Unit
 ) {
     var selectedRole by remember { mutableStateOf("丈夫") }
     var selectedMeal by remember { mutableStateOf("午餐") }
