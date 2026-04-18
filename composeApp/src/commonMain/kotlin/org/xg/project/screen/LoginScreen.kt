@@ -2,7 +2,9 @@ package org.xg.project.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,10 +30,14 @@ fun LoginScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .imePadding()
+                .verticalScroll(rememberScrollState())
                 .padding(32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            Spacer(modifier = Modifier.height(64.dp))
+            
             Text(
                 text = "欢迎来到黄小厨",
                 fontSize = 28.sp,
@@ -77,6 +83,8 @@ fun LoginScreen(
             ) {
                 Text("登录", fontSize = 18.sp, color = Color.White)
             }
+            
+            Spacer(modifier = Modifier.height(64.dp))
         }
     }
 }
