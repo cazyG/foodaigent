@@ -219,7 +219,6 @@ fun ManualRecipeInputScreen(
         ) {
             Column(
                 modifier = Modifier
-                    .widthIn(max = 600.dp)
                     .fillMaxSize()
                     .padding(innerPadding)
                     .imePadding()

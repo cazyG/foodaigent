@@ -79,15 +79,6 @@ fun RecipesScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (isFromHome) {
-                        IconButton(onClick = onBack) {
-                            Icon(
-                                imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "返回",
-                                tint = GlassStyle.TextPrimary
-                            )
-                        }
-                    }
                     Text(text = "食谱灵感库", modifier = Modifier.padding(start = if (isFromHome) 0.dp else 10.dp), fontWeight = FontWeight.Bold, fontSize = 22.sp, color = GlassStyle.TextPrimary)
                 }
 
