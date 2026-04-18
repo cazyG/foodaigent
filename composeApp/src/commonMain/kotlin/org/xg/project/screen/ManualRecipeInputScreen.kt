@@ -397,10 +397,7 @@ fun ManualRecipeInputScreen(
                 }
 
                 // 烹饪时间
-                val selectedDurationMinutes = state.duration
-                    .filter { it.isDigit() }
-                    .toIntOrNull()
-                    ?.coerceIn(5, 180) ?: 0
+                val selectedDurationMinutes = state.durationMinutes
 
                 Column(
                     modifier = Modifier
@@ -433,7 +430,7 @@ fun ManualRecipeInputScreen(
                         val updateDurationMinutes: (Int) -> Unit = { delta ->
                             val next = (selectedDurationMinutes + delta).coerceIn(5, 180)
                             if (next != selectedDurationMinutes) {
-                                viewModel.handleIntent(ManualRecipeInputIntent.UpdateDuration("${next}分钟"))
+                                viewModel.handleIntent(ManualRecipeInputIntent.UpdateDuration(next))
                             }
                         }
 
@@ -506,10 +503,7 @@ fun ManualRecipeInputScreen(
                 }
 
                 // 难度
-                val selectedDifficultyStars = state.difficulty
-                    .filter { it.isDigit() }
-                    .toIntOrNull()
-                    ?.coerceIn(1, 5) ?: 0
+                val selectedDifficultyStars = state.difficultyStars
 
                 Column(
                     modifier = Modifier
@@ -535,12 +529,9 @@ fun ManualRecipeInputScreen(
                                 fontSize = 28.sp,
                                 modifier = Modifier
                                     .clickable {
-                                        val nextDifficulty =
-                                            if (star == selectedDifficultyStars) "" else "${star}星"
+                                        val nextDifficulty = if (star == selectedDifficultyStars) 1 else star
                                         viewModel.handleIntent(
-                                            ManualRecipeInputIntent.UpdateDifficulty(
-                                                nextDifficulty
-                                            )
+                                            ManualRecipeInputIntent.UpdateDifficulty(nextDifficulty)
                                         )
                                     }
                                     .padding(horizontal = 2.dp, vertical = 4.dp)
@@ -600,14 +591,13 @@ fun ManualRecipeInputScreen(
                     }
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    val ingredientNameFocusRequesters = remember(state.ingredients.size) {
-                        List(state.ingredients.size) { FocusRequester() }
-                    }
-                    val ingredientQuantityFocusRequesters = remember(state.ingredients.size) {
-                        List(state.ingredients.size) { FocusRequester() }
-                    }
+                    val ingredientNameFocusRequesters = remember { mutableMapOf<String, FocusRequester>() }
+                    val ingredientQuantityFocusRequesters = remember { mutableMapOf<String, FocusRequester>() }
 
                     state.ingredients.forEachIndexed { index, ingredient ->
+                        val nameFocusRequester = ingredientNameFocusRequesters.getOrPut(ingredient.id) { FocusRequester() }
+                        val quantityFocusRequester = ingredientQuantityFocusRequesters.getOrPut(ingredient.id) { FocusRequester() }
+
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -634,14 +624,12 @@ fun ManualRecipeInputScreen(
                                 },
                                 modifier = Modifier
                                     .weight(2f)
-                                    .focusRequester(ingredientNameFocusRequesters[index]),
+                                    .focusRequester(nameFocusRequester),
                                 singleLine = true,
                                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                                 keyboardActions = KeyboardActions(
                                     onNext = {
-                                        if (index < ingredientQuantityFocusRequesters.size) {
-                                            ingredientQuantityFocusRequesters[index].requestFocus()
-                                        }
+                                        quantityFocusRequester.requestFocus()
                                     },
                                     onDone = {
                                         focusManager.clearFocus()
@@ -671,13 +659,13 @@ fun ManualRecipeInputScreen(
                                 },
                                 modifier = Modifier
                                     .weight(1f)
-                                    .focusRequester(ingredientQuantityFocusRequesters[index]),
+                                    .focusRequester(quantityFocusRequester),
                                 singleLine = true,
                                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                                 keyboardActions = KeyboardActions(
                                     onNext = {
                                         if (index < state.ingredients.size - 1) {
-                                            ingredientNameFocusRequesters[index + 1].requestFocus()
+                                            ingredientNameFocusRequesters[state.ingredients[index + 1].id]?.requestFocus()
                                         } else {
                                             stepsFocusRequester.requestFocus()
                                         }
@@ -757,11 +745,11 @@ fun ManualRecipeInputScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    val stepFocusRequesters = remember(state.steps.size) {
-                        List(state.steps.size) { FocusRequester() }
-                    }
+                    val stepFocusRequesters = remember { mutableMapOf<Int, FocusRequester>() }
 
                     state.steps.forEachIndexed { index, step ->
+                        val currentStepFocusRequester = stepFocusRequesters.getOrPut(index) { FocusRequester() }
+
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -791,7 +779,7 @@ fun ManualRecipeInputScreen(
                                 modifier = Modifier
                                     .weight(2f)
                                     .focusRequester(
-                                        if (index == 0) stepsFocusRequester else stepFocusRequesters[index]
+                                        if (index == 0) stepsFocusRequester else currentStepFocusRequester
                                     ),
                                 singleLine = true,
                                 keyboardOptions = KeyboardOptions(
@@ -800,7 +788,7 @@ fun ManualRecipeInputScreen(
                                 keyboardActions = KeyboardActions(
                                     onNext = {
                                         if (index < state.steps.size - 1) {
-                                            stepFocusRequesters[index + 1].requestFocus()
+                                            stepFocusRequesters[index + 1]?.requestFocus()
                                         }
                                     },
                                     onDone = {

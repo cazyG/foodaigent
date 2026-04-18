@@ -36,8 +36,8 @@ class ManualRecipeInputViewModel(
             ManualRecipeInputIntent.AddStep -> addStep()
             is ManualRecipeInputIntent.UpdateStep -> updateStep(intent.index, intent.value)
             is ManualRecipeInputIntent.RemoveStep -> removeStep(intent.index)
-            is ManualRecipeInputIntent.UpdateDuration -> updateDuration(intent.value)
-            is ManualRecipeInputIntent.UpdateDifficulty -> updateDifficulty(intent.value)
+            is ManualRecipeInputIntent.UpdateDuration -> updateDuration(intent.minutes)
+            is ManualRecipeInputIntent.UpdateDifficulty -> updateDifficulty(intent.stars)
             is ManualRecipeInputIntent.UpdateTag -> updateTag(intent.value)
             is ManualRecipeInputIntent.SelectMealType -> selectMealType(intent.mealType)
             is ManualRecipeInputIntent.UploadImage -> uploadImage(intent.imageBytes)
@@ -87,12 +87,12 @@ class ManualRecipeInputViewModel(
         )
     }
 
-    private fun updateDuration(value: String) {
-        _state.value = _state.value.copy(duration = value)
+    private fun updateDuration(minutes: Int) {
+        _state.value = _state.value.copy(durationMinutes = minutes.coerceIn(5, 180))
     }
 
-    private fun updateDifficulty(value: String) {
-        _state.value = _state.value.copy(difficulty = value)
+    private fun updateDifficulty(stars: Int) {
+        _state.value = _state.value.copy(difficultyStars = stars.coerceIn(1, 5))
     }
 
     private fun updateTag(value: String) {

@@ -16,8 +16,8 @@ fun ManualRecipeInputState.toRecipeDraft(): RecipeDraft {
             )
         },
         steps = steps.map { it.trim() }.filter { it.isNotEmpty() },
-        duration = duration.trim(),
-        difficulty = difficulty.trim(),
+        duration = "${durationMinutes}分钟",
+        difficulty = "${difficultyStars}星",
         tag = tag.trim(),
         mealType = safeMealType,
         imageUrl = uploadedImageUrl
