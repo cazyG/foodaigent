@@ -853,37 +853,12 @@ fun ManualRecipeInputScreen(
                             },
                         contentAlignment = Alignment.Center
                     ) {
-                        val imageModel = state.localImageBytes ?: state.uploadedImageUrl
-                        if (imageModel != null) {
+                        if (state.uploadedImageUrl != null) {
                             AsyncImage(
-                                model = imageModel,
+                                model = state.uploadedImageUrl,
                                 contentDescription = state.recipeName,
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                                modifier = Modifier.fillMaxSize()
                             )
-                            if (state.isUploadFailed) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(Color.Black.copy(alpha = 0.4f)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                        Icon(
-                                            imageVector = androidx.compose.material.icons.Icons.Default.Warning,
-                                            contentDescription = "上传失败",
-                                            tint = Color(0xFFFF5A6F),
-                                            modifier = Modifier.size(32.dp).padding(bottom = 8.dp)
-                                        )
-                                        Text(
-                                            "上传失败，点击重新选择",
-                                            color = Color.White,
-                                            fontWeight = FontWeight.SemiBold,
-                                            fontSize = BodyTextSize
-                                        )
-                                    }
-                                }
-                            }
                         } else {
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally

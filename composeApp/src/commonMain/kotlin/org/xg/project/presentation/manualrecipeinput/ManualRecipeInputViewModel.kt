@@ -105,46 +105,37 @@ class ManualRecipeInputViewModel(
 
     private fun uploadImage(imageBytes: ByteArray?) {
         viewModelScope.launch {
-            if (imageBytes == null) return@launch
-            
-            _state.value = _state.value.copy(
-                localImageBytes = imageBytes,
-                isUploading = true,
-                isUploadFailed = false,
-                error = null
-            )
-            
+            _state.value = _state.value.copy(isUploading = true)
             try {
+
                 val timeZone = TimeZone.currentSystemDefault()
-                val filename = "${Clock.System.todayIn(timeZone).toString()}-${Random.nextInt()}.jpg"
+                val filename = "${Clock.System.todayIn(timeZone).toString()}.jpg"
                 val presignedUrlResponse = uploadService.getPresignedUrl(filename)
 
                 val uploadResult = uploadService.uploadFile(
                     presignedUrlResponse.data.putUrl,
                     presignedUrlResponse.data.getUrl,
                     presignedUrlResponse.data.headers,
-                    imageBytes
+                    imageBytes ?: ByteArray(0)
                 )
+                print("${presignedUrlResponse.data}  ----  $uploadResult")
 
                 if (uploadResult.success) {
-                    _state.value = _state.value.copy(
-                        uploadedImageUrl = uploadResult.url,
-                        isUploading = false
-                    )
+                    _state.value = _state.value.copy(uploadedImageUrl = uploadResult.url)
                 } else {
                     _state.value = _state.value.copy(
-                        error = "图片上传失败，请重新上传",
-                        isUploadFailed = true,
+                        error = "图片上传失败: 服务器返回失败",
                         isUploading = false
                     )
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
                 _state.value = _state.value.copy(
-                    error = "图片上传失败，请重新上传: ${e.message}",
-                    isUploadFailed = true,
+                    error = "图片上传失败: ${e.message}",
                     isUploading = false
                 )
+            } finally {
+                _state.value = _state.value.copy(isUploading = false)
             }
         }
     }
@@ -166,18 +157,15 @@ class ManualRecipeInputViewModel(
                     return@launch
                 }
 
-                // 如果有选中的图片但尚未上传完成，则等待
-                if (_state.value.localImageBytes != null && _state.value.uploadedImageUrl == null) {
+                // 如果有选中的图片但尚未上传，则先上传图片
+                if ( _state.value.uploadedImageUrl == null) {
                     // 等待上传完成
                     while (_state.value.isUploading) {
                         kotlinx.coroutines.delay(100)
                     }
-                    // 如果上传失败，提示用户
-                    if (_state.value.isUploadFailed || _state.value.uploadedImageUrl == null) {
-                        _state.value = _state.value.copy(
-                            error = "图片上传失败，请重新上传后保存",
-                            isSaving = false
-                        )
+                    // 如果上传失败，直接返回
+                    if (_state.value.error != null) {
+                        _state.value = _state.value.copy(isSaving = false)
                         return@launch
                     }
                 }

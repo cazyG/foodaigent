@@ -11,10 +11,8 @@ data class ManualRecipeInputState(
     val difficultyStars: Int = 3,
     val tag: String = "",
     val selectedMealType: String = MealType.LUNCH.name,
-    val localImageBytes: ByteArray? = null,
     val uploadedImageUrl: String? = null,
     val isUploading: Boolean = false,
-    val isUploadFailed: Boolean = false,
     val isSaving: Boolean = false,
     val error: String? = null
 )
