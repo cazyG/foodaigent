@@ -93,48 +93,47 @@ private fun BottomNavDisplay() {
         Unit
     }
 
-    Scaffold(
-        bottomBar = {
-            BottomTabBar(
-                activeTab = selectedTab.value,
-                onTabClick = { selectedTab.value = it }
-            )
-        }
-    ) { innerPadding ->
-        NavDisplay(
-            backStack = activeBackStack,
-            modifier = Modifier.padding(innerPadding),
-            onBack = popActiveBackStack,
-            entryProvider = entryProvider {
-                entry<BottomTabRoute.Home> {
-                    IndexScreen(
-                        onAddPlan = {
-                            selectedTab.value = BottomTabRoute.Recipes
-                            recipesBackStack.clear()
-                            recipesBackStack.add(BottomTabRoute.Recipes)
-                        }
-                    )
-                }
-                entry<BottomTabRoute.Recipes> {
-                    RecipesScreen(
-                        refreshTrigger = recipesRefreshKey.value,
-                        onNavigateToManualInput = { recipesBackStack.add(RecipesInternalRoute.ManualRecipeInput) }
-                    )
-                }
-                entry<RecipesInternalRoute.ManualRecipeInput> {
-                    ManualRecipeInputScreen(
-                        onBack = popActiveBackStack,
-                        onSave = {
-                            recipesRefreshKey.value += 1
-                            popActiveBackStack()
-                        }
-                    )
-                }
-                entry<BottomTabRoute.History> { HistoryScreen() }
-                entry<BottomTabRoute.Profile> {
-                    ProfileScreen()
-                }
-            }
+    val bottomBar: @Composable () -> Unit = {
+        BottomTabBar(
+            activeTab = selectedTab.value,
+            onTabClick = { selectedTab.value = it }
         )
     }
+
+    NavDisplay(
+        backStack = activeBackStack,
+        onBack = popActiveBackStack,
+        entryProvider = entryProvider {
+            entry<BottomTabRoute.Home> {
+                IndexScreen(
+                    bottomBar = bottomBar,
+                    onAddPlan = {
+                        selectedTab.value = BottomTabRoute.Recipes
+                        recipesBackStack.clear()
+                        recipesBackStack.add(BottomTabRoute.Recipes)
+                    }
+                )
+            }
+            entry<BottomTabRoute.Recipes> {
+                RecipesScreen(
+                    bottomBar = bottomBar,
+                    refreshTrigger = recipesRefreshKey.value,
+                    onNavigateToManualInput = { recipesBackStack.add(RecipesInternalRoute.ManualRecipeInput) }
+                )
+            }
+            entry<RecipesInternalRoute.ManualRecipeInput> {
+                ManualRecipeInputScreen(
+                    onBack = popActiveBackStack,
+                    onSave = {
+                        recipesRefreshKey.value += 1
+                        popActiveBackStack()
+                    }
+                )
+            }
+            entry<BottomTabRoute.History> { HistoryScreen(bottomBar = bottomBar) }
+            entry<BottomTabRoute.Profile> {
+                ProfileScreen(bottomBar = bottomBar)
+            }
+        }
+    )
 }

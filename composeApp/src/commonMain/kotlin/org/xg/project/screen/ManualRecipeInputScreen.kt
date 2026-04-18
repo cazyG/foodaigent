@@ -215,6 +215,7 @@ fun ManualRecipeInputScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(innerPadding)
                 .imePadding()
         ) {
             // 错误提示

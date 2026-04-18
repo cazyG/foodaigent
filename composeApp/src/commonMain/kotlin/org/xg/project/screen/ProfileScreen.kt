@@ -49,16 +49,20 @@ import androidx.compose.material3.Scaffold
 
 @Composable
 fun ProfileScreen(
+    bottomBar: @Composable () -> Unit = {},
     viewModel: ProfileViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
     val scrollState = rememberScrollState()
 
-    Scaffold { innerPadding ->
+    Scaffold(
+        bottomBar = bottomBar,
+        containerColor = Color.Transparent,
+        modifier = Modifier.fillMaxSize().background(GlassStyle.BgGradient)
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(GlassStyle.BgGradient)
                 .padding(innerPadding)
                 .verticalScroll(scrollState)
         ) {

@@ -30,6 +30,7 @@ import org.xg.project.presentation.recipes.RecipesViewModel
 
 @Composable
 fun RecipesScreen(
+    bottomBar: @Composable () -> Unit = {},
     viewModel: RecipesViewModel = koinViewModel(),
     refreshTrigger: Int = 0,
     onNavigateToManualInput: () -> Unit = {}
@@ -40,7 +41,11 @@ fun RecipesScreen(
         viewModel.handleIntent(RecipesIntent.LoadRecipes)
     }
     
-    Scaffold { innerPadding ->
+    Scaffold(
+        bottomBar = bottomBar,
+        containerColor = Color.Transparent,
+        modifier = Modifier.fillMaxSize().background(GlassStyle.BgGradient)
+    ) { innerPadding ->
         if (state.isLoading) {
             Box(modifier = Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = Color(0xFFF59E42))
@@ -51,7 +56,6 @@ fun RecipesScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(GlassStyle.BgGradient)
                 .padding(innerPadding)
         ) {
             Row(

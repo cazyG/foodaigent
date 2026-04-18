@@ -47,14 +47,19 @@ import org.xg.project.presentation.history.HistoryIntent
 
 @Composable
 fun HistoryScreen(
+    bottomBar: @Composable () -> Unit = {},
     viewModel: HistoryViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
     val scrollState = rememberScrollState()
 
-    Scaffold { innerPadding ->
+    Scaffold(
+        bottomBar = bottomBar,
+        containerColor = Color.Transparent,
+        modifier = Modifier.fillMaxSize().background(GlassStyle.BgGradient)
+    ) { innerPadding ->
         Column(
-            modifier = Modifier.fillMaxSize().background(GlassStyle.BgGradient).padding(innerPadding).verticalScroll(scrollState)
+            modifier = Modifier.fillMaxSize().padding(innerPadding).verticalScroll(scrollState)
         ) {
             Box(
                 Modifier

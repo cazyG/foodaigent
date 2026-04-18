@@ -41,6 +41,7 @@ import org.xg.project.presentation.index.IndexIntent
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun IndexScreen(
+    bottomBar: @Composable () -> Unit = {},
     onAddPlan: () -> Unit,
     viewModel: IndexViewModel = koinViewModel()
 ) {
@@ -60,7 +61,11 @@ fun IndexScreen(
         snack = emptyList()
     )
 
-    Scaffold { innerPadding ->
+    Scaffold(
+        bottomBar = bottomBar,
+        containerColor = Color.Transparent,
+        modifier = Modifier.fillMaxSize().background(GlassStyle.BgGradient)
+    ) { innerPadding ->
         if (state.isLoading) {
             Box(
                 modifier = Modifier.fillMaxSize().padding(innerPadding),
@@ -74,7 +79,6 @@ fun IndexScreen(
         Column(
             Modifier
                 .fillMaxSize()
-                .background(GlassStyle.BgGradient)
                 .padding(innerPadding)
                 .verticalScroll(scrollState)
         ) {
