@@ -35,6 +35,7 @@ import org.xg.project.screen.HomeScreen
 import org.xg.project.screen.ManualRecipeInputScreen
 import org.xg.project.screen.ProfileScreen
 import org.xg.project.screen.RecipesScreen
+import org.xg.project.screen.RecipeDetailScreen
 import org.xg.project.screen.LoginScreen
 
 @Composable
@@ -103,6 +104,12 @@ fun App() {
                                     // 注意：这里可能需要通知 RecipesScreen 刷新列表，目前使用重新进入或状态管理来更新
                                     popRootBackStack()
                                 }
+                            )
+                        }
+                        entry<AppRoute.RecipeDetail> { route ->
+                            RecipeDetailScreen(
+                                recipeId = route.id,
+                                onBack = popRootBackStack
                             )
                         }
                     }
@@ -174,7 +181,10 @@ private fun HomeNavDisplay(
                             RecipesScreen(
                                 isFromHome = false,
                                 refreshTrigger = recipesRefreshKey.value,
-                                onNavigateToManualInput = onNavigateToManualInput
+                                onNavigateToManualInput = onNavigateToManualInput,
+                                onNavigateToDetail = { recipeId ->
+                                    rootBackStack.add(AppRoute.RecipeDetail(recipeId))
+                                }
                             )
                         }
                         entry<RecipesInternalRoute.FromHome> { route ->

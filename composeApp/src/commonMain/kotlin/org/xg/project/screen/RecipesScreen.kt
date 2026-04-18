@@ -37,6 +37,7 @@ fun RecipesScreen(
     viewModel: RecipesViewModel = koinViewModel(),
     refreshTrigger: Int = 0,
     onNavigateToManualInput: () -> Unit = {},
+    onNavigateToDetail: (Int) -> Unit = {},
     onBack: () -> Unit = {},
     onSaveSuccess: () -> Unit = {}
 ) {
@@ -153,12 +154,14 @@ fun RecipesScreen(
                         RecipeCard(
                             recipe = recipe,
                             isSelected = recipe.id in state.selectedRecipeIds,
-                            onToggle = { 
+                            onClick = { 
                                 if (isFromHome) {
                                     viewModel.handleIntent(RecipesIntent.ToggleSelection(recipe.id)) 
+                                } else {
+                                    onNavigateToDetail(recipe.id)
                                 }
                             },
-                            isSelectable = isFromHome
+                            showSelectionBorder = isFromHome
                         )
                     }
                 }
@@ -171,19 +174,17 @@ fun RecipesScreen(
 fun RecipeCard(
     recipe: Recipe,
     isSelected: Boolean,
-    onToggle: () -> Unit,
-    isSelectable: Boolean = true
+    onClick: () -> Unit,
+    showSelectionBorder: Boolean = false
 ) {
     Card(
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth()
+            .clickable { onClick() }
             .then(
-                if (isSelectable) Modifier.clickable { onToggle() } else Modifier
-            )
-            .then(
-                // 如果选中，添加金色边框
-                if (isSelected && isSelectable) Modifier.border(
+                // 如果选中并且允许显示边框，添加金色边框
+                if (isSelected && showSelectionBorder) Modifier.border(
                     width = 1.5.dp,
                     color = GlassStyle.Stroke,
                     shape = RoundedCornerShape(24.dp)

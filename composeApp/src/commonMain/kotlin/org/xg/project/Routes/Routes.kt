@@ -17,6 +17,10 @@ sealed class AppRoute : NavKey {
     @Serializable
     @SerialName("manual_recipe_input")
     data object ManualRecipeInput : AppRoute()
+
+    @Serializable
+    @SerialName("recipe_detail")
+    data class RecipeDetail(val id: Int) : AppRoute()
 }
 
 @Serializable

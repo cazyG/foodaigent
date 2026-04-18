@@ -19,6 +19,7 @@ val appSavedStateConfiguration = SavedStateConfiguration {
             subclass(AppRoute.Login::class, AppRoute.Login.serializer())
             subclass(AppRoute.Home::class, AppRoute.Home.serializer())
             subclass(AppRoute.ManualRecipeInput::class, AppRoute.ManualRecipeInput.serializer())
+            subclass(AppRoute.RecipeDetail::class, AppRoute.RecipeDetail.serializer())
             subclass(BottomTabRoute.Home::class, BottomTabRoute.Home.serializer())
             subclass(BottomTabRoute.Recipes::class, BottomTabRoute.Recipes.serializer())
             subclass(BottomTabRoute.History::class, BottomTabRoute.History.serializer())
