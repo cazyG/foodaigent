@@ -23,7 +23,6 @@ import org.koin.dsl.koinConfiguration
 import androidx.navigation3.runtime.rememberNavBackStack
 import org.xg.project.Routes.AppRoute
 import org.xg.project.Routes.BottomTabRoute
-import org.xg.project.Routes.RecipesInternalRoute
 import org.xg.project.di.appModule
 import org.xg.project.screen.BottomTabBar
 import org.xg.project.screen.HistoryScreen
@@ -31,6 +30,7 @@ import org.xg.project.screen.IndexScreen
 import org.xg.project.screen.ManualRecipeInputScreen
 import org.xg.project.screen.ProfileScreen
 import org.xg.project.screen.RecipesScreen
+import org.xg.project.screen.LoginScreen
 
 @Composable
 fun App() {
@@ -48,8 +48,18 @@ fun App() {
         configuration = koinConfiguration(declaration = { modules(appModule) }),
         content = {
             MaterialTheme {
+                val rootBackStack = rememberAppNavBackStack(AppRoute.Login)
+                
+                val popRootBackStack = {
+                    if (rootBackStack.size > 1) {
+                        rootBackStack.removeAt(rootBackStack.lastIndex)
+                    }
+                    Unit
+                }
+
                 NavDisplay(
-                    backStack = rememberAppNavBackStack(AppRoute.Main),
+                    backStack = rootBackStack,
+                    onBack = popRootBackStack,
                     transitionSpec = {
                         slideInHorizontally {
                             it
@@ -65,7 +75,31 @@ fun App() {
                         } + fadeOut()
                     },
                     entryProvider = entryProvider {
-                        entry<AppRoute.Main> { BottomNavDisplay() }
+                        entry<AppRoute.Login> {
+                            LoginScreen(
+                                onLoginSuccess = {
+                                    rootBackStack.clear()
+                                    rootBackStack.add(AppRoute.Home)
+                                }
+                            )
+                        }
+                        entry<AppRoute.Home> {
+                            HomeNavDisplay(
+                                onNavigateToManualInput = {
+                                    rootBackStack.add(AppRoute.ManualRecipeInput)
+                                }
+                            )
+                        }
+                        entry<AppRoute.ManualRecipeInput> {
+                            ManualRecipeInputScreen(
+                                onBack = popRootBackStack,
+                                onSave = {
+                                    // 手动录入完成后，返回上一级。
+                                    // 注意：这里可能需要通知 RecipesScreen 刷新列表，目前使用重新进入或状态管理来更新
+                                    popRootBackStack()
+                                }
+                            )
+                        }
                     }
                 )
             }
@@ -73,7 +107,9 @@ fun App() {
 }
 
 @Composable
-private fun BottomNavDisplay() {
+private fun HomeNavDisplay(
+    onNavigateToManualInput: () -> Unit
+) {
     val selectedTab = rememberSaveable { mutableStateOf<BottomTabRoute>(BottomTabRoute.Home) }
     val homeBackStack = rememberAppNavBackStack(BottomTabRoute.Home)
     val recipesBackStack = rememberAppNavBackStack(BottomTabRoute.Recipes)
@@ -118,16 +154,7 @@ private fun BottomNavDisplay() {
                 RecipesScreen(
                     bottomBar = bottomBar,
                     refreshTrigger = recipesRefreshKey.value,
-                    onNavigateToManualInput = { recipesBackStack.add(RecipesInternalRoute.ManualRecipeInput) }
-                )
-            }
-            entry<RecipesInternalRoute.ManualRecipeInput> {
-                ManualRecipeInputScreen(
-                    onBack = popActiveBackStack,
-                    onSave = {
-                        recipesRefreshKey.value += 1
-                        popActiveBackStack()
-                    }
+                    onNavigateToManualInput = onNavigateToManualInput
                 )
             }
             entry<BottomTabRoute.History> { HistoryScreen(bottomBar = bottomBar) }

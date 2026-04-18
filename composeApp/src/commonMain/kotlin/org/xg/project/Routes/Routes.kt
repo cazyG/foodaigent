@@ -7,8 +7,16 @@ import androidx.navigation3.runtime.NavKey
 @Serializable
 sealed class AppRoute : NavKey {
     @Serializable
-    @SerialName("main")
-    data object Main : AppRoute()
+    @SerialName("login")
+    data object Login : AppRoute()
+
+    @Serializable
+    @SerialName("home")
+    data object Home : AppRoute()
+
+    @Serializable
+    @SerialName("manual_recipe_input")
+    data object ManualRecipeInput : AppRoute()
 }
 
 @Serializable
@@ -28,11 +36,4 @@ sealed class BottomTabRoute : NavKey {
     @Serializable
     @SerialName("tab_profile")
     data object Profile : BottomTabRoute()
-}
-
-@Serializable
-sealed class RecipesInternalRoute : NavKey {
-    @Serializable
-    @SerialName("manual_recipe_input")
-    data object ManualRecipeInput : RecipesInternalRoute()
 }
