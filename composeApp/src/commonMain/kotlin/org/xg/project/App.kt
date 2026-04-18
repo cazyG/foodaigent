@@ -136,31 +136,35 @@ private fun HomeNavDisplay(
         )
     }
 
-    NavDisplay(
-        backStack = activeBackStack,
-        onBack = popActiveBackStack,
-        entryProvider = entryProvider {
-            entry<BottomTabRoute.Home> {
-                IndexScreen(
-                    bottomBar = bottomBar,
-                    onAddPlan = {
-                        selectedTab.value = BottomTabRoute.Recipes
-                        recipesBackStack.clear()
-                        recipesBackStack.add(BottomTabRoute.Recipes)
-                    }
-                )
+    Scaffold(
+        bottomBar = bottomBar,
+        containerColor = androidx.compose.ui.graphics.Color.Transparent
+    ) { innerPadding ->
+        NavDisplay(
+            backStack = activeBackStack,
+            modifier = Modifier.padding(innerPadding),
+            onBack = popActiveBackStack,
+            entryProvider = entryProvider {
+                entry<BottomTabRoute.Home> {
+                    IndexScreen(
+                        onAddPlan = {
+                            selectedTab.value = BottomTabRoute.Recipes
+                            recipesBackStack.clear()
+                            recipesBackStack.add(BottomTabRoute.Recipes)
+                        }
+                    )
+                }
+                entry<BottomTabRoute.Recipes> {
+                    RecipesScreen(
+                        refreshTrigger = recipesRefreshKey.value,
+                        onNavigateToManualInput = onNavigateToManualInput
+                    )
+                }
+                entry<BottomTabRoute.History> { HistoryScreen() }
+                entry<BottomTabRoute.Profile> {
+                    ProfileScreen()
+                }
             }
-            entry<BottomTabRoute.Recipes> {
-                RecipesScreen(
-                    bottomBar = bottomBar,
-                    refreshTrigger = recipesRefreshKey.value,
-                    onNavigateToManualInput = onNavigateToManualInput
-                )
-            }
-            entry<BottomTabRoute.History> { HistoryScreen(bottomBar = bottomBar) }
-            entry<BottomTabRoute.Profile> {
-                ProfileScreen(bottomBar = bottomBar)
-            }
-        }
-    )
+        )
+    }
 }
