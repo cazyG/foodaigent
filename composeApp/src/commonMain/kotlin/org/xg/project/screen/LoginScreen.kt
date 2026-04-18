@@ -41,55 +41,56 @@ fun LoginScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-            Spacer(modifier = Modifier.height(64.dp))
-            
-            Text(
-                text = "欢迎来到黄小厨",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = GlassStyle.TextPrimary,
-                modifier = Modifier.padding(bottom = 32.dp)
-            )
+                Spacer(modifier = Modifier.height(64.dp))
 
-            OutlinedTextField(
-                value = username,
-                onValueChange = { username = it },
-                label = { Text("用户名") },
-                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = Color.White.copy(alpha = 0.3f),
-                    unfocusedContainerColor = Color.White.copy(alpha = 0.1f)
+                Text(
+                    text = "欢迎来到黄小厨",
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = GlassStyle.TextPrimary,
+                    modifier = Modifier.padding(bottom = 32.dp)
                 )
-            )
 
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text("密码") },
-                visualTransformation = PasswordVisualTransformation(),
-                modifier = Modifier.fillMaxWidth().padding(bottom = 32.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = Color.White.copy(alpha = 0.3f),
-                    unfocusedContainerColor = Color.White.copy(alpha = 0.1f)
+                OutlinedTextField(
+                    value = username,
+                    onValueChange = { username = it },
+                    label = { Text("用户名") },
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = Color.White.copy(alpha = 0.3f),
+                        unfocusedContainerColor = Color.White.copy(alpha = 0.1f)
+                    )
                 )
-            )
 
-            Button(
-                onClick = onLoginSuccess,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                shape = RoundedCornerShape(25.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFF59E42)
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("密码") },
+                    visualTransformation = PasswordVisualTransformation(),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 32.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = Color.White.copy(alpha = 0.3f),
+                        unfocusedContainerColor = Color.White.copy(alpha = 0.1f)
+                    )
                 )
-            ) {
-                Text("登录", fontSize = 18.sp, color = Color.White)
+
+                Button(
+                    onClick = onLoginSuccess,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    shape = RoundedCornerShape(25.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFF59E42)
+                    )
+                ) {
+                    Text("登录", fontSize = 18.sp, color = Color.White)
+                }
+
+                Spacer(modifier = Modifier.height(64.dp))
             }
-            
-            Spacer(modifier = Modifier.height(64.dp))
         }
     }
 }
