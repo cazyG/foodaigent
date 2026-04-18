@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 
 import org.koin.compose.viewmodel.koinViewModel
 import org.xg.project.domain.model.MealType
@@ -35,6 +37,7 @@ fun RecipesScreen(
     viewModel: RecipesViewModel = koinViewModel(),
     refreshTrigger: Int = 0,
     onNavigateToManualInput: () -> Unit = {},
+    onBack: () -> Unit = {},
     onSaveSuccess: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsState()
@@ -75,7 +78,18 @@ fun RecipesScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "食谱灵感库", modifier = Modifier.padding(start = 10.dp), fontWeight = FontWeight.Bold, fontSize = 22.sp, color = GlassStyle.TextPrimary)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (isFromHome) {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "返回",
+                                tint = GlassStyle.TextPrimary
+                            )
+                        }
+                    }
+                    Text(text = "食谱灵感库", modifier = Modifier.padding(start = if (isFromHome) 0.dp else 10.dp), fontWeight = FontWeight.Bold, fontSize = 22.sp, color = GlassStyle.TextPrimary)
+                }
 
                 if (isFromHome) {
                     val buttonText = if (state.selectedRecipeIds.isNotEmpty()) "保存" else "+ 手动录入"

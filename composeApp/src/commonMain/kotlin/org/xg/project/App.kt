@@ -170,6 +170,7 @@ private fun HomeNavDisplay(
                         initialMealType = route.mealType,
                         refreshTrigger = recipesRefreshKey.value,
                         onNavigateToManualInput = onNavigateToManualInput,
+                        onBack = popActiveBackStack,
                         onSaveSuccess = {
                             selectedTab.value = BottomTabRoute.Home
                             recipesBackStack.clear()
