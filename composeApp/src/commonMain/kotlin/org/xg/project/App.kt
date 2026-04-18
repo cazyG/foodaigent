@@ -164,10 +164,9 @@ private fun HomeNavDisplay(
                         entry<BottomTabRoute.Home> {
                             HomeScreen(
                                 onAddPlan = { mealType ->
-                                    selectedTab.value = BottomTabRoute.Recipes
                                     recipesBackStack.clear()
-                                    recipesBackStack.add(BottomTabRoute.Recipes)
                                     recipesBackStack.add(RecipesInternalRoute.FromHome(mealType.name))
+                                    selectedTab.value = BottomTabRoute.Recipes
                                 }
                             )
                         }
