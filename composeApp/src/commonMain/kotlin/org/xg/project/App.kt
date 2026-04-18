@@ -163,8 +163,7 @@ private fun HomeNavDisplay(
                         onNavigateToManualInput = onNavigateToManualInput
                     )
                 }
-                entry<RecipesInternalRoute.FromHome> { backStackEntry ->
-                    val route = backStackEntry as RecipesInternalRoute.FromHome
+                entry<RecipesInternalRoute.FromHome> { route ->
                     RecipesScreen(
                         isFromHome = true,
                         initialMealType = route.mealType,
