@@ -30,14 +30,27 @@ import org.xg.project.presentation.recipes.RecipesViewModel
 
 @Composable
 fun RecipesScreen(
+    isFromHome: Boolean = false,
+    initialMealType: String? = null,
     viewModel: RecipesViewModel = koinViewModel(),
     refreshTrigger: Int = 0,
-    onNavigateToManualInput: () -> Unit = {}
+    onNavigateToManualInput: () -> Unit = {},
+    onSaveSuccess: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsState()
 
     LaunchedEffect(refreshTrigger) {
         viewModel.handleIntent(RecipesIntent.LoadRecipes)
+    }
+
+    LaunchedEffect(initialMealType) {
+        if (initialMealType != null) {
+            try {
+                viewModel.handleIntent(RecipesIntent.ChangeMealType(MealType.valueOf(initialMealType)))
+            } catch (e: Exception) {
+                // Handle invalid meal type if necessary
+            }
+        }
     }
     
     Box(
@@ -64,18 +77,28 @@ fun RecipesScreen(
             ) {
                 Text(text = "食谱灵感库", modifier = Modifier.padding(start = 10.dp), fontWeight = FontWeight.Bold, fontSize = 22.sp, color = GlassStyle.TextPrimary)
 
-                val buttonText = if (state.selectedRecipeIds.isNotEmpty()) "保存" else "+ 手动录入"
-                Button(
-                    onClick = {
-                        if (state.selectedRecipeIds.isNotEmpty()) {
-                            viewModel.handleIntent(RecipesIntent.SaveSelections)
-                        } else {
-                            onNavigateToManualInput()
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.24f))
-                ) {
-                    Text(buttonText, color = GlassStyle.TextPrimary)
+                if (isFromHome) {
+                    val buttonText = if (state.selectedRecipeIds.isNotEmpty()) "保存" else "+ 手动录入"
+                    Button(
+                        onClick = {
+                            if (state.selectedRecipeIds.isNotEmpty()) {
+                                viewModel.handleIntent(RecipesIntent.SaveSelections)
+                                onSaveSuccess()
+                            } else {
+                                onNavigateToManualInput()
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.24f))
+                    ) {
+                        Text(buttonText, color = GlassStyle.TextPrimary)
+                    }
+                } else {
+                    Button(
+                        onClick = onNavigateToManualInput,
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.24f))
+                    ) {
+                        Text("+ 手动录入", color = GlassStyle.TextPrimary)
+                    }
                 }
             }
 
@@ -125,7 +148,12 @@ fun RecipesScreen(
                         RecipeCard(
                             recipe = recipe,
                             isSelected = recipe.id in state.selectedRecipeIds,
-                            onToggle = { viewModel.handleIntent(RecipesIntent.ToggleSelection(recipe.id)) }
+                            onToggle = { 
+                                if (isFromHome) {
+                                    viewModel.handleIntent(RecipesIntent.ToggleSelection(recipe.id)) 
+                                }
+                            },
+                            isSelectable = isFromHome
                         )
                     }
                 }
@@ -138,16 +166,19 @@ fun RecipesScreen(
 fun RecipeCard(
     recipe: Recipe,
     isSelected: Boolean,
-    onToggle: () -> Unit
+    onToggle: () -> Unit,
+    isSelectable: Boolean = true
 ) {
     Card(
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth()
-            .clickable { onToggle() }
+            .then(
+                if (isSelectable) Modifier.clickable { onToggle() } else Modifier
+            )
             .then(
                 // 如果选中，添加金色边框
-                if (isSelected) Modifier.border(
+                if (isSelected && isSelectable) Modifier.border(
                     width = 1.5.dp,
                     color = GlassStyle.Stroke,
                     shape = RoundedCornerShape(24.dp)

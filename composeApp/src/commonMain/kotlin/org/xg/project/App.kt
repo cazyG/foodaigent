@@ -23,10 +23,11 @@ import org.koin.dsl.koinConfiguration
 import androidx.navigation3.runtime.rememberNavBackStack
 import org.xg.project.Routes.AppRoute
 import org.xg.project.Routes.BottomTabRoute
+import org.xg.project.Routes.RecipesInternalRoute
 import org.xg.project.di.appModule
 import org.xg.project.screen.BottomTabBar
 import org.xg.project.screen.HistoryScreen
-import org.xg.project.screen.IndexScreen
+import org.xg.project.screen.HomeScreen
 import org.xg.project.screen.ManualRecipeInputScreen
 import org.xg.project.screen.ProfileScreen
 import org.xg.project.screen.RecipesScreen
@@ -146,18 +147,34 @@ private fun HomeNavDisplay(
             onBack = popActiveBackStack,
             entryProvider = entryProvider {
                 entry<BottomTabRoute.Home> {
-                    IndexScreen(
-                        onAddPlan = {
+                    HomeScreen(
+                        onAddPlan = { mealType ->
                             selectedTab.value = BottomTabRoute.Recipes
                             recipesBackStack.clear()
                             recipesBackStack.add(BottomTabRoute.Recipes)
+                            recipesBackStack.add(RecipesInternalRoute.FromHome(mealType.name))
                         }
                     )
                 }
                 entry<BottomTabRoute.Recipes> {
                     RecipesScreen(
+                        isFromHome = false,
                         refreshTrigger = recipesRefreshKey.value,
                         onNavigateToManualInput = onNavigateToManualInput
+                    )
+                }
+                entry<RecipesInternalRoute.FromHome> { backStackEntry ->
+                    val route = backStackEntry.key as RecipesInternalRoute.FromHome
+                    RecipesScreen(
+                        isFromHome = true,
+                        initialMealType = route.mealType,
+                        refreshTrigger = recipesRefreshKey.value,
+                        onNavigateToManualInput = onNavigateToManualInput,
+                        onSaveSuccess = {
+                            selectedTab.value = BottomTabRoute.Home
+                            recipesBackStack.clear()
+                            recipesBackStack.add(BottomTabRoute.Recipes)
+                        }
                     )
                 }
                 entry<BottomTabRoute.History> { HistoryScreen() }

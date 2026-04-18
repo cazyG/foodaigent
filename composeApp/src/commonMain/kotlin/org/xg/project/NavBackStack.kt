@@ -11,6 +11,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import org.xg.project.Routes.AppRoute
 import org.xg.project.Routes.BottomTabRoute
+import org.xg.project.Routes.RecipesInternalRoute
 
 val appSavedStateConfiguration = SavedStateConfiguration {
     serializersModule = SerializersModule {
@@ -22,6 +23,7 @@ val appSavedStateConfiguration = SavedStateConfiguration {
             subclass(BottomTabRoute.Recipes::class, BottomTabRoute.Recipes.serializer())
             subclass(BottomTabRoute.History::class, BottomTabRoute.History.serializer())
             subclass(BottomTabRoute.Profile::class, BottomTabRoute.Profile.serializer())
+            subclass(RecipesInternalRoute.FromHome::class, RecipesInternalRoute.FromHome.serializer())
         }
     }
 }

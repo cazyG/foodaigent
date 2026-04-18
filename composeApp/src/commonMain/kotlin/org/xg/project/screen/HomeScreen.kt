@@ -35,13 +35,14 @@ import kotlin.time.Clock
 
 import org.xg.project.domain.model.DailyMenuRecord
 import org.xg.project.domain.model.MenuItemData
+import org.xg.project.domain.model.MealType
 import org.xg.project.presentation.index.IndexViewModel
 import org.xg.project.presentation.index.IndexIntent
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun IndexScreen(
-    onAddPlan: () -> Unit,
+fun HomeScreen(
+    onAddPlan: (MealType) -> Unit,
     viewModel: IndexViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -101,8 +102,6 @@ fun IndexScreen(
                 Text("${today.year}年${today.month.number}月${today.day}日", color = GlassStyle.TextPrimary)
             }
 
-            val openRecipes = { onAddPlan() }
-
             MenuSection(
                 title = "早餐",
                 titleColor = GlassStyle.TextPrimary,
@@ -110,7 +109,7 @@ fun IndexScreen(
                 modifier = Modifier.wrapContentSize(),
                 showReviewButton = state.canReviewBreakfast,
                 onReviewClick = { /* TODO */ },
-                onAddPlan = openRecipes
+                onAddPlan = { onAddPlan(MealType.BREAKFAST) }
             )
 
             MenuSection(
@@ -119,7 +118,7 @@ fun IndexScreen(
                 modifier = Modifier.wrapContentSize(),
                 showReviewButton = state.canReviewLunch,
                 onReviewClick = { /* TODO */ },
-                onAddPlan = openRecipes
+                onAddPlan = { onAddPlan(MealType.LUNCH) }
             )
 
             MenuSection(
@@ -128,7 +127,7 @@ fun IndexScreen(
                 modifier = Modifier.wrapContentSize(),
                 showReviewButton = state.canReviewDinner,
                 onReviewClick = { /* TODO */ },
-                onAddPlan = openRecipes
+                onAddPlan = { onAddPlan(MealType.DINNER) }
             )
 
             MenuSection(
@@ -138,7 +137,7 @@ fun IndexScreen(
                 modifier = Modifier.wrapContentSize(),
                 showReviewButton = state.canReviewSnack,
                 onReviewClick = { /* TODO */ },
-                onAddPlan = openRecipes
+                onAddPlan = { onAddPlan(MealType.SNACK) }
             )
         }
     }

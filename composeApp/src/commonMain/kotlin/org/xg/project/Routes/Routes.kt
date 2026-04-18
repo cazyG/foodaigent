@@ -37,3 +37,10 @@ sealed class BottomTabRoute : NavKey {
     @SerialName("tab_profile")
     data object Profile : BottomTabRoute()
 }
+
+@Serializable
+sealed class RecipesInternalRoute : NavKey {
+    @Serializable
+    @SerialName("recipes_from_home")
+    data class FromHome(val mealType: String) : RecipesInternalRoute()
+}
