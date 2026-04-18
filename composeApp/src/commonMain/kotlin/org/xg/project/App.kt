@@ -93,6 +93,9 @@ fun App() {
                             HomeNavDisplay(
                                 onNavigateToManualInput = {
                                     rootBackStack.add(AppRoute.ManualRecipeInput)
+                                },
+                                onNavigateToRecipeDetail = { recipeId ->
+                                    rootBackStack.add(AppRoute.RecipeDetail(recipeId))
                                 }
                             )
                         }
@@ -120,7 +123,8 @@ fun App() {
 
 @Composable
 private fun HomeNavDisplay(
-    onNavigateToManualInput: () -> Unit
+    onNavigateToManualInput: () -> Unit,
+    onNavigateToRecipeDetail: (Int) -> Unit
 ) {
     val selectedTab = rememberSaveable { mutableStateOf<BottomTabRoute>(BottomTabRoute.Home) }
     val homeBackStack = rememberAppNavBackStack(BottomTabRoute.Home)
@@ -182,9 +186,7 @@ private fun HomeNavDisplay(
                                 isFromHome = false,
                                 refreshTrigger = recipesRefreshKey.value,
                                 onNavigateToManualInput = onNavigateToManualInput,
-                                onNavigateToDetail = { recipeId ->
-                                    rootBackStack.add(AppRoute.RecipeDetail(recipeId))
-                                }
+                                onNavigateToDetail = onNavigateToRecipeDetail
                             )
                         }
                         entry<RecipesInternalRoute.FromHome> { route ->

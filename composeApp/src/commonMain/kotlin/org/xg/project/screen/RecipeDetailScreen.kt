@@ -261,7 +261,7 @@ fun RecipeDetailScreen(
                                         .background(Color.White.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
                                         .border(1.dp, GlassStroke, RoundedCornerShape(12.dp))
                                         .padding(12.dp),
-                                    crossAlignment = Alignment.Top
+                                    verticalAlignment = Alignment.Top
                                 ) {
                                     Box(
                                         modifier = Modifier
