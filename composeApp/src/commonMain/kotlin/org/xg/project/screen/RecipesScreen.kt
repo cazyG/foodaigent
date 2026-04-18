@@ -151,7 +151,7 @@ fun RecipesScreen(
                 }
 
                 LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
+                    columns = GridCells.Adaptive(minSize = 160.dp),
                     contentPadding = PaddingValues(all = 12.dp),
                     modifier = Modifier
                         .weight(7.4f)

@@ -4,6 +4,8 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -144,7 +146,7 @@ fun HomeScreen(
 }
 
 // 带标题和网格的菜单区块，支持空状态和点击添加计划
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
 @Composable
 fun MenuSection(
     title: String,
@@ -209,24 +211,23 @@ fun MenuSection(
             }
         } else {
             // 有菜单：显示网格列表
-            Column(
+            BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 4.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                    .padding(horizontal = 12.dp, vertical = 4.dp)
             ) {
-                menus.chunked(2).forEach { rowMenus ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        for (item in rowMenus) {
-                            Box(modifier = Modifier.weight(1f)) {
-                                MenuCard(title, item.name, item.desc, chef = item.chef)
-                            }
-                        }
-                        if (rowMenus.size == 1) {
-                            Spacer(modifier = Modifier.weight(1f))
+                // 根据屏幕宽度动态计算列数和项宽
+                val columns = maxOf(2, (maxWidth.value / 160).toInt())
+                val itemWidth = (maxWidth - (12.dp * (columns - 1))) / columns
+                
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    menus.forEach { item ->
+                        Box(modifier = Modifier.width(itemWidth)) {
+                            MenuCard(title, item.name, item.desc, chef = item.chef)
                         }
                     }
                 }

@@ -5,6 +5,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -26,6 +28,7 @@ import org.xg.project.Routes.BottomTabRoute
 import org.xg.project.Routes.RecipesInternalRoute
 import org.xg.project.di.appModule
 import org.xg.project.screen.BottomTabBar
+import org.xg.project.screen.SideNavigationBar
 import org.xg.project.screen.HistoryScreen
 import org.xg.project.screen.HomeScreen
 import org.xg.project.screen.ManualRecipeInputScreen
@@ -130,58 +133,71 @@ private fun HomeNavDisplay(
         Unit
     }
 
-    val bottomBar: @Composable () -> Unit = {
-        BottomTabBar(
-            activeTab = selectedTab.value,
-            onTabClick = { selectedTab.value = it }
-        )
-    }
+    BoxWithConstraints {
+        val isWideScreen = maxWidth >= 600.dp
 
-    Scaffold(
-        bottomBar = bottomBar,
-        containerColor = androidx.compose.ui.graphics.Color.Transparent
-    ) { innerPadding ->
-        NavDisplay(
-            backStack = activeBackStack,
-            modifier = Modifier.padding(innerPadding),
-            onBack = popActiveBackStack,
-            entryProvider = entryProvider {
-                entry<BottomTabRoute.Home> {
-                    HomeScreen(
-                        onAddPlan = { mealType ->
-                            selectedTab.value = BottomTabRoute.Recipes
-                            recipesBackStack.clear()
-                            recipesBackStack.add(BottomTabRoute.Recipes)
-                            recipesBackStack.add(RecipesInternalRoute.FromHome(mealType.name))
+        Scaffold(
+            bottomBar = {
+                if (!isWideScreen) {
+                    BottomTabBar(
+                        activeTab = selectedTab.value,
+                        onTabClick = { selectedTab.value = it }
+                    )
+                }
+            },
+            containerColor = androidx.compose.ui.graphics.Color.Transparent
+        ) { innerPadding ->
+            Row(modifier = Modifier.padding(innerPadding)) {
+                if (isWideScreen) {
+                    SideNavigationBar(
+                        activeTab = selectedTab.value,
+                        onTabClick = { selectedTab.value = it }
+                    )
+                }
+
+                NavDisplay(
+                    backStack = activeBackStack,
+                    modifier = Modifier.weight(1f),
+                    onBack = popActiveBackStack,
+                    entryProvider = entryProvider {
+                        entry<BottomTabRoute.Home> {
+                            HomeScreen(
+                                onAddPlan = { mealType ->
+                                    selectedTab.value = BottomTabRoute.Recipes
+                                    recipesBackStack.clear()
+                                    recipesBackStack.add(BottomTabRoute.Recipes)
+                                    recipesBackStack.add(RecipesInternalRoute.FromHome(mealType.name))
+                                }
+                            )
                         }
-                    )
-                }
-                entry<BottomTabRoute.Recipes> {
-                    RecipesScreen(
-                        isFromHome = false,
-                        refreshTrigger = recipesRefreshKey.value,
-                        onNavigateToManualInput = onNavigateToManualInput
-                    )
-                }
-                entry<RecipesInternalRoute.FromHome> { route ->
-                    RecipesScreen(
-                        isFromHome = true,
-                        initialMealType = route.mealType,
-                        refreshTrigger = recipesRefreshKey.value,
-                        onNavigateToManualInput = onNavigateToManualInput,
-                        onBack = popActiveBackStack,
-                        onSaveSuccess = {
-                            selectedTab.value = BottomTabRoute.Home
-                            recipesBackStack.clear()
-                            recipesBackStack.add(BottomTabRoute.Recipes)
+                        entry<BottomTabRoute.Recipes> {
+                            RecipesScreen(
+                                isFromHome = false,
+                                refreshTrigger = recipesRefreshKey.value,
+                                onNavigateToManualInput = onNavigateToManualInput
+                            )
                         }
-                    )
-                }
-                entry<BottomTabRoute.History> { HistoryScreen() }
-                entry<BottomTabRoute.Profile> {
-                    ProfileScreen()
-                }
+                        entry<RecipesInternalRoute.FromHome> { route ->
+                            RecipesScreen(
+                                isFromHome = true,
+                                initialMealType = route.mealType,
+                                refreshTrigger = recipesRefreshKey.value,
+                                onNavigateToManualInput = onNavigateToManualInput,
+                                onBack = popActiveBackStack,
+                                onSaveSuccess = {
+                                    selectedTab.value = BottomTabRoute.Home
+                                    recipesBackStack.clear()
+                                    recipesBackStack.add(BottomTabRoute.Recipes)
+                                }
+                            )
+                        }
+                        entry<BottomTabRoute.History> { HistoryScreen() }
+                        entry<BottomTabRoute.Profile> {
+                            ProfileScreen()
+                        }
+                    }
+                )
             }
-        )
+        }
     }
 }
