@@ -164,7 +164,7 @@ private fun HomeNavDisplay(
                     )
                 }
                 entry<RecipesInternalRoute.FromHome> { backStackEntry ->
-                    val route = backStackEntry.key as RecipesInternalRoute.FromHome
+                    val route = backStackEntry as RecipesInternalRoute.FromHome
                     RecipesScreen(
                         isFromHome = true,
                         initialMealType = route.mealType,
