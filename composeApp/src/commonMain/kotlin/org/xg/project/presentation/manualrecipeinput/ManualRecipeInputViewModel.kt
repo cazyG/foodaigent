@@ -40,7 +40,7 @@ class ManualRecipeInputViewModel(
             is ManualRecipeInputIntent.UpdateDifficulty -> updateDifficulty(intent.stars)
             is ManualRecipeInputIntent.UpdateTag -> updateTag(intent.value)
             is ManualRecipeInputIntent.SelectMealType -> selectMealType(intent.mealType)
-            is ManualRecipeInputIntent.UploadImage -> uploadImage(intent.imageBytes)
+            is ManualRecipeInputIntent.UploadImage -> uploadImage(intent.fileName,intent.imageBytes)
             ManualRecipeInputIntent.SaveRecipe -> saveRecipe()
             ManualRecipeInputIntent.ResetForm -> resetForm()
         }
@@ -103,14 +103,11 @@ class ManualRecipeInputViewModel(
         _state.value = _state.value.copy(selectedMealType = mealType)
     }
 
-    private fun uploadImage(imageBytes: ByteArray?) {
+    private fun uploadImage(fileName: String, imageBytes: ByteArray?) {
         viewModelScope.launch {
             _state.value = _state.value.copy(isUploading = true)
             try {
-
-                val timeZone = TimeZone.currentSystemDefault()
-                val filename = "${Clock.System.todayIn(timeZone).toString()}.jpg"
-                val presignedUrlResponse = uploadService.getPresignedUrl(filename)
+                val presignedUrlResponse = uploadService.getPresignedUrl(fileName)
 
                 val uploadResult = uploadService.uploadFile(
                     presignedUrlResponse.data.putUrl,

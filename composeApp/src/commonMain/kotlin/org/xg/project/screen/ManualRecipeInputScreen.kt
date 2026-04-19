@@ -125,9 +125,11 @@ fun ManualRecipeInputScreen(
     LaunchedEffect(result) {
         when (result) {
             is ImagePickerResult.Success -> {
+                val file = result.photos.firstOrNull()
+
                 val imageBytes = result.photos.firstOrNull()?.loadBytes()
                 if (imageBytes != null) {
-                    viewModel.handleIntent(ManualRecipeInputIntent.UploadImage(imageBytes))
+                    viewModel.handleIntent(ManualRecipeInputIntent.UploadImage(file?.fileName?:"",imageBytes))
                 }
             }
 
@@ -274,11 +276,7 @@ fun ManualRecipeInputScreen(
                 OutlinedTextField(
                     value = state.recipeName,
                     onValueChange = {
-                        viewModel.handleIntent(
-                            ManualRecipeInputIntent.UpdateRecipeName(
-                                it
-                            )
-                        )
+                        viewModel.handleIntent(ManualRecipeInputIntent.UpdateRecipeName(it))
                     },
                     label = { Text("食谱名称") },
                     shape = FieldShape,
@@ -352,7 +350,7 @@ fun ManualRecipeInputScreen(
                     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
                         val isWideScreen = maxWidth >= 520.dp
                         val columns = if (isWideScreen) 4 else 2
-                        val mealTypeRows = MealType.values().toList().chunked(columns)
+                        val mealTypeRows = MealType.entries.chunked(columns)
 
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             mealTypeRows.forEach { mealTypeRow ->

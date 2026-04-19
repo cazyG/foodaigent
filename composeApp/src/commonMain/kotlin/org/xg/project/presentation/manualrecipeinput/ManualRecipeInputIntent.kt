@@ -15,7 +15,7 @@ sealed class ManualRecipeInputIntent {
     data class UpdateDifficulty(val stars: Int) : ManualRecipeInputIntent()
     data class UpdateTag(val value: String) : ManualRecipeInputIntent()
     data class SelectMealType(val mealType: String) : ManualRecipeInputIntent()
-    data class UploadImage(val imageBytes: ByteArray?) : ManualRecipeInputIntent()
+    data class UploadImage(val fileName: String,val imageBytes: ByteArray?) : ManualRecipeInputIntent()
     object SaveRecipe : ManualRecipeInputIntent()
     object ResetForm : ManualRecipeInputIntent()
 }
