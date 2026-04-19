@@ -18,7 +18,7 @@ import org.xg.project.domain.model.RecipeDraft
 // 模拟网络请求数据层
 class FoodRepository {
     
-    private val baseUrl = "http://localhost:8080/api"
+    private val baseUrl = "http://localhost:8090/api"
 
     suspend fun fetchDailyRecords(): List<DailyMenuRecord> {
         try {
@@ -75,14 +75,7 @@ class FoodRepository {
     private fun RecipeDraft.toCreateRecipeRequest(): CreateRecipeRequest {
         return CreateRecipeRequest(
             name = name,
-            ingredients = Json.encodeToString(
-                ingredients.map {
-                    IngredientPayload(
-                        name = it.name,
-                        number = it.number
-                    )
-                }
-            ),
+            ingredients = Json.encodeToString(ingredients),
             steps = Json.encodeToString(steps),
             duration = duration,
             difficulty = difficulty,

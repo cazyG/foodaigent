@@ -1,5 +1,8 @@
 package org.xg.project.domain.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class RecipeDraftIngredient(
     val name: String,
     val number: String
