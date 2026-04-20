@@ -58,7 +58,8 @@ class FoodRepository {
         val difficulty: String,
         val tag: String,
         val mealType: String,
-        val imageUrl: String?
+        val imageUrl: String?,
+        val submitter: String?,
     )
 
     @Serializable
@@ -83,7 +84,8 @@ class FoodRepository {
             difficulty = difficulty,
             tag = tag,
             mealType = mealType.name,
-            imageUrl = imageUrl
+            imageUrl = imageUrl,
+            submitter = "admin"
         )
     }
 
@@ -95,7 +97,7 @@ class FoodRepository {
                 setBody(request)
             }.body()
         } catch (e: Exception) {
-            println("Network request failed for create recipe: ${e.message}")
+            println("Network request failed for create recipe: ${e}")
             throw e
         }
     }
