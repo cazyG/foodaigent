@@ -174,9 +174,7 @@ class ManualRecipeInputViewModel(
 
                 if (response.success) {
                     // 保存成功
-                    _state.value = _state.value.copy(
-                        isSaving = false
-                    )
+                    _state.value = ManualRecipeInputState()
                     _uiEvent.emit(ManualRecipeInputUiEvent.SaveSuccess)
                 } else {
                     _state.value = _state.value.copy(
