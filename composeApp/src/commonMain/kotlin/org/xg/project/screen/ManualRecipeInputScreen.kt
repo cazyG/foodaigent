@@ -106,6 +106,12 @@ fun ManualRecipeInputScreen(
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val (nameFocusRequester, durationFocusRequester, tagFocusRequester, stepsFocusRequester) = FocusRequester.createRefs()
+    val resetAndBack = {
+        focusManager.clearFocus()
+        keyboardController?.hide()
+        viewModel.handleIntent(ManualRecipeInputIntent.ResetForm)
+        onBack()
+    }
 
     // 使用ImagePickerKMP 1.0.38版本的API
     val pickerConfig = remember {
@@ -171,7 +177,7 @@ fun ManualRecipeInputScreen(
                 },
                 navigationIcon = {
                     TextButton(
-                        onClick = onBack,
+                        onClick = resetAndBack,
                         modifier = Modifier.sizeIn(minHeight = 36.dp)
                     ) {
                         Icon(
