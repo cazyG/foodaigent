@@ -59,4 +59,21 @@ class UploadService(private val httpClient: HttpClient) {
             throw e
         }
     }
+
+    suspend fun uploadImage(fileName: String, imageBytes: ByteArray): UploadResult {
+        return try {
+            val presignedUrlResponse = getPresignedUrl(fileName)
+            val uploadResult = uploadFile(
+                presignedUrlResponse.data.putUrl,
+                presignedUrlResponse.data.getUrl,
+                presignedUrlResponse.data.headers,
+                imageBytes
+            )
+            println("${presignedUrlResponse.data}  ----  $uploadResult")
+            uploadResult
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw e
+        }
+    }
 }
