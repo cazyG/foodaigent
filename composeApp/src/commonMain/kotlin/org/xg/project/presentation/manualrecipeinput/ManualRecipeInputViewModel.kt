@@ -107,12 +107,7 @@ class ManualRecipeInputViewModel(
         viewModelScope.launch {
             _state.value = _state.value.copy(isUploading = true)
             try {
-                val timeZone = TimeZone.currentSystemDefault()
-                val generatedFilename = "${Clock.System.todayIn(timeZone).toString()}.jpg"
-                val actualFileName = fileName.ifEmpty { generatedFilename }
-
-                val uploadResult = uploadService.uploadImage(actualFileName, imageBytes ?: ByteArray(0))
-
+                val uploadResult = uploadService.uploadImage(fileName, imageBytes ?: ByteArray(0))
                 if (uploadResult.success) {
                     _state.value = _state.value.copy(uploadedImageUrl = uploadResult.url)
                 } else {
