@@ -1,7 +1,6 @@
 package org.xg.project.presentation.manualrecipeinput.usecase
 
 import org.xg.project.data.repository.FoodRepository
-import org.xg.project.data.repository.FoodRepository.BaseResponse
 import org.xg.project.domain.Result
 import org.xg.project.domain.model.RecipeDraft
 

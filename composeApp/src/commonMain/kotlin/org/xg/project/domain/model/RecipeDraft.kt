@@ -8,6 +8,7 @@ data class RecipeDraftIngredient(
     val number: String
 )
 
+@Serializable
 data class RecipeDraft(
     val name: String,
     val ingredients: List<RecipeDraftIngredient>,

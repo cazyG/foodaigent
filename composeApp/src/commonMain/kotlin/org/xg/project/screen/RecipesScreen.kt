@@ -205,7 +205,8 @@ fun RecipeCard(
                 .background(Color.White.copy(alpha = 0.15f))
         ) {
             // 底层：图片
-            val displayImg = recipe.img ?: recipe.imageUrl
+            // RecipeDraft 只有 imageUrl 字段（没有 img）
+            val displayImg = recipe.imageUrl
             if (displayImg != null) {
                 AsyncImage(
                     model = displayImg,
