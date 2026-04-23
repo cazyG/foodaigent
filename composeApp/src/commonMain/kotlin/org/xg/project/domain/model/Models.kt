@@ -37,5 +37,6 @@ data class Recipe(
     val difficulty: String,
     val tag: String,
     val mealType: MealType,
-    val img: String? = null
+    val img: String? = null,
+    val imageUrl: String? = null
 )

@@ -22,12 +22,7 @@ class FoodRepository {
     
     private val baseUrl = "http://localhost:8090/api"
 
-    @Serializable
-    data class BaseResponse<T>(
-        val success: Boolean,
-        val data: T,
-        val message: String
-    )
+
 
     suspend fun fetchDailyRecords(): Result<List<DailyMenuRecord>> {
         return try {
@@ -45,7 +40,7 @@ class FoodRepository {
 
     suspend fun fetchRecipes(): Result<List<Recipe>> {
         return try {
-            val response = httpClient.get("$baseUrl/recipes").body<BaseResponse<List<Recipe>>>()
+            val response = httpClient.get("$baseUrl/recipe").body<BaseResponse<List<Recipe>>>()
             if (response.success) {
                 Result.Success(response.data)
             } else {

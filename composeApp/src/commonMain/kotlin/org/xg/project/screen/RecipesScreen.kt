@@ -204,9 +204,10 @@ fun RecipeCard(
                 .background(Color.White.copy(alpha = 0.15f))
         ) {
             // 底层：图片
-            if (recipe.img != null) {
+            val displayImg = recipe.img ?: recipe.imageUrl
+            if (displayImg != null) {
                 AsyncImage(
-                    model = recipe.img,
+                    model = displayImg,
                     contentDescription = recipe.name,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
