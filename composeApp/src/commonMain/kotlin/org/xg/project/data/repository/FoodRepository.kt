@@ -16,39 +16,39 @@ import org.xg.project.domain.model.MealType
 import org.xg.project.domain.model.MenuItemData
 import org.xg.project.domain.model.Recipe
 import org.xg.project.domain.model.RecipeDraft
-
+import org.xg.project.domain.Result
 // 模拟网络请求数据层
 class FoodRepository {
     
     private val baseUrl = "http://localhost:8090/api"
 
-    suspend fun fetchDailyRecords(): org.xg.project.domain.Result<List<DailyMenuRecord>> {
+    suspend fun fetchDailyRecords(): Result<List<DailyMenuRecord>> {
         return try {
             val response = httpClient.get("$baseUrl/daily-records").body<List<DailyMenuRecord>>()
-            org.xg.project.domain.Result.Success(response)
+            Result.Success(response)
         } catch (e: Exception) {
             println("Network request failed for daily-records: ${e.message}")
-            org.xg.project.domain.Result.Error(e.message ?: "Unknown error")
+            Result.Error(e.message ?: "Unknown error")
         }
     }
 
-    suspend fun fetchRecipes(): org.xg.project.domain.Result<List<Recipe>> {
+    suspend fun fetchRecipes(): Result<List<Recipe>> {
         return try {
             val response = httpClient.get("$baseUrl/recipes").body<List<Recipe>>()
-            org.xg.project.domain.Result.Success(response)
+            Result.Success(response)
         } catch (e: Exception) {
             println("Network request failed for recipes: ${e.message}")
-            org.xg.project.domain.Result.Error(e.message ?: "Unknown error")
+            Result.Error(e.message ?: "Unknown error")
         }
     }
 
-    suspend fun fetchTasteRadar(): org.xg.project.domain.Result<Map<String, Float>> {
+    suspend fun fetchTasteRadar(): Result<Map<String, Float>> {
         return try {
             val response = httpClient.get("$baseUrl/taste-radar").body<Map<String, Float>>()
-            org.xg.project.domain.Result.Success(response)
+            Result.Success(response)
         } catch (e: Exception) {
             println("Network request failed for taste-radar: ${e.message}")
-            org.xg.project.domain.Result.Error(e.message ?: "Unknown error")
+            Result.Error(e.message ?: "Unknown error")
         }
     }
 
@@ -66,9 +66,9 @@ class FoodRepository {
     )
 
     @Serializable
-    data class CreateRecipeResponse(
+    data class BaseResponse<T>(
         val success: Boolean,
-        val recipeId: Int,
+        val data: T,
         val message: String
     )
 
@@ -92,17 +92,27 @@ class FoodRepository {
         )
     }
 
-    suspend fun createRecipe(recipeDraft: RecipeDraft): org.xg.project.domain.Result<CreateRecipeResponse> {
+    suspend fun createRecipe(recipeDraft: RecipeDraft): Result<BaseResponse<*>> {
         return try {
             val request = recipeDraft.toCreateRecipeRequest()
             val response = httpClient.post("$baseUrl/recipe") {
                 contentType(ContentType.Application.Json)
                 setBody(request)
-            }.body<CreateRecipeResponse>()
-            org.xg.project.domain.Result.Success(response)
+            }.body<BaseResponse<*>>()
+            Result.Success(response)
         } catch (e: Exception) {
             println("Network request failed for create recipe: ${e}")
-            org.xg.project.domain.Result.Error(e.message ?: "Unknown error")
+            Result.Error(e.message ?: "Unknown error")
+        }
+    }
+
+    suspend fun getAllRecipe(): Result<BaseResponse<RecipeDraft>> {
+        return try {
+            val response = httpClient.get("$baseUrl/recipe").body<BaseResponse<RecipeDraft>>()
+            Result.Success(response)
+        } catch (e: Exception) {
+            println("Network request failed for create recipe: ${e}")
+            Result.Error(e.message ?: "Unknown error")
         }
     }
 }
