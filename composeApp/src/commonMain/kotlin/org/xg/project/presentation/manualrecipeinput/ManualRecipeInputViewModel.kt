@@ -106,24 +106,26 @@ class ManualRecipeInputViewModel(
     private fun uploadImage(fileName: String, imageBytes: ByteArray?) {
         viewModelScope.launch {
             _state.value = _state.value.copy(isUploading = true)
-            try {
-                val uploadResult = uploadService.uploadImage(fileName, imageBytes ?: ByteArray(0))
-                if (uploadResult.success) {
-                    _state.value = _state.value.copy(uploadedImageUrl = uploadResult.url)
-                } else {
+            when (val result = uploadService.uploadImage(fileName, imageBytes ?: ByteArray(0))) {
+                is org.xg.project.domain.Result.Success -> {
+                    if (result.data.success) {
+                        _state.value = _state.value.copy(
+                            uploadedImageUrl = result.data.url,
+                            isUploading = false
+                        )
+                    } else {
+                        _state.value = _state.value.copy(
+                            error = "图片上传失败: 服务器返回失败",
+                            isUploading = false
+                        )
+                    }
+                }
+                is org.xg.project.domain.Result.Error -> {
                     _state.value = _state.value.copy(
-                        error = "图片上传失败: 服务器返回失败",
+                        error = "图片上传失败: ${result.message}",
                         isUploading = false
                     )
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                _state.value = _state.value.copy(
-                    error = "图片上传失败: ${e.message}",
-                    isUploading = false
-                )
-            } finally {
-                _state.value = _state.value.copy(isUploading = false)
             }
         }
     }
@@ -131,53 +133,55 @@ class ManualRecipeInputViewModel(
     private fun saveRecipe() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isSaving = true, error = null)
-            try {
-                // 验证表单
-                val normalizedSteps = _state.value.steps
-                    .map { it.trim() }
-                    .filter { it.isNotEmpty() }
+            
+            // 验证表单
+            val normalizedSteps = _state.value.steps
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
 
-                if (_state.value.recipeName.isEmpty() || _state.value.ingredients.isEmpty() || normalizedSteps.isEmpty()) {
-                    _state.value = _state.value.copy(
-                        error = "食谱名称、原材料和制作过程不能为空",
-                        isSaving = false
-                    )
+            if (_state.value.recipeName.isEmpty() || _state.value.ingredients.isEmpty() || normalizedSteps.isEmpty()) {
+                _state.value = _state.value.copy(
+                    error = "食谱名称、原材料和制作过程不能为空",
+                    isSaving = false
+                )
+                return@launch
+            }
+
+            // 如果有选中的图片但尚未上传，则先上传图片
+            if ( _state.value.uploadedImageUrl == null) {
+                // 等待上传完成
+                while (_state.value.isUploading) {
+                    kotlinx.coroutines.delay(100)
+                }
+                // 如果上传失败，直接返回
+                if (_state.value.error != null) {
+                    _state.value = _state.value.copy(isSaving = false)
                     return@launch
                 }
+            }
 
-                // 如果有选中的图片但尚未上传，则先上传图片
-                if ( _state.value.uploadedImageUrl == null) {
-                    // 等待上传完成
-                    while (_state.value.isUploading) {
-                        kotlinx.coroutines.delay(100)
-                    }
-                    // 如果上传失败，直接返回
-                    if (_state.value.error != null) {
-                        _state.value = _state.value.copy(isSaving = false)
-                        return@launch
+            val recipeDraft = _state.value.copy(steps = normalizedSteps).toRecipeDraft()
+
+            // 保存食谱到服务器
+            when (val response = foodRepository.createRecipe(recipeDraft)) {
+                is org.xg.project.domain.Result.Success -> {
+                    if (response.data.success) {
+                        // 保存成功
+                        _state.value = ManualRecipeInputState()
+                        _uiEvent.emit(ManualRecipeInputUiEvent.SaveSuccess)
+                    } else {
+                        _state.value = _state.value.copy(
+                            error = "保存失败: ${response.data.message}",
+                            isSaving = false
+                        )
                     }
                 }
-
-                val recipeDraft = _state.value.copy(steps = normalizedSteps).toRecipeDraft()
-
-                // 保存食谱到服务器
-                val response = foodRepository.createRecipe(recipeDraft)
-
-                if (response.success) {
-                    // 保存成功
-                    _state.value = ManualRecipeInputState()
-                    _uiEvent.emit(ManualRecipeInputUiEvent.SaveSuccess)
-                } else {
+                is org.xg.project.domain.Result.Error -> {
                     _state.value = _state.value.copy(
                         error = "保存失败: ${response.message}",
                         isSaving = false
                     )
                 }
-            } catch (e: Exception) {
-                _state.value = _state.value.copy(
-                    error = "保存失败: ${e.message}",
-                    isSaving = false
-                )
             }
         }
     }

@@ -28,19 +28,19 @@ class HistoryViewModel(
     private fun loadHistoryData() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
-            try {
-                // 模拟并行请求
-                val records = repository.fetchDailyRecords()
-                
-                _state.value = _state.value.copy(
-                    isLoading = false,
-                    dailyRecords = records
-                )
-            } catch (e: Exception) {
-                _state.value = _state.value.copy(
-                    isLoading = false,
-                    error = e.message ?: "Unknown error"
-                )
+            when (val result = repository.fetchDailyRecords()) {
+                is org.xg.project.domain.Result.Success -> {
+                    _state.value = _state.value.copy(
+                        isLoading = false,
+                        dailyRecords = result.data
+                    )
+                }
+                is org.xg.project.domain.Result.Error -> {
+                    _state.value = _state.value.copy(
+                        isLoading = false,
+                        error = result.message
+                    )
+                }
             }
         }
     }

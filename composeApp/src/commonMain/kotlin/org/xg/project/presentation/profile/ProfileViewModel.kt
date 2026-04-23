@@ -26,10 +26,10 @@ class ProfileViewModel(
             _state.value = _state.value.copy(isLoading = true)
             // 模拟网络请求，实际项目中从 Repository 获取数据
             kotlinx.coroutines.delay(500)
-            val radarData = try {
-                repository.fetchTasteRadar()
-            } catch (e: Exception) {
-                emptyMap()
+            
+            val radarData = when (val result = repository.fetchTasteRadar()) {
+                is org.xg.project.domain.Result.Success -> result.data
+                is org.xg.project.domain.Result.Error -> emptyMap()
             }
             
             _state.value = _state.value.copy(

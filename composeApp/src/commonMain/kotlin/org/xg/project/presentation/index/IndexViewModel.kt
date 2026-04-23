@@ -31,30 +31,32 @@ class IndexViewModel(
     private fun loadTodayMenu() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
-            try {
-                // 模拟网络获取今天的菜单
-                val records = repository.fetchDailyRecords()
-                val todayRecord = records.firstOrNull()
+            when (val result = repository.fetchDailyRecords()) {
+                is org.xg.project.domain.Result.Success -> {
+                    val records = result.data
+                    val todayRecord = records.firstOrNull()
 
-                // 计算各个餐段的评价资格
-                val canBreakfast = checkReviewEligibility(MealType.BREAKFAST)
-                val canLunch = checkReviewEligibility(MealType.LUNCH)
-                val canDinner = checkReviewEligibility(MealType.DINNER)
-                val canSnack = checkReviewEligibility(MealType.SNACK)
+                    // 计算各个餐段的评价资格
+                    val canBreakfast = checkReviewEligibility(MealType.BREAKFAST)
+                    val canLunch = checkReviewEligibility(MealType.LUNCH)
+                    val canDinner = checkReviewEligibility(MealType.DINNER)
+                    val canSnack = checkReviewEligibility(MealType.SNACK)
 
-                _state.value = _state.value.copy(
-                    isLoading = false,
-                    todayRecord = todayRecord,
-                    canReviewBreakfast = canBreakfast,
-                    canReviewLunch = canLunch,
-                    canReviewDinner = canDinner,
-                    canReviewSnack = canSnack
-                )
-            } catch (e: Exception) {
-                _state.value = _state.value.copy(
-                    isLoading = false,
-                    error = e.message ?: "Unknown error"
-                )
+                    _state.value = _state.value.copy(
+                        isLoading = false,
+                        todayRecord = todayRecord,
+                        canReviewBreakfast = canBreakfast,
+                        canReviewLunch = canLunch,
+                        canReviewDinner = canDinner,
+                        canReviewSnack = canSnack
+                    )
+                }
+                is org.xg.project.domain.Result.Error -> {
+                    _state.value = _state.value.copy(
+                        isLoading = false,
+                        error = result.message
+                    )
+                }
             }
         }
     }

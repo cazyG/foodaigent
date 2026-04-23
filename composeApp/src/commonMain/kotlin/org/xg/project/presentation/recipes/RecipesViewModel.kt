@@ -31,17 +31,19 @@ class RecipesViewModel(
     private fun loadRecipes() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
-            try {
-                val recipes = repository.fetchRecipes()
-                _state.value = _state.value.copy(
-                    isLoading = false,
-                    allRecipes = recipes
-                )
-            } catch (e: Exception) {
-                _state.value = _state.value.copy(
-                    isLoading = false,
-                    error = e.message ?: "Unknown error"
-                )
+            when (val result = repository.fetchRecipes()) {
+                is org.xg.project.domain.Result.Success -> {
+                    _state.value = _state.value.copy(
+                        isLoading = false,
+                        allRecipes = result.data
+                    )
+                }
+                is org.xg.project.domain.Result.Error -> {
+                    _state.value = _state.value.copy(
+                        isLoading = false,
+                        error = result.message
+                    )
+                }
             }
         }
     }

@@ -26,23 +26,22 @@ class UploadService(private val httpClient: HttpClient) {
     @Serializable
     data class UploadResult(val success: Boolean, val url: String)
     
-    suspend fun getPresignedUrl(filename: String): PresignedUrlResponse {
-        try {
+    suspend fun getPresignedUrl(filename: String): org.xg.project.domain.Result<PresignedUrlResponse> {
+        return try {
             val response = httpClient.get("$baseUrl/api/generatePresignedUrl?filename=$filename")
-            val responseBody = response.body<String>()
-            
             try {
-                return response.body<PresignedUrlResponse>()
+                org.xg.project.domain.Result.Success(response.body<PresignedUrlResponse>())
             } catch (e: Exception) {
-                throw Exception("服务器返回错误: $responseBody")
+                val responseBody = response.body<String>()
+                org.xg.project.domain.Result.Error("服务器返回错误: $responseBody")
             }
         } catch (e: Exception) {
-            throw e
+            org.xg.project.domain.Result.Error(e.message ?: "Unknown error")
         }
     }
     
-    suspend fun uploadFile(putUrl: String, getUrl: String, headers: Map<String, String>, file: ByteArray): UploadResult {
-        try {
+    suspend fun uploadFile(putUrl: String, getUrl: String, headers: Map<String, String>, file: ByteArray): org.xg.project.domain.Result<UploadResult> {
+        return try {
             val response: HttpResponse = httpClient.put(putUrl) {
                 this.headers {
                     headers.forEach { (key, value) -> append(key, value) }
@@ -50,30 +49,33 @@ class UploadService(private val httpClient: HttpClient) {
                 setBody(file)
             }
             
-            return if (response.status.value == 200) {
-                UploadResult(success = true, url = getUrl)
+            if (response.status.value == 200) {
+                org.xg.project.domain.Result.Success(UploadResult(success = true, url = getUrl))
             } else {
-                UploadResult(success = false, url = "")
+                org.xg.project.domain.Result.Error("Upload failed with status: ${response.status.value}")
             }
         } catch (e: Exception) {
-            throw e
+            org.xg.project.domain.Result.Error(e.message ?: "Unknown error")
         }
     }
 
-    suspend fun uploadImage(fileName: String, imageBytes: ByteArray): UploadResult {
+    suspend fun uploadImage(fileName: String, imageBytes: ByteArray): org.xg.project.domain.Result<UploadResult> {
         return try {
-            val presignedUrlResponse = getPresignedUrl(fileName)
-            val uploadResult = uploadFile(
-                presignedUrlResponse.data.putUrl,
-                presignedUrlResponse.data.getUrl,
-                presignedUrlResponse.data.headers,
-                imageBytes
-            )
-            println("${presignedUrlResponse.data}  ----  $uploadResult")
-            uploadResult
+            when (val presignedResult = getPresignedUrl(fileName)) {
+                is org.xg.project.domain.Result.Success -> {
+                    val uploadResult = uploadFile(
+                        presignedResult.data.data.putUrl,
+                        presignedResult.data.data.getUrl,
+                        presignedResult.data.data.headers,
+                        imageBytes
+                    )
+                    uploadResult
+                }
+                is org.xg.project.domain.Result.Error -> presignedResult
+            }
         } catch (e: Exception) {
             e.printStackTrace()
-            throw e
+            org.xg.project.domain.Result.Error(e.message ?: "Unknown error")
         }
     }
 }
