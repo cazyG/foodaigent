@@ -67,13 +67,6 @@ class FoodRepository {
     }
 
     @Serializable
-    data class BaseResponse<T>(
-        val success: Boolean,
-        val data: T,
-        val message: String
-    )
-
-    @Serializable
     data class CreateRecipeResponse(
         val recipeId: Int
     )
@@ -130,9 +123,9 @@ class FoodRepository {
         }
     }
 
-    suspend fun getAllRecipe(): Result<RecipeDraft> {
+    suspend fun getAllRecipe(): Result<List<RecipeDraft>> {
         return try {
-            val response = httpClient.get("$baseUrl/recipe").body<BaseResponse<RecipeDraft>>()
+            val response = httpClient.get("$baseUrl/recipe").body<BaseResponse<List<RecipeDraft>>>()
             if (response.success) {
                 Result.Success(response.data)
             } else {

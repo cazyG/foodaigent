@@ -124,7 +124,7 @@ fun App() {
 @Composable
 private fun HomeNavDisplay(
     onNavigateToManualInput: () -> Unit,
-    onNavigateToRecipeDetail: (Int) -> Unit
+    onNavigateToRecipeDetail: (String) -> Unit
 ) {
     val selectedTab = rememberSaveable { mutableStateOf<BottomTabRoute>(BottomTabRoute.Home) }
     val homeBackStack = rememberAppNavBackStack(BottomTabRoute.Home)

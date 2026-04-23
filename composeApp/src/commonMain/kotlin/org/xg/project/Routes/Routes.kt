@@ -20,7 +20,7 @@ sealed class AppRoute : NavKey {
 
     @Serializable
     @SerialName("recipe_detail")
-    data class RecipeDetail(val id: Int) : AppRoute()
+    data class RecipeDetail(val id: String) : AppRoute()
 }
 
 @Serializable
