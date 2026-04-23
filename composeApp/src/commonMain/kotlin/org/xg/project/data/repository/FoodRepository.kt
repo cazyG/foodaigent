@@ -22,10 +22,21 @@ class FoodRepository {
     
     private val baseUrl = "http://localhost:8090/api"
 
+    @Serializable
+    data class BaseResponse<T>(
+        val success: Boolean,
+        val data: T,
+        val message: String
+    )
+
     suspend fun fetchDailyRecords(): Result<List<DailyMenuRecord>> {
         return try {
-            val response = httpClient.get("$baseUrl/daily-records").body<List<DailyMenuRecord>>()
-            Result.Success(response)
+            val response = httpClient.get("$baseUrl/daily-records").body<BaseResponse<List<DailyMenuRecord>>>()
+            if (response.success) {
+                Result.Success(response.data)
+            } else {
+                Result.Error(response.message)
+            }
         } catch (e: Exception) {
             println("Network request failed for daily-records: ${e.message}")
             Result.Error(e.message ?: "Unknown error")
@@ -34,8 +45,12 @@ class FoodRepository {
 
     suspend fun fetchRecipes(): Result<List<Recipe>> {
         return try {
-            val response = httpClient.get("$baseUrl/recipes").body<List<Recipe>>()
-            Result.Success(response)
+            val response = httpClient.get("$baseUrl/recipes").body<BaseResponse<List<Recipe>>>()
+            if (response.success) {
+                Result.Success(response.data)
+            } else {
+                Result.Error(response.message)
+            }
         } catch (e: Exception) {
             println("Network request failed for recipes: ${e.message}")
             Result.Error(e.message ?: "Unknown error")
@@ -44,13 +59,29 @@ class FoodRepository {
 
     suspend fun fetchTasteRadar(): Result<Map<String, Float>> {
         return try {
-            val response = httpClient.get("$baseUrl/taste-radar").body<Map<String, Float>>()
-            Result.Success(response)
+            val response = httpClient.get("$baseUrl/taste-radar").body<BaseResponse<Map<String, Float>>>()
+            if (response.success) {
+                Result.Success(response.data)
+            } else {
+                Result.Error(response.message)
+            }
         } catch (e: Exception) {
             println("Network request failed for taste-radar: ${e.message}")
             Result.Error(e.message ?: "Unknown error")
         }
     }
+
+    @Serializable
+    data class BaseResponse<T>(
+        val success: Boolean,
+        val data: T,
+        val message: String
+    )
+
+    @Serializable
+    data class CreateRecipeResponse(
+        val recipeId: Int
+    )
 
     @Serializable
     data class CreateRecipeRequest(
@@ -63,13 +94,6 @@ class FoodRepository {
         val mealType: String,
         val imageUrl: String?,
         val submitter: String?,
-    )
-
-    @Serializable
-    data class BaseResponse<T>(
-        val success: Boolean,
-        val data: T,
-        val message: String
     )
 
     @Serializable
@@ -92,24 +116,33 @@ class FoodRepository {
         )
     }
 
-    suspend fun createRecipe(recipeDraft: RecipeDraft): Result<BaseResponse<*>> {
+    suspend fun createRecipe(recipeDraft: RecipeDraft): Result<CreateRecipeResponse> {
         return try {
             val request = recipeDraft.toCreateRecipeRequest()
             val response = httpClient.post("$baseUrl/recipe") {
                 contentType(ContentType.Application.Json)
                 setBody(request)
-            }.body<BaseResponse<*>>()
-            Result.Success(response)
+            }.body<BaseResponse<CreateRecipeResponse>>()
+            
+            if (response.success) {
+                Result.Success(response.data)
+            } else {
+                Result.Error(response.message)
+            }
         } catch (e: Exception) {
             println("Network request failed for create recipe: ${e}")
             Result.Error(e.message ?: "Unknown error")
         }
     }
 
-    suspend fun getAllRecipe(): Result<BaseResponse<RecipeDraft>> {
+    suspend fun getAllRecipe(): Result<RecipeDraft> {
         return try {
             val response = httpClient.get("$baseUrl/recipe").body<BaseResponse<RecipeDraft>>()
-            Result.Success(response)
+            if (response.success) {
+                Result.Success(response.data)
+            } else {
+                Result.Error(response.message)
+            }
         } catch (e: Exception) {
             println("Network request failed for create recipe: ${e}")
             Result.Error(e.message ?: "Unknown error")

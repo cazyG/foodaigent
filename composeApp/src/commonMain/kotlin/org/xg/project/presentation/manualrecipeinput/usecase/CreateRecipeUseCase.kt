@@ -8,7 +8,7 @@ import org.xg.project.domain.model.RecipeDraft
 class CreateRecipeUseCase(
     private val repository: FoodRepository
 ) {
-    suspend operator fun invoke(recipeDraft: RecipeDraft): Result<BaseResponse<*>> {
+    suspend operator fun invoke(recipeDraft: RecipeDraft): Result<FoodRepository.CreateRecipeResponse> {
         return repository.createRecipe(recipeDraft)
     }
 }

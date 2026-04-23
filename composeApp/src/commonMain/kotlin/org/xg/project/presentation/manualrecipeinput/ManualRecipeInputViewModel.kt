@@ -161,15 +161,8 @@ class ManualRecipeInputViewModel(
                 is Result.Success -> {
                     when (val response = createRecipeUseCase(draftResult.data)) {
                         is Result.Success -> {
-                            if (response.data.success) {
-                                _state.value = ManualRecipeInputState()
-                                _uiEvent.emit(ManualRecipeInputUiEvent.SaveSuccess)
-                            } else {
-                                _state.value = _state.value.copy(
-                                    error = "保存失败: ${response.data.message}",
-                                    isSaving = false
-                                )
-                            }
+                            _state.value = ManualRecipeInputState()
+                            _uiEvent.emit(ManualRecipeInputUiEvent.SaveSuccess)
                         }
                         is Result.Error -> {
                             _state.value = _state.value.copy(
