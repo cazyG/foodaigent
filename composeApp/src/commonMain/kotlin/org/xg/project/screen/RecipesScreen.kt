@@ -27,6 +27,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import org.koin.compose.viewmodel.koinViewModel
 import org.xg.project.domain.model.MealType
 import org.xg.project.domain.model.Recipe
+import org.xg.project.domain.model.RecipeDraft
 import org.xg.project.presentation.recipes.RecipesIntent
 import org.xg.project.presentation.recipes.RecipesViewModel
 
@@ -37,7 +38,7 @@ fun RecipesScreen(
     viewModel: RecipesViewModel = koinViewModel(),
     refreshTrigger: Int = 0,
     onNavigateToManualInput: () -> Unit = {},
-    onNavigateToDetail: (Int) -> Unit = {},
+    onNavigateToDetail: (String) -> Unit = {},
     onBack: () -> Unit = {},
     onSaveSuccess: () -> Unit = {}
 ) {
@@ -153,12 +154,12 @@ fun RecipesScreen(
                     items(state.currentRecipes) { recipe ->
                         RecipeCard(
                             recipe = recipe,
-                            isSelected = recipe.id in state.selectedRecipeIds,
+                            isSelected = recipe.name in state.selectedRecipeIds,
                             onClick = { 
                                 if (isFromHome) {
-                                    viewModel.handleIntent(RecipesIntent.ToggleSelection(recipe.id)) 
+                                    viewModel.handleIntent(RecipesIntent.ToggleSelection(recipe.name))
                                 } else {
-                                    onNavigateToDetail(recipe.id)
+                                    onNavigateToDetail(recipe.name)
                                 }
                             },
                             showSelectionBorder = isFromHome
@@ -172,7 +173,7 @@ fun RecipesScreen(
 
 @Composable
 fun RecipeCard(
-    recipe: Recipe,
+    recipe: RecipeDraft,
     isSelected: Boolean,
     onClick: () -> Unit,
     showSelectionBorder: Boolean = false
@@ -204,9 +205,9 @@ fun RecipeCard(
                 .background(Color.White.copy(alpha = 0.15f))
         ) {
             // 底层：图片
-            if (recipe.img != null) {
+            if (recipe.imageUrl != null) {
                 AsyncImage(
-                    model = recipe.img,
+                    model = recipe.imageUrl,
                     contentDescription = recipe.name,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop

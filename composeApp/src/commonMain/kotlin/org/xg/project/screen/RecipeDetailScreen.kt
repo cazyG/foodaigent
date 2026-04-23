@@ -49,13 +49,13 @@ data class RecipeDetailState(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecipeDetailScreen(
-    recipeId: Int,
+    recipeId: String,
     onBack: () -> Unit
 ) {
     // 模拟数据加载。实际项目中应该从 ViewModel 中通过 recipeId 获取
     val recipe = remember(recipeId) {
         RecipeDetailState(
-            id = recipeId,
+            id = 0,
             recipeName = "美味食谱 $recipeId",
             ingredients = listOf(
                 Ingredient("1", "西红柿", "2个"),
