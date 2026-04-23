@@ -12,8 +12,7 @@ import kotlinx.coroutines.launch
 import org.xg.project.data.remote.UploadService
 import org.xg.project.data.remote.httpClient
 import org.xg.project.data.repository.FoodRepository
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.todayIn
+import org.xg.project.domain.Result
 import org.xg.project.domain.model.Ingredient
 import org.xg.project.presentation.manualrecipeinput.usecase.BuildRecipeDraftUseCase
 import org.xg.project.presentation.manualrecipeinput.usecase.CreateRecipeUseCase
@@ -113,7 +112,7 @@ class ManualRecipeInputViewModel(
         viewModelScope.launch {
             _state.value = _state.value.copy(isUploading = true)
             when (val result = uploadImageUseCase(fileName, imageBytes ?: ByteArray(0))) {
-                is org.xg.project.domain.Result.Success -> {
+                is Result.Success -> {
                     if (result.data.success) {
                         _state.value = _state.value.copy(
                             uploadedImageUrl = result.data.url,
@@ -126,7 +125,7 @@ class ManualRecipeInputViewModel(
                         )
                     }
                 }
-                is org.xg.project.domain.Result.Error -> {
+                is Result.Error -> {
                     _state.value = _state.value.copy(
                         error = "图片上传失败: ${result.message}",
                         isUploading = false
@@ -153,15 +152,15 @@ class ManualRecipeInputViewModel(
             }
 
             when (val draftResult = buildRecipeDraftUseCase(_state.value)) {
-                is org.xg.project.domain.Result.Error -> {
+                is Result.Error -> {
                     _state.value = _state.value.copy(
                         error = draftResult.message,
                         isSaving = false
                     )
                 }
-                is org.xg.project.domain.Result.Success -> {
+                is Result.Success -> {
                     when (val response = createRecipeUseCase(draftResult.data)) {
-                        is org.xg.project.domain.Result.Success -> {
+                        is Result.Success -> {
                             if (response.data.success) {
                                 _state.value = ManualRecipeInputState()
                                 _uiEvent.emit(ManualRecipeInputUiEvent.SaveSuccess)
@@ -172,7 +171,7 @@ class ManualRecipeInputViewModel(
                                 )
                             }
                         }
-                        is org.xg.project.domain.Result.Error -> {
+                        is Result.Error -> {
                             _state.value = _state.value.copy(
                                 error = "保存失败: ${response.message}",
                                 isSaving = false
