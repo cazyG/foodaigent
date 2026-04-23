@@ -15,12 +15,18 @@ import org.xg.project.data.repository.FoodRepository
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import org.xg.project.domain.model.Ingredient
+import org.xg.project.presentation.manualrecipeinput.usecase.BuildRecipeDraftUseCase
+import org.xg.project.presentation.manualrecipeinput.usecase.CreateRecipeUseCase
+import org.xg.project.presentation.manualrecipeinput.usecase.UploadImageUseCase
 import kotlin.time.Clock
 import kotlin.random.Random
 
 class ManualRecipeInputViewModel(
     private val uploadService: UploadService = UploadService(httpClient),
-    private val foodRepository: FoodRepository = FoodRepository()
+    private val foodRepository: FoodRepository = FoodRepository(),
+    private val buildRecipeDraftUseCase: BuildRecipeDraftUseCase = BuildRecipeDraftUseCase(),
+    private val createRecipeUseCase: CreateRecipeUseCase = CreateRecipeUseCase(foodRepository),
+    private val uploadImageUseCase: UploadImageUseCase = UploadImageUseCase(uploadService)
 ) : ViewModel() {
     private val _state = MutableStateFlow(ManualRecipeInputState())
     val state: StateFlow<ManualRecipeInputState> = _state.asStateFlow()
@@ -106,7 +112,7 @@ class ManualRecipeInputViewModel(
     private fun uploadImage(fileName: String, imageBytes: ByteArray?) {
         viewModelScope.launch {
             _state.value = _state.value.copy(isUploading = true)
-            when (val result = uploadService.uploadImage(fileName, imageBytes ?: ByteArray(0))) {
+            when (val result = uploadImageUseCase(fileName, imageBytes ?: ByteArray(0))) {
                 is org.xg.project.domain.Result.Success -> {
                     if (result.data.success) {
                         _state.value = _state.value.copy(
@@ -133,20 +139,6 @@ class ManualRecipeInputViewModel(
     private fun saveRecipe() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isSaving = true, error = null)
-            
-            // 验证表单
-            val normalizedSteps = _state.value.steps
-                .map { it.trim() }
-                .filter { it.isNotEmpty() }
-
-            if (_state.value.recipeName.isEmpty() || _state.value.ingredients.isEmpty() || normalizedSteps.isEmpty()) {
-                _state.value = _state.value.copy(
-                    error = "食谱名称、原材料和制作过程不能为空",
-                    isSaving = false
-                )
-                return@launch
-            }
-
             // 如果有选中的图片但尚未上传，则先上传图片
             if ( _state.value.uploadedImageUrl == null) {
                 // 等待上传完成
@@ -160,27 +152,33 @@ class ManualRecipeInputViewModel(
                 }
             }
 
-            val recipeDraft = _state.value.copy(steps = normalizedSteps).toRecipeDraft()
-
-            // 保存食谱到服务器
-            when (val response = foodRepository.createRecipe(recipeDraft)) {
-                is org.xg.project.domain.Result.Success -> {
-                    if (response.data.success) {
-                        // 保存成功
-                        _state.value = ManualRecipeInputState()
-                        _uiEvent.emit(ManualRecipeInputUiEvent.SaveSuccess)
-                    } else {
-                        _state.value = _state.value.copy(
-                            error = "保存失败: ${response.data.message}",
-                            isSaving = false
-                        )
-                    }
-                }
+            when (val draftResult = buildRecipeDraftUseCase(_state.value)) {
                 is org.xg.project.domain.Result.Error -> {
                     _state.value = _state.value.copy(
-                        error = "保存失败: ${response.message}",
+                        error = draftResult.message,
                         isSaving = false
                     )
+                }
+                is org.xg.project.domain.Result.Success -> {
+                    when (val response = createRecipeUseCase(draftResult.data)) {
+                        is org.xg.project.domain.Result.Success -> {
+                            if (response.data.success) {
+                                _state.value = ManualRecipeInputState()
+                                _uiEvent.emit(ManualRecipeInputUiEvent.SaveSuccess)
+                            } else {
+                                _state.value = _state.value.copy(
+                                    error = "保存失败: ${response.data.message}",
+                                    isSaving = false
+                                )
+                            }
+                        }
+                        is org.xg.project.domain.Result.Error -> {
+                            _state.value = _state.value.copy(
+                                error = "保存失败: ${response.message}",
+                                isSaving = false
+                            )
+                        }
+                    }
                 }
             }
         }

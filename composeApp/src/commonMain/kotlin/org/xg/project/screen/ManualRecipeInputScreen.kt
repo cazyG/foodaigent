@@ -896,4 +896,3 @@ fun ManualRecipeInputScreen(
         }
     }
 }
-}

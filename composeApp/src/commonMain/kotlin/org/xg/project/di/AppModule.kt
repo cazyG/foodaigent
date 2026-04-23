@@ -6,6 +6,9 @@ import org.xg.project.data.remote.UploadService
 import org.xg.project.data.remote.httpClient
 import org.xg.project.data.repository.FoodRepository
 import org.xg.project.domain.usecase.CheckMealReviewEligibilityUseCase
+import org.xg.project.presentation.manualrecipeinput.usecase.BuildRecipeDraftUseCase
+import org.xg.project.presentation.manualrecipeinput.usecase.CreateRecipeUseCase
+import org.xg.project.presentation.manualrecipeinput.usecase.UploadImageUseCase
 import org.xg.project.presentation.history.HistoryViewModel
 import org.xg.project.presentation.index.IndexViewModel
 import org.xg.project.presentation.manualrecipeinput.ManualRecipeInputViewModel
@@ -22,6 +25,9 @@ val appModule = module {
 
     // UseCases
     factory { CheckMealReviewEligibilityUseCase() }
+    factory { BuildRecipeDraftUseCase() }
+    factory { CreateRecipeUseCase(get()) }
+    factory { UploadImageUseCase(get()) }
 
     // ViewModels
     viewModelOf(::IndexViewModel)
