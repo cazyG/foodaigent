@@ -1,17 +1,16 @@
 package org.xg.project.presentation.recipes
 
 import org.xg.project.domain.model.MealType
-import org.xg.project.domain.model.Recipe
-import org.xg.project.domain.model.RecipeDraft
+import org.xg.project.domain.model.RecipeMenu
 
 data class RecipesState(
     val isLoading: Boolean = false,
-    val allRecipes: List<Recipe> = emptyList(),
+    val allRecipes: List<RecipeMenu> = emptyList(),
     val selectedMealType: MealType = MealType.BREAKFAST,
     val selectedRecipeIds: Set<Int> = emptySet(),
     val error: String? = null
 ) {
-    val currentRecipes: List<Recipe>
+    val currentRecipes: List<RecipeMenu>
         get() = allRecipes.filter { it.mealType == selectedMealType }
 }
 

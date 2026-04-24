@@ -26,7 +26,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 
 import org.koin.compose.viewmodel.koinViewModel
 import org.xg.project.domain.model.MealType
-import org.xg.project.domain.model.Recipe
+import org.xg.project.domain.model.RecipeMenu
 import org.xg.project.presentation.recipes.RecipesIntent
 import org.xg.project.presentation.recipes.RecipesViewModel
 
@@ -172,7 +172,7 @@ fun RecipesScreen(
 
 @Composable
 fun RecipeCard(
-    recipe: Recipe,
+    recipe: RecipeMenu,
     isSelected: Boolean,
     onClick: () -> Unit,
     showSelectionBorder: Boolean = false

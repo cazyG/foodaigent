@@ -3,36 +3,26 @@ package org.xg.project.data.repository
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.client.statement.bodyAsText
 import io.ktor.client.call.body
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import io.ktor.http.isSuccess
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromJsonElement
 import org.xg.project.data.remote.httpClient
+import org.xg.project.data.model.BaseResponse
+import org.xg.project.data.model.ResponseResult
 import org.xg.project.domain.model.DailyMenuRecord
 import org.xg.project.domain.model.MealType
-import org.xg.project.domain.model.Recipe
 import org.xg.project.domain.model.RecipeDraft
 import org.xg.project.domain.model.RecipeDraftIngredient
 import org.xg.project.domain.Result
+import org.xg.project.domain.model.RecipeMenu
+
 // 模拟网络请求数据层
 class FoodRepository {
     
-    private val baseUrl = "http://localhost:8090/api"
+    private val baseUrl = "http://43.167.217.211:8090/api"
 
-    @Serializable
-    data class BaseResponse<T>(
-        val success: Boolean,
-        val data: T,
-        val message: String = ""
-    )
 
     private val json = Json {
         prettyPrint = true
@@ -98,14 +88,6 @@ class FoodRepository {
         Result.Error(e.message ?: "Unknown error")
     }
 
-    suspend fun fetchRecipes(): Result<List<Recipe>> = runCatching {
-        val res = httpClient.get("$baseUrl/recipe").body<BaseResponse<List<RecipeApiDto>>>()
-        if (res.success) Result.Success(res.data.map { it.toRecipe() }) else Result.Error(res.message.ifBlank { "请求失败" })
-    }.getOrElse { e ->
-        println("Network request failed: ${e.message}")
-        Result.Error(e.message ?: "Unknown error")
-    }
-
     suspend fun fetchTasteRadar(): Result<Map<String, Float>> = runCatching {
         val res = httpClient.get("$baseUrl/taste-radar").body<BaseResponse<Map<String, Float>>>()
         if (res.success) Result.Success(res.data) else Result.Error(res.message.ifBlank { "请求失败" })
@@ -165,38 +147,14 @@ class FoodRepository {
         Result.Error(e.message ?: "Unknown error")
     }
 
-    private fun RecipeApiDto.toRecipe(): Recipe {
-        val parsedMealType = runCatching { MealType.valueOf(mealType) }
-            .getOrDefault(MealType.BREAKFAST)
 
-        val parsedIngredients = runCatching {
-            json.decodeFromString<List<RecipeDraftIngredient>>(ingredients)
-        }.getOrDefault(emptyList())
-
-        val parsedSteps = runCatching {
-            json.decodeFromString<List<String>>(steps)
-        }.getOrDefault(emptyList())
-
-        return Recipe(
-            id = id,
-            name = name,
-            ingredients = parsedIngredients,
-            steps = parsedSteps,
-            duration = duration,
-            difficulty = difficulty,
-            tag = tag,
-            mealType = parsedMealType,
-            imageUrl = sanitizeUrl(imageUrl),
-            submitter = submitter,
-            submitTime = submitTime
-        )
-    }
-
-    suspend fun getAllRecipe(): Result<List<Recipe>> = runCatching {
-        val res = httpClient.get("$baseUrl/recipe").body<BaseResponse<List<RecipeApiDto>>>()
-        if (res.success) Result.Success(res.data.map { it.toRecipe() }) else Result.Error(res.message.ifBlank { "请求失败" })
+    suspend fun getAllRecipe(): ResponseResult<List<RecipeMenu>> = runCatching {
+        val res = httpClient.get("$baseUrl/recipe").body<BaseResponse<List<RecipeMenu>>>()
+        print("****->getAllRecipe   ${res.data}")
+        if (res.success) ResponseResult.Success(res.data)
+        else ResponseResult.Error(res.message.ifBlank { "请求失败" })
     }.getOrElse { e ->
         println("Network request failed: ${e.message}")
-        Result.Error(e.message ?: "Unknown error")
+        ResponseResult.Error(e.message ?: "Unknown error")
     }
 }

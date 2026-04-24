@@ -29,18 +29,4 @@ enum class MealType(val title: String,name: String) {
     SNACK("宵夜","SNACK")
 }
 
-@Serializable
-data class Recipe(
-    val id: Int,
-    val name: String,
-    val duration: String,
-    val difficulty: String,
-    val tag: String,
-    val mealType: MealType,
-    val ingredients: List<RecipeDraftIngredient> = emptyList(),
-    val steps: List<String> = emptyList(),
-    val img: String? = null,
-    val imageUrl: String? = null,
-    val submitter: String? = null,
-    val submitTime: Long? = null
-)
+

@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.xg.project.data.model.ResponseResult
 import org.xg.project.data.repository.FoodRepository
 import org.xg.project.domain.Result
 
@@ -33,17 +34,20 @@ class RecipesViewModel(
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
             when (val result = repository.getAllRecipe()) {
-                is Result.Success -> {
+                is ResponseResult.Success -> {
                     _state.value = _state.value.copy(
                         isLoading = false,
                         allRecipes = result.data
                     )
                 }
-                is Result.Error -> {
+                is ResponseResult.Error -> {
                     _state.value = _state.value.copy(
                         isLoading = false,
                         error = result.message
                     )
+                }
+                else -> {
+
                 }
             }
         }

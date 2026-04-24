@@ -1,4 +1,4 @@
-package org.xg.project.data.repository
+package org.xg.project.data.model
 
 import kotlinx.serialization.Serializable
 
@@ -16,4 +16,3 @@ data class BaseResponse<T>(
     val data: T,
     val message: String = ""
 )
-
