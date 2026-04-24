@@ -25,9 +25,11 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 
 import org.koin.compose.viewmodel.koinViewModel
+import kotlinx.coroutines.flow.collectLatest
 import org.xg.project.domain.model.MealType
 import org.xg.project.domain.model.RecipeMenu
 import org.xg.project.presentation.recipes.RecipesIntent
+import org.xg.project.presentation.recipes.RecipesEffect
 import org.xg.project.presentation.recipes.RecipesViewModel
 
 @Composable
@@ -42,6 +44,21 @@ fun RecipesScreen(
     onSaveSuccess: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(Unit) {
+        viewModel.effect.collectLatest { effect ->
+            when (effect) {
+                is RecipesEffect.SaveSuccess -> onSaveSuccess()
+                is RecipesEffect.ShowError -> {
+                    snackbarHostState.showSnackbar(
+                        message = effect.message,
+                        duration = SnackbarDuration.Short
+                    )
+                }
+            }
+        }
+    }
 
     LaunchedEffect(refreshTrigger) {
         viewModel.handleIntent(RecipesIntent.LoadRecipes)
@@ -89,7 +106,6 @@ fun RecipesScreen(
                         onClick = {
                             if (state.selectedRecipeIds.isNotEmpty()) {
                                 viewModel.handleIntent(RecipesIntent.SaveSelections)
-                                onSaveSuccess()
                             } else {
                                 onNavigateToManualInput()
                             }
@@ -150,23 +166,60 @@ fun RecipesScreen(
                         .glassPanel(RoundedCornerShape(24.dp))
                         .fillMaxHeight()
                 ) {
-                    items(state.currentRecipes) { recipe ->
-                        RecipeCard(
-                            recipe = recipe,
-                            isSelected = recipe.id in state.selectedRecipeIds,
-                            onClick = { 
-                                if (isFromHome) {
-                                    viewModel.handleIntent(RecipesIntent.ToggleSelection(recipe.id))
-                                } else {
-                                    onNavigateToDetail(recipe.id.toString())
+                    if (state.error != null && state.currentRecipes.isEmpty()) {
+                        item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(32.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    text = "加载失败",
+                                    color = GlassStyle.TextPrimary,
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = state.error ?: "",
+                                    color = GlassStyle.TextSecondary,
+                                    fontSize = 14.sp
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Button(
+                                    onClick = { viewModel.handleIntent(RecipesIntent.LoadRecipes) },
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.24f))
+                                ) {
+                                    Text("重试", color = GlassStyle.TextPrimary)
                                 }
-                            },
-                            showSelectionBorder = isFromHome
-                        )
+                            }
+                        }
+                    } else {
+                        items(state.currentRecipes) { recipe ->
+                            RecipeCard(
+                                recipe = recipe,
+                                isSelected = recipe.id in state.selectedRecipeIds,
+                                onClick = { 
+                                    if (isFromHome) {
+                                        viewModel.handleIntent(RecipesIntent.ToggleSelection(recipe.id))
+                                    } else {
+                                        onNavigateToDetail(recipe.id.toString())
+                                    }
+                                },
+                                showSelectionBorder = isFromHome
+                            )
+                        }
                     }
                 }
             }
         }
+        
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
     }
 }
 

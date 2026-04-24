@@ -20,3 +20,8 @@ sealed class RecipesIntent {
     data class ToggleSelection(val recipeId: Int) : RecipesIntent()
     object SaveSelections : RecipesIntent()
 }
+
+sealed interface RecipesEffect {
+    object SaveSuccess : RecipesEffect()
+    data class ShowError(val message: String) : RecipesEffect()
+}
