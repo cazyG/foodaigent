@@ -27,17 +27,10 @@ class FoodRepository {
     
     private val baseUrl = "http://localhost:8090/api"
 
-    /**
-     * 说明：
-     * - 实际运行时后端可能没有启动/接口可能返回非 JSON（例如 404 HTML），这会导致 Ktor 在调用 body<T>() 时抛出 NoTransformationFoundException。
-     * - 同时在部分环境下，泛型的 BaseResponse<T> 反序列化可能出现 “Serializer not found” 的问题。
-     *
-     * 因此这里统一用 JsonElement 先接住，再把 data 转成目标类型，避免因为响应头/序列化导致运行时报错。
-     */
     @Serializable
-    private data class BaseResponseJson(
+    data class BaseResponse<T>(
         val success: Boolean,
-        val data: JsonElement? = null,
+        val data: T,
         val message: String = ""
     )
 
@@ -45,11 +38,6 @@ class FoodRepository {
         prettyPrint = true
         isLenient = true
         ignoreUnknownKeys = true
-    }
-
-    private inline fun <reified T> BaseResponseJson.decodeData(): T {
-        val element = data ?: JsonNull
-        return json.decodeFromJsonElement<T>(element)
     }
 
     /**
@@ -102,26 +90,28 @@ class FoodRepository {
         )
     }
 
-    suspend fun fetchDailyRecords(): Result<List<DailyMenuRecord>> {
-        @Suppress("UNCHECKED_CAST")
-        return safeApiCall<List<DailyMenuRecord>>(
-            apiCall = { httpClient.get("$baseUrl/daily-records") }
-        ) as Result<List<DailyMenuRecord>>
+    suspend fun fetchDailyRecords(): Result<List<DailyMenuRecord>> = runCatching {
+        val res = httpClient.get("$baseUrl/daily-records").body<BaseResponse<List<DailyMenuRecord>>>()
+        if (res.success) Result.Success(res.data) else Result.Error(res.message.ifBlank { "请求失败" })
+    }.getOrElse { e ->
+        println("Network request failed: ${e.message}")
+        Result.Error(e.message ?: "Unknown error")
     }
 
-    suspend fun fetchRecipes(): Result<List<Recipe>> {
-        @Suppress("UNCHECKED_CAST")
-        return safeApiCall<List<RecipeApiDto>>(
-            apiCall = { httpClient.get("$baseUrl/recipe") },
-            mapData = { list -> list.map { it.toRecipe() } }
-        ) as Result<List<Recipe>>
+    suspend fun fetchRecipes(): Result<List<Recipe>> = runCatching {
+        val res = httpClient.get("$baseUrl/recipe").body<BaseResponse<List<RecipeApiDto>>>()
+        if (res.success) Result.Success(res.data.map { it.toRecipe() }) else Result.Error(res.message.ifBlank { "请求失败" })
+    }.getOrElse { e ->
+        println("Network request failed: ${e.message}")
+        Result.Error(e.message ?: "Unknown error")
     }
 
-    suspend fun fetchTasteRadar(): Result<Map<String, Float>> {
-        @Suppress("UNCHECKED_CAST")
-        return safeApiCall<Map<String, Float>>(
-            apiCall = { httpClient.get("$baseUrl/taste-radar") }
-        ) as Result<Map<String, Float>>
+    suspend fun fetchTasteRadar(): Result<Map<String, Float>> = runCatching {
+        val res = httpClient.get("$baseUrl/taste-radar").body<BaseResponse<Map<String, Float>>>()
+        if (res.success) Result.Success(res.data) else Result.Error(res.message.ifBlank { "请求失败" })
+    }.getOrElse { e ->
+        println("Network request failed: ${e.message}")
+        Result.Error(e.message ?: "Unknown error")
     }
 
 
@@ -163,16 +153,16 @@ class FoodRepository {
         )
     }
 
-    suspend fun createRecipe(recipeDraft: RecipeDraft): Result<CreateRecipeResponse> {
-        @Suppress("UNCHECKED_CAST")
-        return safeApiCall<CreateRecipeResponse>(
-            apiCall = {
-                httpClient.post("$baseUrl/recipe") {
-                    contentType(ContentType.Application.Json)
-                    setBody(recipeDraft.toCreateRecipeRequest())
-                }
-            }
-        ) as Result<CreateRecipeResponse>
+    suspend fun createRecipe(recipeDraft: RecipeDraft): Result<CreateRecipeResponse> = runCatching {
+        val request = recipeDraft.toCreateRecipeRequest()
+        val res = httpClient.post("$baseUrl/recipe") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body<BaseResponse<CreateRecipeResponse>>()
+        if (res.success) Result.Success(res.data) else Result.Error(res.message.ifBlank { "请求失败" })
+    }.getOrElse { e ->
+        println("Network request failed: ${e.message}")
+        Result.Error(e.message ?: "Unknown error")
     }
 
     private fun RecipeApiDto.toRecipe(): Recipe {
@@ -202,34 +192,11 @@ class FoodRepository {
         )
     }
 
-    private suspend inline fun <reified T> safeApiCall(
-        apiCall: () -> io.ktor.client.statement.HttpResponse,
-        crossinline mapData: (T) -> Any = { it as Any }
-    ): Result<Any> {
-        return runCatching {
-            val httpResponse = apiCall()
-            if (!httpResponse.status.isSuccess()) {
-                val text = httpResponse.bodyAsText()
-                Result.Error("接口请求失败：HTTP ${httpResponse.status.value} ${httpResponse.status.description}. 响应：$text")
-            } else {
-                val wrapper = httpResponse.body<BaseResponseJson>()
-                if (wrapper.success) {
-                    Result.Success(mapData(wrapper.decodeData<T>()))
-                } else {
-                    Result.Error(wrapper.message.ifBlank { "请求失败" })
-                }
-            }
-        }.getOrElse { e ->
-            println("Network request failed: ${e.message}")
-            Result.Error(e.message ?: "Unknown error")
-        }
-    }
-
-    suspend fun getAllRecipe(): Result<List<Recipe>> {
-        @Suppress("UNCHECKED_CAST")
-        return safeApiCall<List<RecipeApiDto>>(
-            apiCall = { httpClient.get("$baseUrl/recipe") },
-            mapData = { list -> list.map { it.toRecipe() } }
-        ) as Result<List<Recipe>>
+    suspend fun getAllRecipe(): Result<List<Recipe>> = runCatching {
+        val res = httpClient.get("$baseUrl/recipe").body<BaseResponse<List<RecipeApiDto>>>()
+        if (res.success) Result.Success(res.data.map { it.toRecipe() }) else Result.Error(res.message.ifBlank { "请求失败" })
+    }.getOrElse { e ->
+        println("Network request failed: ${e.message}")
+        Result.Error(e.message ?: "Unknown error")
     }
 }
