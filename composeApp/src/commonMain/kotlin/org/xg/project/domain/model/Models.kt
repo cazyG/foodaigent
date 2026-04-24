@@ -37,6 +37,10 @@ data class Recipe(
     val difficulty: String,
     val tag: String,
     val mealType: MealType,
+    val ingredients: List<RecipeDraftIngredient> = emptyList(),
+    val steps: List<String> = emptyList(),
     val img: String? = null,
-    val imageUrl: String? = null
+    val imageUrl: String? = null,
+    val submitter: String? = null,
+    val submitTime: Long? = null
 )

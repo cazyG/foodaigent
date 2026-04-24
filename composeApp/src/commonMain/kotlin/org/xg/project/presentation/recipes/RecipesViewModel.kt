@@ -67,7 +67,7 @@ class RecipesViewModel(
     }
 
     private fun saveSelections() {
-        val selectedRecipes = _state.value.allRecipes.filter { it.name in _state.value.selectedRecipeIds }
+        val selectedRecipes = _state.value.allRecipes.filter { it.id in _state.value.selectedRecipeIds }
         println("保存选中食谱: ${selectedRecipes.joinToString { it.name }}")
         _state.value = _state.value.copy(selectedRecipeIds = emptySet())
     }

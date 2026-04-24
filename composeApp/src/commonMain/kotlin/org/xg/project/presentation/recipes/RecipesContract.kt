@@ -6,18 +6,18 @@ import org.xg.project.domain.model.RecipeDraft
 
 data class RecipesState(
     val isLoading: Boolean = false,
-    val allRecipes: List<RecipeDraft> = emptyList(),
+    val allRecipes: List<Recipe> = emptyList(),
     val selectedMealType: MealType = MealType.BREAKFAST,
-    val selectedRecipeIds: Set<String> = emptySet(),
+    val selectedRecipeIds: Set<Int> = emptySet(),
     val error: String? = null
 ) {
-    val currentRecipes: List<RecipeDraft>
+    val currentRecipes: List<Recipe>
         get() = allRecipes.filter { it.mealType == selectedMealType }
 }
 
 sealed class RecipesIntent {
     object LoadRecipes : RecipesIntent()
     data class ChangeMealType(val mealType: MealType) : RecipesIntent()
-    data class ToggleSelection(val recipeId: String) : RecipesIntent()
+    data class ToggleSelection(val recipeId: Int) : RecipesIntent()
     object SaveSelections : RecipesIntent()
 }

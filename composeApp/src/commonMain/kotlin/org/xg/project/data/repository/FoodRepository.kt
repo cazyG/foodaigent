@@ -229,7 +229,34 @@ class FoodRepository {
         }
     }
 
-    suspend fun getAllRecipe(): Result<List<RecipeDraft>> {
+    private fun RecipeApiDto.toRecipe(): Recipe {
+        val parsedMealType = runCatching { MealType.valueOf(mealType) }
+            .getOrDefault(MealType.BREAKFAST)
+
+        val parsedIngredients = runCatching {
+            json.decodeFromString<List<RecipeDraftIngredient>>(ingredients)
+        }.getOrDefault(emptyList())
+
+        val parsedSteps = runCatching {
+            json.decodeFromString<List<String>>(steps)
+        }.getOrDefault(emptyList())
+
+        return Recipe(
+            id = id,
+            name = name,
+            ingredients = parsedIngredients,
+            steps = parsedSteps,
+            duration = duration,
+            difficulty = difficulty,
+            tag = tag,
+            mealType = parsedMealType,
+            imageUrl = sanitizeUrl(imageUrl),
+            submitter = submitter,
+            submitTime = submitTime
+        )
+    }
+
+    suspend fun getAllRecipe(): Result<List<Recipe>> {
         return try {
             val httpResponse = httpClient.get("$baseUrl/recipe")
             if (!httpResponse.status.isSuccess()) {
@@ -239,7 +266,7 @@ class FoodRepository {
                 val wrapper = httpResponse.body<BaseResponseJson>()
                 if (wrapper.success) {
                     val apiList = wrapper.decodeData<List<RecipeApiDto>>()
-                    Result.Success(apiList.map { it.toRecipeDraft() })
+                    Result.Success(apiList.map { it.toRecipe() })
                 } else {
                     Result.Error(wrapper.message.ifBlank { "请求失败" })
                 }

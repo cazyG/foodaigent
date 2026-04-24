@@ -27,7 +27,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import org.koin.compose.viewmodel.koinViewModel
 import org.xg.project.domain.model.MealType
 import org.xg.project.domain.model.Recipe
-import org.xg.project.domain.model.RecipeDraft
 import org.xg.project.presentation.recipes.RecipesIntent
 import org.xg.project.presentation.recipes.RecipesViewModel
 
@@ -154,12 +153,12 @@ fun RecipesScreen(
                     items(state.currentRecipes) { recipe ->
                         RecipeCard(
                             recipe = recipe,
-                            isSelected = recipe.name in state.selectedRecipeIds,
+                            isSelected = recipe.id in state.selectedRecipeIds,
                             onClick = { 
                                 if (isFromHome) {
-                                    viewModel.handleIntent(RecipesIntent.ToggleSelection(recipe.name))
+                                    viewModel.handleIntent(RecipesIntent.ToggleSelection(recipe.id))
                                 } else {
-                                    onNavigateToDetail(recipe.name)
+                                    onNavigateToDetail(recipe.id.toString())
                                 }
                             },
                             showSelectionBorder = isFromHome
@@ -173,7 +172,7 @@ fun RecipesScreen(
 
 @Composable
 fun RecipeCard(
-    recipe: RecipeDraft,
+    recipe: Recipe,
     isSelected: Boolean,
     onClick: () -> Unit,
     showSelectionBorder: Boolean = false
@@ -205,8 +204,7 @@ fun RecipeCard(
                 .background(Color.White.copy(alpha = 0.15f))
         ) {
             // 底层：图片
-            // RecipeDraft 只有 imageUrl 字段（没有 img）
-            val displayImg = recipe.imageUrl
+            val displayImg = recipe.img ?: recipe.imageUrl
             if (displayImg != null) {
                 AsyncImage(
                     model = displayImg,
