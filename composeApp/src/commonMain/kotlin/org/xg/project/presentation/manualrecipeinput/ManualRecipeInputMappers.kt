@@ -19,7 +19,8 @@ fun ManualRecipeInputState.toRecipeDraft(): RecipeDraft {
         duration = "${durationMinutes}分钟",
         difficulty = "${difficultyStars}星",
         tag = tag.trim(),
-        mealType = safeMealType,
-        imageUrl = uploadedImageUrl
+        mealType = safeMealType.name,
+        imageUrl = uploadedImageUrl,
+        submitter = "admin"
     )
 }

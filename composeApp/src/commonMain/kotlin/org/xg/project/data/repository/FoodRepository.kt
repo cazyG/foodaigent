@@ -45,38 +45,10 @@ class FoodRepository {
         val recipeId: Int
     )
 
-    @Serializable
-    data class CreateRecipeRequest(
-        val name: String,
-        val ingredients: String,
-        val steps: String,
-        val duration: String,
-        val difficulty: String,
-        val tag: String,
-        val mealType: String,
-        val imageUrl: String?,
-        val submitter: String?,
-    )
-
-    private fun RecipeDraft.toCreateRecipeRequest(): CreateRecipeRequest {
-        return CreateRecipeRequest(
-            name = name,
-            ingredients = Json.encodeToString(ingredients),
-            steps = Json.encodeToString(steps),
-            duration = duration,
-            difficulty = difficulty,
-            tag = tag,
-            mealType = mealType.name,
-            imageUrl = imageUrl,
-            submitter = "admin"
-        )
-    }
-
     suspend fun createRecipe(recipeDraft: RecipeDraft): Result<CreateRecipeResponse> = runCatching {
-        val request = recipeDraft.toCreateRecipeRequest()
         val res = httpClient.post("$baseUrl/recipe") {
             contentType(ContentType.Application.Json)
-            setBody(request)
+            setBody(recipeDraft)
         }.body<BaseResponse<CreateRecipeResponse>>()
         if (res.success) Result.Success(res.data) else Result.Error(res.message.ifBlank { "请求失败" })
     }.getOrElse { e ->
