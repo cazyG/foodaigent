@@ -16,16 +16,16 @@ data class RecipeMenu(
     val difficulty: String,
     val tag: String,
     val mealType: MealType,
-    @Serializable(with = IngredientsSerializer::class)
+    @Serializable(with = RecipeMenuIngredientsSerializer::class)
     val ingredients: List<RecipeMenuIngredients> = emptyList(),
-    @Serializable(with = StepsSerializer::class)
+    @Serializable(with = RecipeMenuStepsSerializer::class)
     val steps: List<String> = emptyList(),
     val img: String? = null,
     val imageUrl: String? = null,
     val submitter: String? = null,
     val submitTime: Long? = null
 ){
-    object IngredientsSerializer : KSerializer<List<RecipeDraftIngredient>> {
+    object RecipeMenuIngredientsSerializer : KSerializer<List<RecipeDraftIngredient>> {
         override val descriptor: SerialDescriptor = Json
             .serializersModule
             .serializer<List<RecipeDraftIngredient>>()
@@ -46,7 +46,7 @@ data class RecipeMenu(
         }
     }
 
-    object StepsSerializer : KSerializer<List<String>> {
+    object RecipeMenuStepsSerializer : KSerializer<List<String>> {
         override val descriptor: SerialDescriptor = Json
             .serializersModule
             .serializer<List<String>>()
