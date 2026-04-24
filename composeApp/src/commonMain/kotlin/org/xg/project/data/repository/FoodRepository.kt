@@ -206,7 +206,7 @@ class FoodRepository {
         apiCall: () -> io.ktor.client.statement.HttpResponse,
         crossinline mapData: (T) -> Any = { it as Any }
     ): Result<Any> {
-        return try {
+        return runCatching {
             val httpResponse = apiCall()
             if (!httpResponse.status.isSuccess()) {
                 val text = httpResponse.bodyAsText()
@@ -219,7 +219,7 @@ class FoodRepository {
                     Result.Error(wrapper.message.ifBlank { "请求失败" })
                 }
             }
-        } catch (e: Exception) {
+        }.getOrElse { e ->
             println("Network request failed: ${e.message}")
             Result.Error(e.message ?: "Unknown error")
         }
