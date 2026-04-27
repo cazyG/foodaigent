@@ -3,24 +3,22 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
     repositories {
-        google()
+        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
         mavenCentral()
         gradlePluginPortal()
-        maven("https://maven.aliyun.com/repository/google")
-        maven("https://maven.aliyun.com/repository/gradle-plugin")
         maven("https://maven.aliyun.com/repository/public")
-        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+        maven("https://maven.aliyun.com/repository/gradle-plugin")
+        maven("https://maven.aliyun.com/repository/google")
     }
 }
 
 dependencyResolutionManagement {
     repositories {
-        google()
+        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
         mavenCentral()
+        maven("https://maven.aliyun.com/repository/public")
         maven("https://jitpack.io")
         maven("https://maven.aliyun.com/repository/google")
-        maven("https://maven.aliyun.com/repository/public")
-        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     }
 }
 
