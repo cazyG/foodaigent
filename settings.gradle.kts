@@ -1,4 +1,4 @@
-rootProject.name = "锅铲黄炒"
+rootProject.name = "aigent"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
