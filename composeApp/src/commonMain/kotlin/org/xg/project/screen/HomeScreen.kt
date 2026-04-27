@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -42,10 +43,8 @@ import org.xg.project.domain.model.MenuItemData
 import org.xg.project.domain.model.MealType
 import org.xg.project.presentation.index.IndexViewModel
 import org.xg.project.presentation.index.IndexIntent
-
-import androidx.compose.ui.mediaQuery
 import androidx.compose.ui.ExperimentalMediaQueryApi
-import androidx.window.core.layout.WindowWidthSizeClass
+import androidx.compose.ui.mediaQuery
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMediaQueryApi::class)
 @Composable
@@ -159,7 +158,7 @@ fun HomeScreen(
 }
 
 // 带标题和网格的菜单区块，支持空状态和点击添加计划
-@OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class, ExperimentalMediaQueryApi::class)
 @Composable
 fun MenuSection(
     title: String,
@@ -224,15 +223,16 @@ fun MenuSection(
             }
         } else {
             // 有菜单：显示网格列表
-            BoxWithConstraints(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 12.dp, vertical = 4.dp)
             ) {
                 // 根据 MediaQuery 动态计算列数
-                val isCompact = mediaQuery { windowSize.widthSizeClass == WindowWidthSizeClass.COMPACT }
-                val isMedium = mediaQuery { windowSize.widthSizeClass == WindowWidthSizeClass.MEDIUM }
+                val isCompact = mediaQuery { windowSize.width < 600.dp }
+                val isMedium = mediaQuery { windowSize.width >= 600.dp && windowSize.width < 840.dp }
                 val columns = if (isCompact) 2 else if (isMedium) 3 else 4
+                val maxWidth = mediaQuery { windowSize.width }
                 val itemWidth = (maxWidth - (12.dp * (columns - 1))) / columns
                 
                 FlowRow(

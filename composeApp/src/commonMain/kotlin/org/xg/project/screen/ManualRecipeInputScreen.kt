@@ -77,9 +77,8 @@ import org.xg.project.domain.model.MealType
 import org.xg.project.presentation.manualrecipeinput.ManualRecipeInputIntent
 import org.xg.project.presentation.manualrecipeinput.ManualRecipeInputUiEvent
 import org.xg.project.presentation.manualrecipeinput.ManualRecipeInputViewModel
-import androidx.compose.ui.mediaQuery
 import androidx.compose.ui.ExperimentalMediaQueryApi
-import androidx.window.core.layout.WindowWidthSizeClass
+import androidx.compose.ui.mediaQuery
 
 private val GlassBlue = Color(0xFF95B6FF)
 private val GlassBlueDark = Color(0xFF89A7FF)
@@ -368,8 +367,8 @@ fun ManualRecipeInputScreen(
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
 
-                        Box(modifier = Modifier.fillMaxWidth()) {
-                            val isWideScreen = mediaQuery { windowSize.widthSizeClass != WindowWidthSizeClass.COMPACT }
+                        Box(modifier = Modifier.fillMaxWidth()) { // Container for meal types
+                            val isWideScreen = mediaQuery { windowSize.width >= 520.dp }
                             val columns = if (isWideScreen) 4 else 2
                             val mealTypeRows = MealType.entries.chunked(columns)
 

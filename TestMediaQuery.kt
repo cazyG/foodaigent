@@ -5,6 +5,6 @@ import androidx.compose.ui.ExperimentalMediaQueryApi
 @OptIn(ExperimentalMediaQueryApi::class)
 fun test() {
     mediaQuery {
-        val a = windowSize.widthSizeClass
+        val a = windowSize
     }
 }

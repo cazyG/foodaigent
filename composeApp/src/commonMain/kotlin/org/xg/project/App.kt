@@ -6,7 +6,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -26,7 +26,6 @@ import androidx.compose.ui.ExperimentalMediaQueryApi
 import androidx.compose.ui.UiMediaScope
 import androidx.compose.ui.ComposeUiFlags
 import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.window.core.layout.WindowWidthSizeClass
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import coil3.ImageLoader
@@ -167,7 +166,7 @@ private fun HomeNavDisplay(
                     end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY))
             ),
     ){
-        val isWideScreen = mediaQuery { windowSize.widthSizeClass != WindowWidthSizeClass.COMPACT }
+        val isWideScreen = mediaQuery { windowSize.width >= 600.dp }
 
         Scaffold(
             modifier = Modifier,
