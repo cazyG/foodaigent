@@ -1,11 +1,13 @@
 package org.xg.project
 
-import androidx.compose.ui.res.painterResource
+import aigent.composeapp.generated.resources.Res
+import aigent.composeapp.generated.resources.app_icon
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.painterResource
 
 fun main() = application {
     val windowState = rememberWindowState(
@@ -17,7 +19,7 @@ fun main() = application {
     Window(
         onCloseRequest = ::exitApplication,
         title = "锅铲黄炒",
-        icon = painterResource("app_icon.png"),
+        icon = painterResource(Res.drawable.app_icon),
         state = windowState
     ) {
         App()
