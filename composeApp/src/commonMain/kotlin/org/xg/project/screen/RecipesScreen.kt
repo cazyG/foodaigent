@@ -272,7 +272,7 @@ fun RecipeCard(
                 Box(
                     modifier = Modifier
                         .padding(6.dp)
-                        .background(Color.White.copy(alpha = 0.38f), RoundedCornerShape(8.dp))
+                        .background(Color.White.copy(alpha = 0.85f), RoundedCornerShape(8.dp))
                         .align(Alignment.TopEnd)
                 ) {
                     Text(
@@ -293,11 +293,12 @@ fun RecipeCard(
                         Brush.verticalGradient(
                             colors = listOf(
                                 Color.Transparent,
-                                Color.White.copy(alpha = 0.36f)
+                                Color.White.copy(alpha = 0.7f),
+                                Color.White.copy(alpha = 0.95f)
                             )
                         )
                     )
-                    .padding(8.dp)
+                    .padding(horizontal = 8.dp, bottom = 8.dp, top = 24.dp)
             ) {
                 Text(
                     recipe.name,
