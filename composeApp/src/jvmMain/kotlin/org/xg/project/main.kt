@@ -1,5 +1,6 @@
 package org.xg.project
 
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
@@ -15,7 +16,8 @@ fun main() = application {
 
     Window(
         onCloseRequest = ::exitApplication,
-        title = "aigent",
+        title = "锅铲黄炒",
+        icon = painterResource("app_icon.png"),
         state = windowState
     ) {
         App()
