@@ -47,6 +47,8 @@ import coil3.compose.AsyncImage
 import org.koin.compose.viewmodel.koinViewModel
 import org.xg.project.presentation.profile.ProfileViewModel
 import androidx.compose.material3.Scaffold
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 
 @Composable
 fun ProfileScreen(
@@ -56,7 +58,13 @@ fun ProfileScreen(
     val scrollState = rememberScrollState()
 
     Box(
-        modifier = Modifier.fillMaxSize().background(GlassStyle.BgGradient),
+        modifier = Modifier.fillMaxSize().background(
+            Brush.linearGradient(
+                colors = listOf(Color(0xFFD9CA8F), Color(0xFFD7ECF6)),
+                start = Offset(0f, 0f),
+                end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
+            )
+        ),
         contentAlignment = Alignment.TopCenter
     ) {
         Column(
@@ -131,73 +139,73 @@ fun UserInfoCard(
     ) {
         GlassHighlight {
             Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // 头像
-            Box(
                 modifier = Modifier
-                    .size(70.dp)
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.16f))
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                if (avatarUrl != null) {
-                    AsyncImage(
-                        model = avatarUrl,
-                        contentDescription = "用户头像",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+                // 头像
+                Box(
+                    modifier = Modifier
+                        .size(70.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.16f))
+                ) {
+                    if (avatarUrl != null) {
+                        AsyncImage(
+                            model = avatarUrl,
+                            contentDescription = "用户头像",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp),
+                            tint = Color(0xFF9CA3AF)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                // 昵称和简介
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = name,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = GlassStyle.TextPrimary
                     )
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        tint = Color(0xFF9CA3AF)
+                    Text(
+                        text = bio,
+                        fontSize = 13.sp,
+                        color = GlassStyle.TextSecondary,
+                        modifier = Modifier.padding(top = 4.dp)
                     )
                 }
-            }
 
-            Spacer(modifier = Modifier.width(16.dp))
-
-            // 昵称和简介
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = name,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = GlassStyle.TextPrimary
-                )
-                Text(
-                    text = bio,
-                    fontSize = 13.sp,
-                    color = GlassStyle.TextSecondary,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
+                // 编辑按钮
+                Button(
+                    onClick = onEditClick,
+                    shape = RoundedCornerShape(24.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White.copy(alpha = 0.18f),
+                        contentColor = GlassStyle.TextPrimary
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "编辑",
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("编辑", fontSize = 13.sp)
+                }
             }
-
-            // 编辑按钮
-            Button(
-                onClick = onEditClick,
-                shape = RoundedCornerShape(24.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White.copy(alpha = 0.18f),
-                    contentColor = GlassStyle.TextPrimary
-                )
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Edit,
-                    contentDescription = "编辑",
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text("编辑", fontSize = 13.sp)
-            }
-        }
         }
     }
 }

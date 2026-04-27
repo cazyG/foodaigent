@@ -23,6 +23,7 @@ import coil3.compose.AsyncImage
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.ui.geometry.Offset
 
 import org.koin.compose.viewmodel.koinViewModel
 import kotlinx.coroutines.flow.collectLatest
@@ -73,9 +74,15 @@ fun RecipesScreen(
             }
         }
     }
-    
+
     Box(
-        modifier = Modifier.fillMaxSize().background(GlassStyle.BgGradient)
+        modifier = Modifier.fillMaxSize().background(
+            Brush.linearGradient(
+                colors = listOf(Color(0xFFD9CA8F), Color(0xFFD7ECF6)),
+                start = Offset(0f, 0f),
+                end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
+            )
+        ),
     ) {
         if (state.isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -97,11 +104,18 @@ fun RecipesScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "食谱灵感库", modifier = Modifier.padding(start = if (isFromHome) 0.dp else 10.dp), fontWeight = FontWeight.Bold, fontSize = 22.sp, color = GlassStyle.TextPrimary)
+                    Text(
+                        text = "食谱灵感库",
+                        modifier = Modifier.padding(start = if (isFromHome) 0.dp else 10.dp),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 22.sp,
+                        color = GlassStyle.TextPrimary
+                    )
                 }
 
                 if (isFromHome) {
-                    val buttonText = if (state.selectedRecipeIds.isNotEmpty()) "保存" else "+ 手动录入"
+                    val buttonText =
+                        if (state.selectedRecipeIds.isNotEmpty()) "保存" else "+ 手动录入"
                     Button(
                         onClick = {
                             if (state.selectedRecipeIds.isNotEmpty()) {
@@ -148,7 +162,9 @@ fun RecipesScreen(
                                 .fillMaxWidth()
                                 .padding(horizontal = 2.dp, vertical = 6.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (isSelected) Color.White.copy(alpha = 0.28f) else Color.White.copy(alpha = 0.16f),
+                                containerColor = if (isSelected) Color.White.copy(alpha = 0.28f) else Color.White.copy(
+                                    alpha = 0.16f
+                                ),
                                 contentColor = if (isSelected) GlassStyle.TextPrimary else GlassStyle.TextSecondary
                             ),
                             shape = RoundedCornerShape(16.dp)
@@ -190,7 +206,11 @@ fun RecipesScreen(
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Button(
                                     onClick = { viewModel.handleIntent(RecipesIntent.LoadRecipes) },
-                                    colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.24f))
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color.White.copy(
+                                            alpha = 0.24f
+                                        )
+                                    )
                                 ) {
                                     Text("重试", color = GlassStyle.TextPrimary)
                                 }
@@ -201,7 +221,7 @@ fun RecipesScreen(
                             RecipeCard(
                                 recipe = recipe,
                                 isSelected = recipe.id in state.selectedRecipeIds,
-                                onClick = { 
+                                onClick = {
                                     if (isFromHome) {
                                         viewModel.handleIntent(RecipesIntent.ToggleSelection(recipe.id))
                                     } else {
@@ -215,7 +235,7 @@ fun RecipesScreen(
                 }
             }
         }
-        
+
         SnackbarHost(
             hostState = snackbarHostState,
             modifier = Modifier.align(Alignment.BottomCenter)
@@ -298,7 +318,7 @@ fun RecipeCard(
                             )
                         )
                     )
-                    .padding(horizontal = 8.dp, bottom = 8.dp, top = 24.dp)
+                    .padding(start = 8.dp, end = 8.dp, bottom = 8.dp, top = 24.dp)
             ) {
                 Text(
                     recipe.name,
@@ -309,7 +329,11 @@ fun RecipeCard(
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(recipe.duration, fontSize = 10.sp, color = GlassStyle.TextSecondary)
-                    Text(" | ", fontSize = 10.sp, color = GlassStyle.TextSecondary.copy(alpha = 0.6f))
+                    Text(
+                        " | ",
+                        fontSize = 10.sp,
+                        color = GlassStyle.TextSecondary.copy(alpha = 0.6f)
+                    )
                     Text(recipe.difficulty, fontSize = 10.sp, color = GlassStyle.TextPrimary)
                 }
             }

@@ -5,6 +5,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -15,6 +16,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
@@ -145,10 +150,18 @@ private fun HomeNavDisplay(
         Unit
     }
 
-    BoxWithConstraints {
+    BoxWithConstraints (
+        modifier = Modifier
+            .background(
+                Brush.linearGradient(colors = listOf(Color(0xFFD9CA8F),Color(0xFFD7ECF6)),
+                    start = Offset(0f, 0f),
+                    end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY))
+            ),
+    ){
         val isWideScreen = maxWidth >= 600.dp
 
         Scaffold(
+            modifier = Modifier,
             bottomBar = {
                 if (!isWideScreen) {
                     BottomTabBar(
@@ -157,7 +170,7 @@ private fun HomeNavDisplay(
                     )
                 }
             },
-            containerColor = androidx.compose.ui.graphics.Color.Transparent
+            containerColor = Transparent
         ) { innerPadding ->
             Row(modifier = Modifier.padding(innerPadding)) {
                 if (isWideScreen) {

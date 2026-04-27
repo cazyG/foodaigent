@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -82,8 +83,10 @@ fun RecipeDetailScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                Brush.verticalGradient(
-                    colors = listOf(GlassBgTop, GlassBgBottom)
+                Brush.linearGradient(
+                    colors = listOf(Color(0xFFD9CA8F), Color(0xFFD7ECF6)),
+                    start = Offset(0f, 0f),
+                    end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
                 )
             ),
         topBar = {
@@ -190,7 +193,10 @@ fun RecipeDetailScreen(
                         if (recipe.tag.isNotEmpty()) {
                             Box(
                                 modifier = Modifier
-                                    .background(Color.White.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
+                                    .background(
+                                        Color.White.copy(alpha = 0.4f),
+                                        RoundedCornerShape(8.dp)
+                                    )
                                     .padding(horizontal = 8.dp, vertical = 4.dp)
                             ) {
                                 Text(
@@ -225,7 +231,10 @@ fun RecipeDetailScreen(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(Color.White.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
+                                .background(
+                                    Color.White.copy(alpha = 0.1f),
+                                    RoundedCornerShape(12.dp)
+                                )
                                 .border(1.dp, GlassStroke, RoundedCornerShape(12.dp))
                                 .padding(12.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -235,8 +244,17 @@ fun RecipeDetailScreen(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Text(ingredient.name, color = GlassText, fontSize = BodyTextSize)
-                                    Text(ingredient.quantity, color = GlassText, fontSize = BodyTextSize, fontWeight = FontWeight.Medium)
+                                    Text(
+                                        ingredient.name,
+                                        color = GlassText,
+                                        fontSize = BodyTextSize
+                                    )
+                                    Text(
+                                        ingredient.quantity,
+                                        color = GlassText,
+                                        fontSize = BodyTextSize,
+                                        fontWeight = FontWeight.Medium
+                                    )
                                 }
                                 Divider(color = GlassStroke.copy(alpha = 0.3f), thickness = 1.dp)
                             }
@@ -258,7 +276,10 @@ fun RecipeDetailScreen(
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .background(Color.White.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
+                                        .background(
+                                            Color.White.copy(alpha = 0.1f),
+                                            RoundedCornerShape(12.dp)
+                                        )
                                         .border(1.dp, GlassStroke, RoundedCornerShape(12.dp))
                                         .padding(12.dp),
                                     verticalAlignment = Alignment.Top
@@ -266,13 +287,26 @@ fun RecipeDetailScreen(
                                     Box(
                                         modifier = Modifier
                                             .size(24.dp)
-                                            .background(Color(0xFFF59E42).copy(alpha = 0.8f), RoundedCornerShape(12.dp)),
+                                            .background(
+                                                Color(0xFFF59E42).copy(alpha = 0.8f),
+                                                RoundedCornerShape(12.dp)
+                                            ),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        Text("${index + 1}", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                        Text(
+                                            "${index + 1}",
+                                            color = Color.White,
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
                                     }
                                     Spacer(modifier = Modifier.width(12.dp))
-                                    Text(step, color = GlassText, fontSize = BodyTextSize, lineHeight = 20.sp)
+                                    Text(
+                                        step,
+                                        color = GlassText,
+                                        fontSize = BodyTextSize,
+                                        lineHeight = 20.sp
+                                    )
                                 }
                             }
                         }

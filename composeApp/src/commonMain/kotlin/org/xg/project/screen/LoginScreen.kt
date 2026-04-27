@@ -9,6 +9,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -23,7 +25,14 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
 
     Scaffold(
-        modifier = Modifier.fillMaxSize().background(GlassStyle.BgGradient),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.linearGradient(colors = listOf(Color(0xFFD9CA8F),Color(0xFFD7ECF6)),
+                    start = Offset(0f, 0f),
+                    end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY))
+            ),
+//        modifier = Modifier.fillMaxSize().background(GlassStyle.BgGradient),
         containerColor = Color.Transparent
     ) { innerPadding ->
         Box(
