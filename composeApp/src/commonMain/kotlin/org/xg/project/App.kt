@@ -21,6 +21,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.mediaQuery
+import androidx.compose.ui.ExperimentalMediaQueryApi
+import androidx.compose.ui.UiMediaScope
+import androidx.compose.ui.ComposeUiFlags
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.window.core.layout.WindowWidthSizeClass
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import coil3.ImageLoader
@@ -43,8 +49,10 @@ import org.xg.project.screen.RecipesScreen
 import org.xg.project.screen.RecipeDetailScreen
 import org.xg.project.screen.LoginScreen
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun App() {
+    ComposeUiFlags.isMediaQueryIntegrationEnabled = true
     // Coil3 初始化网络请求组件
     setSingletonImageLoaderFactory { context ->
         ImageLoader.Builder(context)
@@ -126,6 +134,7 @@ fun App() {
         })
 }
 
+@OptIn(ExperimentalMediaQueryApi::class)
 @Composable
 private fun HomeNavDisplay(
     onNavigateToManualInput: () -> Unit,
@@ -150,7 +159,7 @@ private fun HomeNavDisplay(
         Unit
     }
 
-    BoxWithConstraints (
+    Box(
         modifier = Modifier
             .background(
                 Brush.linearGradient(colors = listOf(Color(0xFFD9CA8F),Color(0xFFD7ECF6)),
@@ -158,7 +167,7 @@ private fun HomeNavDisplay(
                     end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY))
             ),
     ){
-        val isWideScreen = maxWidth >= 600.dp
+        val isWideScreen = mediaQuery { windowSize.widthSizeClass != WindowWidthSizeClass.COMPACT }
 
         Scaffold(
             modifier = Modifier,

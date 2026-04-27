@@ -43,7 +43,11 @@ import org.xg.project.domain.model.MealType
 import org.xg.project.presentation.index.IndexViewModel
 import org.xg.project.presentation.index.IndexIntent
 
-@OptIn(ExperimentalFoundationApi::class)
+import androidx.compose.ui.mediaQuery
+import androidx.compose.ui.ExperimentalMediaQueryApi
+import androidx.window.core.layout.WindowWidthSizeClass
+
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMediaQueryApi::class)
 @Composable
 fun HomeScreen(
     onAddPlan: (MealType) -> Unit,
@@ -225,8 +229,10 @@ fun MenuSection(
                     .fillMaxWidth()
                     .padding(horizontal = 12.dp, vertical = 4.dp)
             ) {
-                // 根据屏幕宽度动态计算列数和项宽
-                val columns = maxOf(2, (maxWidth.value / 160).toInt())
+                // 根据 MediaQuery 动态计算列数
+                val isCompact = mediaQuery { windowSize.widthSizeClass == WindowWidthSizeClass.COMPACT }
+                val isMedium = mediaQuery { windowSize.widthSizeClass == WindowWidthSizeClass.MEDIUM }
+                val columns = if (isCompact) 2 else if (isMedium) 3 else 4
                 val itemWidth = (maxWidth - (12.dp * (columns - 1))) / columns
                 
                 FlowRow(

@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -78,6 +77,9 @@ import org.xg.project.domain.model.MealType
 import org.xg.project.presentation.manualrecipeinput.ManualRecipeInputIntent
 import org.xg.project.presentation.manualrecipeinput.ManualRecipeInputUiEvent
 import org.xg.project.presentation.manualrecipeinput.ManualRecipeInputViewModel
+import androidx.compose.ui.mediaQuery
+import androidx.compose.ui.ExperimentalMediaQueryApi
+import androidx.window.core.layout.WindowWidthSizeClass
 
 private val GlassBlue = Color(0xFF95B6FF)
 private val GlassBlueDark = Color(0xFF89A7FF)
@@ -94,7 +96,7 @@ private val SectionTitleSize = 16.sp
 private val BodyTextSize = 14.sp
 private val HelperTextSize = 12.sp
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMediaQueryApi::class)
 @Composable
 fun ManualRecipeInputScreen(
     viewModel: ManualRecipeInputViewModel = koinViewModel<ManualRecipeInputViewModel>(),
@@ -366,8 +368,8 @@ fun ManualRecipeInputScreen(
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
 
-                        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-                            val isWideScreen = maxWidth >= 520.dp
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            val isWideScreen = mediaQuery { windowSize.widthSizeClass != WindowWidthSizeClass.COMPACT }
                             val columns = if (isWideScreen) 4 else 2
                             val mealTypeRows = MealType.entries.chunked(columns)
 
