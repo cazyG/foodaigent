@@ -4,10 +4,10 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 pluginManagement {
     repositories {
         maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-        mavenCentral()
-        gradlePluginPortal()
-        maven("https://maven.aliyun.com/repository/public")
         maven("https://maven.aliyun.com/repository/gradle-plugin")
+        maven("https://maven.aliyun.com/repository/public")
+        gradlePluginPortal()
+        mavenCentral()
         maven("https://maven.aliyun.com/repository/google")
     }
 }
@@ -15,8 +15,8 @@ pluginManagement {
 dependencyResolutionManagement {
     repositories {
         maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-        mavenCentral()
         maven("https://maven.aliyun.com/repository/public")
+        mavenCentral()
         maven("https://jitpack.io")
         maven("https://maven.aliyun.com/repository/google")
     }
