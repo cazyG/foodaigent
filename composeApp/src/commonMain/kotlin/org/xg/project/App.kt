@@ -34,6 +34,9 @@ import coil3.network.ktor3.KtorNetworkFetcherFactory
 import org.koin.compose.KoinApplication
 import org.koin.dsl.koinConfiguration
 import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import org.xg.project.Routes.AppRoute
 import org.xg.project.Routes.BottomTabRoute
 import org.xg.project.Routes.RecipesInternalRoute

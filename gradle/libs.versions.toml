@@ -7,17 +7,15 @@ androidx-activity = "1.13.0"
 androidx-appcompat = "1.7.1"
 androidx-core = "1.18.0"
 androidx-espresso = "3.7.0"
-androidx-lifecycle = "2.10.0"
-compose-multiplatform-lifecycle = "2.10.0-alpha05"
+androidx-lifecycle = "2.11.0-beta01"
 androidx-testExt = "1.3.0"
-adaptive = "1.3.0-alpha02"
 coilCompose = "3.4.0"
 componentsResources = "1.11.0-beta03"
 composeHotReload = "1.0.0"
 composeMultiplatform = "1.11.0-beta03"
 composeWebviewMultiplatform = "0.0.11"
 composeWebviewMultiplatformVersion = "2.0.3"
-foundation = "1.11.0-beta03"
+foundation = "1.11.0"
 imagepickerkmp = "1.0.38"
 icons-xtended = "1.7.3"
 junit = "4.13.2"
@@ -28,24 +26,20 @@ kotlinxIoCore = "0.9.0"
 kotlinxSerialization = "1.10.0"
 koin = "4.2.0"
 ktor = "3.0.0"
-material3 = "1.9.0"
-material3Version = "1.10.0-alpha05"
-navigation = "1.0.0-alpha05"
-navigationCompose = "2.9.2"
+material3 = "1.11.0-alpha07"
+material3-adaptive = "1.3.0-beta01"
+navigation = "1.1.1"
 runtime = "1.11.0-beta03"
-uiToolingPreview = "1.11.0-beta03"
+uiToolingPreview = "1.11.0"
 uiToolingPreviewVersion = "1.11.0-beta03"
+window-core = "1.5.1"
 
 [libraries]
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
 coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coilCompose" }
 components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "componentsResources" }
-compose-webview-multiplatform = { module = "io.github.dengzhouli:compose-webview-multiplatform", version.ref = "composeWebviewMultiplatform" }
-androidx-adaptive-navigation = { module = "org.jetbrains.compose.material3.adaptive:adaptive-navigation3", version.ref = "adaptive" }
 foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "foundation" }
-jetbrains-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3Version" }
 imagepickerkmp = { module = "io.github.ismoy:imagepickerkmp", version.ref = "imagepickerkmp" }
-kevinnzou-compose-webview-multiplatform = { module = "io.github.kevinnzou:compose-webview-multiplatform", version.ref = "composeWebviewMultiplatformVersion" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-testJunit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 junit = { module = "junit:junit", version.ref = "junit" }
@@ -70,15 +64,15 @@ koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin" }
 koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koin" }
 kotlinx-coroutinesSwing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
-material3-v190 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3" }
-navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3" }
+material3-adaptive = { module = "org.jetbrains.compose.material3.adaptive:adaptive", version.ref = "material3-adaptive" }
 navigation3-compose-ui = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version.ref = "navigation" }
-navigation3-viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-navigation3",version.ref = "compose-multiplatform-lifecycle" }
+navigation3-viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-navigation3",version.ref = "androidx-lifecycle" }
 runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "runtime" }
 ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "uiToolingPreview" }
 ui-tooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "uiToolingPreview" }
-ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "uiToolingPreview" }
-ui-tooling-preview-v1101 = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "uiToolingPreviewVersion" }
+window-core = { module = "org.jetbrains.androidx.window:window-core", version.ref = "window-core" }
+ui-tooling-preview= { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "uiToolingPreview" }
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
@@ -87,6 +81,3 @@ composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "composeMul
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-#org.jetbrains.androidx.navigation3:navigation3-ui
-#org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-navigation3
-#org.jetbrains.compose.material3.adaptive:adaptive-navigation3
