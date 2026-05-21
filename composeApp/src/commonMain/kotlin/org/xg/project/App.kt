@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,9 +24,9 @@ import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.mediaQuery
 import androidx.compose.ui.ExperimentalMediaQueryApi
-import androidx.compose.ui.UiMediaScope
 import androidx.compose.ui.ComposeUiFlags
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.UiMediaScope
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import coil3.ImageLoader
@@ -34,9 +35,6 @@ import coil3.network.ktor3.KtorNetworkFetcherFactory
 import org.koin.compose.KoinApplication
 import org.koin.dsl.koinConfiguration
 import androidx.navigation3.runtime.rememberNavBackStack
-import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import org.xg.project.Routes.AppRoute
 import org.xg.project.Routes.BottomTabRoute
 import org.xg.project.Routes.RecipesInternalRoute
@@ -167,9 +165,9 @@ private fun HomeNavDisplay(
                 Brush.linearGradient(colors = listOf(Color(0xFFD9CA8F),Color(0xFFD7ECF6)),
                     start = Offset(0f, 0f),
                     end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY))
-            ),
-    ){
-        val isWideScreen = mediaQuery { windowSize.width >= 600.dp }
+            )
+    ) {
+        val isWideScreen = mediaQuery { windowPosture == UiMediaScope.Posture.Tabletop }
 
         Scaffold(
             modifier = Modifier,

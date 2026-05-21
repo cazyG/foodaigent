@@ -52,6 +52,7 @@ kotlin {
             implementation(libs.foundation)
             implementation(libs.material3)
             implementation(libs.material3.adaptive)
+            implementation(libs.material3.window.size)
             implementation(libs.window.core)
             implementation(libs.ui)
             implementation(libs.components.resources)
