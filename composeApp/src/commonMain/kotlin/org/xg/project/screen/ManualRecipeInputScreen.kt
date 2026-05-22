@@ -368,7 +368,7 @@ fun ManualRecipeInputScreen(
                         )
 
                         Box(modifier = Modifier.fillMaxWidth()) {
-                            val isWideScreen = mediaQuery { windowSize.width >= 520.dp }
+                            val isWideScreen = mediaQuery { windowWidth >= 520.dp }
                             val columns = if (isWideScreen) 4 else 2
                             val mealTypeRows = MealType.entries.chunked(columns)
 

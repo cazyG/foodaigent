@@ -7,11 +7,11 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,11 +22,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.mediaQuery
-import androidx.compose.ui.ExperimentalMediaQueryApi
 import androidx.compose.ui.ComposeUiFlags
 import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.UiMediaScope
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import coil3.ImageLoader
@@ -134,7 +131,6 @@ fun App() {
         })
 }
 
-@OptIn(ExperimentalMediaQueryApi::class)
 @Composable
 private fun HomeNavDisplay(
     onNavigateToManualInput: () -> Unit,
@@ -159,7 +155,7 @@ private fun HomeNavDisplay(
         Unit
     }
 
-    Box(
+    BoxWithConstraints(
         modifier = Modifier
             .background(
                 Brush.linearGradient(colors = listOf(Color(0xFFD9CA8F),Color(0xFFD7ECF6)),
@@ -167,8 +163,7 @@ private fun HomeNavDisplay(
                     end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY))
             )
     ) {
-        val isWideScreen = mediaQuery { windowPosture == UiMediaScope.Posture.Tabletop }
-
+        val isWideScreen = maxWidth >= 600.dp
         Scaffold(
             modifier = Modifier,
             bottomBar = {

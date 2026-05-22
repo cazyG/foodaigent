@@ -43,10 +43,8 @@ import org.xg.project.domain.model.MenuItemData
 import org.xg.project.domain.model.MealType
 import org.xg.project.presentation.index.IndexViewModel
 import org.xg.project.presentation.index.IndexIntent
-import androidx.compose.ui.ExperimentalMediaQueryApi
-import androidx.compose.ui.mediaQuery
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMediaQueryApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
     onAddPlan: (MealType) -> Unit,
@@ -158,7 +156,7 @@ fun HomeScreen(
 }
 
 // 带标题和网格的菜单区块，支持空状态和点击添加计划
-@OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class, ExperimentalMediaQueryApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
 @Composable
 fun MenuSection(
     title: String,
@@ -228,21 +226,25 @@ fun MenuSection(
                     .fillMaxWidth()
                     .padding(horizontal = 12.dp, vertical = 4.dp)
             ) {
-                // 根据 MediaQuery 动态计算列数
-                val isCompact = mediaQuery { windowSize.width < 600.dp }
-                val isMedium = mediaQuery { windowSize.width >= 600.dp && windowSize.width < 840.dp }
-                val columns = if (isCompact) 2 else if (isMedium) 3 else 4
-                val maxWidth = mediaQuery { windowSize.width }
-                val itemWidth = (maxWidth - (12.dp * (columns - 1))) / columns
-                
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    menus.forEach { item ->
-                        Box(modifier = Modifier.width(itemWidth)) {
-                            MenuCard(title, item.name, item.desc, chef = item.chef)
+                BoxWithConstraints(Modifier.fillMaxWidth()) {
+                    val spacing = 12.dp
+                    val availableWidth = maxWidth
+                    val columns = when {
+                        availableWidth < 600.dp -> 2
+                        availableWidth < 840.dp -> 3
+                        else -> 4
+                    }
+                    val itemWidth = ((availableWidth - (spacing * (columns - 1))).coerceAtLeast(0.dp)) / columns
+
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(spacing),
+                        verticalArrangement = Arrangement.spacedBy(spacing)
+                    ) {
+                        menus.forEach { item ->
+                            Box(modifier = Modifier.width(itemWidth)) {
+                                MenuCard(title, item.name, item.desc, chef = item.chef)
+                            }
                         }
                     }
                 }
