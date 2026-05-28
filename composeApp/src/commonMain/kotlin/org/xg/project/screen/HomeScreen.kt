@@ -31,8 +31,6 @@ import kotlinx.datetime.todayIn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import org.koin.compose.viewmodel.koinViewModel
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
@@ -68,12 +66,7 @@ fun HomeScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.linearGradient(colors = listOf(Color(0xFFD9CA8F),Color(0xFFD7ECF6)),
-                    start = Offset(0f, 0f),
-                    end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
-                )
-            )
+            .background(GlassStyle.BgGradient)
     ) {
         if (state.isLoading) {
             Box(

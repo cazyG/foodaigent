@@ -13,8 +13,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -24,8 +22,6 @@ import coil3.compose.AsyncImage
 import org.xg.project.domain.model.Ingredient
 import org.xg.project.domain.model.MealType
 
-private val GlassBgTop = Color(0xFFF2F7FF)
-private val GlassBgBottom = Color(0xFFFAF4FF)
 private val GlassText = Color(0xFF475569)
 private val GlassSurface = Color.White.copy(alpha = 0.14f)
 private val GlassSurfaceStrong = Color.White.copy(alpha = 0.2f)
@@ -82,13 +78,7 @@ fun RecipeDetailScreen(
         containerColor = Color.Transparent,
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.linearGradient(
-                    colors = listOf(Color(0xFFD9CA8F), Color(0xFFD7ECF6)),
-                    start = Offset(0f, 0f),
-                    end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
-                )
-            ),
+            .background(GlassStyle.BgGradient),
         topBar = {
             TopAppBar(
                 title = {

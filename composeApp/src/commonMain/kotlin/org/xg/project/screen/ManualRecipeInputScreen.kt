@@ -56,11 +56,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -165,13 +163,7 @@ fun ManualRecipeInputScreen(
         containerColor = Color.Transparent,
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.linearGradient(
-                    colors = listOf(Color(0xFFD9CA8F), Color(0xFFD7ECF6)),
-                    start = Offset(0f, 0f),
-                    end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
-                )
-            ),
+            .background(GlassStyle.BgGradient),
         topBar = {
             TopAppBar(
                 title = {
@@ -862,7 +854,7 @@ fun ManualRecipeInputScreen(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .background(
-                                    Brush.verticalGradient(
+                                    androidx.compose.ui.graphics.Brush.verticalGradient(
                                         colors = listOf(
                                             Color.White.copy(alpha = 0.20f),
                                             Color.Transparent

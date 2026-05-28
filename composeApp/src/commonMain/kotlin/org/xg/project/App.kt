@@ -8,6 +8,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -16,8 +17,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.unit.dp
@@ -42,6 +41,7 @@ import org.xg.project.screen.ProfileScreen
 import org.xg.project.screen.RecipesScreen
 import org.xg.project.screen.RecipeDetailScreen
 import org.xg.project.screen.LoginScreen
+import org.xg.project.screen.GlassStyle
 
 @Composable
 fun App() {
@@ -68,60 +68,66 @@ fun App() {
                     Unit
                 }
 
-                NavDisplay(
-                    backStack = rootBackStack,
-                    onBack = popRootBackStack,
-                    transitionSpec = {
-                        slideInHorizontally {
-                            it
-                        } + fadeIn() togetherWith slideOutHorizontally {
-                            -it
-                        } + fadeOut()
-                    },
-                    popTransitionSpec = {
-                        slideInHorizontally {
-                            -it
-                        } + fadeIn() togetherWith slideOutHorizontally {
-                            it
-                        } + fadeOut()
-                    },
-                    entryProvider = entryProvider {
-                        entry<AppRoute.Login> {
-                            LoginScreen(
-                                onLoginSuccess = {
-                                    rootBackStack.clear()
-                                    rootBackStack.add(AppRoute.Home)
-                                }
-                            )
+                androidx.compose.foundation.layout.Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(GlassStyle.BgGradient)
+                ) {
+                    NavDisplay(
+                        backStack = rootBackStack,
+                        onBack = popRootBackStack,
+                        transitionSpec = {
+                            slideInHorizontally {
+                                it
+                            } + fadeIn() togetherWith slideOutHorizontally {
+                                -it
+                            } + fadeOut()
+                        },
+                        popTransitionSpec = {
+                            slideInHorizontally {
+                                -it
+                            } + fadeIn() togetherWith slideOutHorizontally {
+                                it
+                            } + fadeOut()
+                        },
+                        entryProvider = entryProvider {
+                            entry<AppRoute.Login> {
+                                LoginScreen(
+                                    onLoginSuccess = {
+                                        rootBackStack.clear()
+                                        rootBackStack.add(AppRoute.Home)
+                                    }
+                                )
+                            }
+                            entry<AppRoute.Home> {
+                                HomeNavDisplay(
+                                    onNavigateToManualInput = {
+                                        rootBackStack.add(AppRoute.ManualRecipeInput)
+                                    },
+                                    onNavigateToRecipeDetail = { recipeId ->
+                                        rootBackStack.add(AppRoute.RecipeDetail(recipeId))
+                                    }
+                                )
+                            }
+                            entry<AppRoute.ManualRecipeInput> {
+                                ManualRecipeInputScreen(
+                                    onBack = popRootBackStack,
+                                    onSave = {
+                                        // 手动录入完成后，返回上一级。
+                                        // 注意：这里可能需要通知 RecipesScreen 刷新列表，目前使用重新进入或状态管理来更新
+                                        popRootBackStack()
+                                    }
+                                )
+                            }
+                            entry<AppRoute.RecipeDetail> { route ->
+                                RecipeDetailScreen(
+                                    recipeId = route.id,
+                                    onBack = popRootBackStack
+                                )
+                            }
                         }
-                        entry<AppRoute.Home> {
-                            HomeNavDisplay(
-                                onNavigateToManualInput = {
-                                    rootBackStack.add(AppRoute.ManualRecipeInput)
-                                },
-                                onNavigateToRecipeDetail = { recipeId ->
-                                    rootBackStack.add(AppRoute.RecipeDetail(recipeId))
-                                }
-                            )
-                        }
-                        entry<AppRoute.ManualRecipeInput> {
-                            ManualRecipeInputScreen(
-                                onBack = popRootBackStack,
-                                onSave = {
-                                    // 手动录入完成后，返回上一级。
-                                    // 注意：这里可能需要通知 RecipesScreen 刷新列表，目前使用重新进入或状态管理来更新
-                                    popRootBackStack()
-                                }
-                            )
-                        }
-                        entry<AppRoute.RecipeDetail> { route ->
-                            RecipeDetailScreen(
-                                recipeId = route.id,
-                                onBack = popRootBackStack
-                            )
-                        }
-                    }
-                )
+                    )
+                }
             }
         })
 }
@@ -152,11 +158,7 @@ private fun HomeNavDisplay(
 
     BoxWithConstraints (
         modifier = Modifier
-            .background(
-                Brush.linearGradient(colors = listOf(Color(0xFFD9CA8F),Color(0xFFD7ECF6)),
-                    start = Offset(0f, 0f),
-                    end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY))
-            ),
+            .background(GlassStyle.BgGradient),
     ){
         val isWideScreen = maxWidth >= 600.dp
 
