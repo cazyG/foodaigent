@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -34,7 +35,6 @@ import org.xg.project.Routes.BottomTabRoute
 import org.xg.project.Routes.RecipesInternalRoute
 import org.xg.project.di.appModule
 import org.xg.project.screen.BottomTabBar
-import org.xg.project.screen.SideNavigationBar
 import org.xg.project.screen.HistoryScreen
 import org.xg.project.screen.HomeScreen
 import org.xg.project.screen.ManualRecipeInputScreen
@@ -43,6 +43,23 @@ import org.xg.project.screen.RecipesScreen
 import org.xg.project.screen.RecipeDetailScreen
 import org.xg.project.screen.LoginScreen
 import org.xg.project.screen.GlassStyle
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import org.xg.project.screen.home.HomeColors
+import org.xg.project.screen.navigation.AppDesktopSidebar
+import org.xg.project.screen.navigation.isTabletLandscape
+import org.xg.project.screen.recipes.RecipesColors
+import org.xg.project.screen.recipes.RecipesFonts
 
 private fun BottomTabRoute.toSaveableName(): String = when (this) {
     BottomTabRoute.Home -> "tab_home"
@@ -90,7 +107,7 @@ fun App() {
                         .fillMaxSize()
                         .then(
                             if (isLoginScreen) {
-                                Modifier.background(Color.Transparent)
+                                Modifier.background(Transparent)
                             } else {
                                 Modifier.background(GlassStyle.BgGradient)
                             },
@@ -183,16 +200,24 @@ private fun HomeNavDisplay(
         Unit
     }
 
-    BoxWithConstraints (
-        modifier = Modifier
-            .background(GlassStyle.BgGradient),
-    ){
-        val isWideScreen = maxWidth >= 600.dp
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val tabletLandscape = isTabletLandscape(maxWidth, maxHeight)
 
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .then(
+                    if (tabletLandscape) {
+                        Modifier.background(Color.White)
+                    } else {
+                        Modifier.background(GlassStyle.BgGradient)
+                    },
+                ),
+        ) {
         Scaffold(
             modifier = Modifier,
             bottomBar = {
-                if (!isWideScreen) {
+                if (!tabletLandscape) {
                     BottomTabBar(
                         activeTab = selectedTab,
                         onTabClick = selectTab,
@@ -202,10 +227,17 @@ private fun HomeNavDisplay(
             containerColor = Transparent
         ) { innerPadding ->
             Row(modifier = Modifier.padding(innerPadding)) {
-                if (isWideScreen) {
-                    SideNavigationBar(
+                if (tabletLandscape) {
+                    AppDesktopSidebar(
                         activeTab = selectedTab,
                         onTabClick = selectTab,
+                        modifier = Modifier.fillMaxHeight(),
+                        footer = {
+                            AppSidebarFooter(
+                                selectedTab = selectedTab,
+                                onNavigateToManualInput = onNavigateToManualInput,
+                            )
+                        },
                     )
                 }
 
@@ -220,7 +252,7 @@ private fun HomeNavDisplay(
                                     recipesBackStack.clear()
                                     recipesBackStack.add(RecipesInternalRoute.FromHome(mealType.name))
                                     selectTab(BottomTabRoute.Recipes)
-                                }
+                                },
                             )
                         }
                         entry<BottomTabRoute.Recipes> {
@@ -228,7 +260,7 @@ private fun HomeNavDisplay(
                                 isFromHome = false,
                                 refreshTrigger = recipesRefreshKey.value,
                                 onNavigateToManualInput = onNavigateToManualInput,
-                                onNavigateToDetail = onNavigateToRecipeDetail
+                                onNavigateToDetail = onNavigateToRecipeDetail,
                             )
                         }
                         entry<RecipesInternalRoute.FromHome> { route ->
@@ -242,7 +274,7 @@ private fun HomeNavDisplay(
                                     selectTab(BottomTabRoute.Home)
                                     recipesBackStack.clear()
                                     recipesBackStack.add(BottomTabRoute.Recipes)
-                                }
+                                },
                             )
                         }
                         entry<BottomTabRoute.History> { HistoryScreen() }
@@ -253,5 +285,40 @@ private fun HomeNavDisplay(
                 )
             }
         }
+        }
+    }
+}
+
+@Composable
+private fun AppSidebarFooter(
+    selectedTab: BottomTabRoute,
+    onNavigateToManualInput: () -> Unit,
+) {
+    when (selectedTab) {
+        BottomTabRoute.Home -> {
+            Button(
+                onClick = { },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = HomeColors.BrandBrown),
+            ) {
+                Icon(Icons.Default.Add, contentDescription = null, tint = Color.White)
+                Spacer(modifier = Modifier.width(6.dp))
+                Text("上传新菜谱", color = Color.White)
+            }
+        }
+        BottomTabRoute.Recipes -> {
+            Button(
+                onClick = onNavigateToManualInput,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = RecipesColors.BrandBrown),
+            ) {
+                Icon(Icons.Default.Add, contentDescription = null, tint = Color.White)
+                Spacer(modifier = Modifier.width(6.dp))
+                Text("+ 手动录入", fontSize = RecipesFonts.actionButton, color = Color.White)
+            }
+        }
+        else -> Unit
     }
 }

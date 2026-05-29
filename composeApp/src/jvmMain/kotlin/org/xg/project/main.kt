@@ -22,8 +22,8 @@ fun main() = application {
         icon = painterResource(Res.drawable.app_icon),
         state = windowState,
 //        alwaysOnTop = true,//是否成为悬浮窗
-        undecorated = true,   // 移除系统标题栏和边框
-        transparent = true,   // 窗口背景透明，才能显示我们自己绘制的圆角
+//        undecorated = true,   // 移除系统标题栏和边框
+//        transparent = true,   // 窗口背景透明，才能显示我们自己绘制的圆角
     ) {
         App()
     }

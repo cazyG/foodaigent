@@ -1,36 +1,34 @@
 package org.xg.project.screen
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import coil3.compose.AsyncImage
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-
-import org.koin.compose.viewmodel.koinViewModel
 import kotlinx.coroutines.flow.collectLatest
+import org.koin.compose.viewmodel.koinViewModel
 import org.xg.project.domain.model.MealType
 import org.xg.project.domain.model.RecipeMenu
-import org.xg.project.presentation.recipes.RecipesIntent
 import org.xg.project.presentation.recipes.RecipesEffect
+import org.xg.project.presentation.recipes.RecipesIntent
 import org.xg.project.presentation.recipes.RecipesViewModel
+import org.xg.project.screen.recipes.RecipesBreakpoints
+import org.xg.project.screen.recipes.RecipesCompactContent
+import org.xg.project.screen.recipes.RecipesLoadingState
+import org.xg.project.screen.navigation.isTabletLandscape
+import org.xg.project.screen.navigation.isDesktopWidth
+import org.xg.project.screen.recipes.RecipesMediumContent
+import org.xg.project.screen.recipes.RecipesTabletContent
+import org.xg.project.screen.recipes.RecipesWideContent
+import org.xg.project.screen.recipes.toRecipesContentUi
 
 @Composable
 fun RecipesScreen(
@@ -41,19 +39,22 @@ fun RecipesScreen(
     onNavigateToManualInput: () -> Unit = {},
     onNavigateToDetail: (String) -> Unit = {},
     onBack: () -> Unit = {},
-    onSaveSuccess: () -> Unit = {}
+    onSaveSuccess: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val content = state.toRecipesContentUi()
+    val saveButtonLabel =
+        if (state.selectedRecipeIds.isNotEmpty()) "保存" else "+ 手动录入"
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(viewModel) {
         viewModel.effect.collectLatest { effect ->
             when (effect) {
                 is RecipesEffect.SaveSuccess -> onSaveSuccess()
                 is RecipesEffect.ShowError -> {
                     snackbarHostState.showSnackbar(
                         message = effect.message,
-                        duration = SnackbarDuration.Short
+                        duration = SnackbarDuration.Short,
                     )
                 }
             }
@@ -66,272 +67,91 @@ fun RecipesScreen(
 
     LaunchedEffect(initialMealType) {
         if (initialMealType != null) {
-            try {
-                viewModel.handleIntent(RecipesIntent.ChangeMealType(MealType.valueOf(initialMealType)))
-            } catch (e: Exception) {
-                // Handle invalid meal type if necessary
+            runCatching {
+                MealType.valueOf(initialMealType)
+            }.onSuccess { mealType ->
+                viewModel.handleIntent(RecipesIntent.ChangeMealFilter(mealType))
             }
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(GlassStyle.BgGradient),
-    ) {
-        if (state.isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Color(0xFFF59E42))
-            }
-            return@Box
+    val onSaveOrManual: () -> Unit = {
+        if (state.selectedRecipeIds.isNotEmpty()) {
+            viewModel.handleIntent(RecipesIntent.SaveSelections)
+        } else {
+            onNavigateToManualInput()
         }
+    }
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(GlassStyle.SurfaceStrong)
-                    .padding(4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "食谱灵感库",
-                        modifier = Modifier.padding(start = if (isFromHome) 0.dp else 10.dp),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 22.sp,
-                        color = GlassStyle.TextPrimary
+    val onRecipeOpen: (RecipeMenu) -> Unit = { recipe ->
+        if (isFromHome) {
+            viewModel.handleIntent(RecipesIntent.ToggleSelection(recipe.id))
+        } else {
+            onNavigateToDetail(recipe.id.toString())
+        }
+    }
+
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val layoutWidth = maxWidth
+        val tabletLandscape = isTabletLandscape(maxWidth, maxHeight)
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            when {
+                state.isLoading -> RecipesLoadingState()
+                tabletLandscape && isDesktopWidth(layoutWidth) && !isFromHome -> {
+                    RecipesWideContent(
+                        content = content,
+                        isFromHome = isFromHome,
+                        onIntent = viewModel::handleIntent,
+                        onNavigateToManualInput = onNavigateToManualInput,
+                        onRecipeOpen = onRecipeOpen,
+                        onSaveOrManual = onSaveOrManual,
+                        saveButtonLabel = saveButtonLabel,
                     )
                 }
-
-                if (isFromHome) {
-                    val buttonText =
-                        if (state.selectedRecipeIds.isNotEmpty()) "保存" else "+ 手动录入"
-                    Button(
-                        onClick = {
-                            if (state.selectedRecipeIds.isNotEmpty()) {
-                                viewModel.handleIntent(RecipesIntent.SaveSelections)
-                            } else {
-                                onNavigateToManualInput()
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.24f))
-                    ) {
-                        Text(buttonText, color = GlassStyle.TextPrimary)
-                    }
-                } else {
-                    Button(
-                        onClick = onNavigateToManualInput,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.24f))
-                    ) {
-                        Text("+ 手动录入", color = GlassStyle.TextPrimary)
-                    }
+                tabletLandscape && layoutWidth >= RecipesBreakpoints.CompactMax && !isFromHome -> {
+                    RecipesTabletContent(
+                        content = content,
+                        isFromHome = isFromHome,
+                        layoutWidth = layoutWidth,
+                        onIntent = viewModel::handleIntent,
+                        onNavigateToManualInput = onNavigateToManualInput,
+                        onRecipeOpen = onRecipeOpen,
+                        onSaveOrManual = onSaveOrManual,
+                        saveButtonLabel = saveButtonLabel,
+                    )
+                }
+                layoutWidth >= RecipesBreakpoints.CompactMax -> {
+                    RecipesMediumContent(
+                        content = content,
+                        isFromHome = isFromHome,
+                        layoutWidth = layoutWidth,
+                        onIntent = viewModel::handleIntent,
+                        onNavigateToManualInput = onNavigateToManualInput,
+                        onRecipeOpen = onRecipeOpen,
+                        onBack = onBack,
+                        onSaveOrManual = onSaveOrManual,
+                        saveButtonLabel = saveButtonLabel,
+                    )
+                }
+                else -> {
+                    RecipesCompactContent(
+                        content = content,
+                        isFromHome = isFromHome,
+                        onIntent = viewModel::handleIntent,
+                        onNavigateToManualInput = onNavigateToManualInput,
+                        onRecipeOpen = onRecipeOpen,
+                        onBack = onBack,
+                        onSaveOrManual = onSaveOrManual,
+                        saveButtonLabel = saveButtonLabel,
+                    )
                 }
             }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .weight(2.6f)
-                        .fillMaxHeight()
-                        .glassPanel(RoundedCornerShape(24.dp))
-                        .verticalScroll(rememberScrollState())
-                        .padding(vertical = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    MealType.values().forEach { mealType ->
-                        val isSelected = state.selectedMealType == mealType
-                        Button(
-                            onClick = {
-                                viewModel.handleIntent(RecipesIntent.ChangeMealType(mealType))
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 2.dp, vertical = 6.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (isSelected) Color.White.copy(alpha = 0.28f) else Color.White.copy(
-                                    alpha = 0.16f
-                                ),
-                                contentColor = if (isSelected) GlassStyle.TextPrimary else GlassStyle.TextSecondary
-                            ),
-                            shape = RoundedCornerShape(16.dp)
-                        ) {
-                            Text(mealType.title, fontSize = 16.sp, fontWeight = FontWeight.Medium)
-                        }
-                    }
-                }
-
-                LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 160.dp),
-                    contentPadding = PaddingValues(all = 12.dp),
-                    modifier = Modifier
-                        .weight(7.4f)
-                        .glassPanel(RoundedCornerShape(24.dp))
-                        .fillMaxHeight()
-                ) {
-                    if (state.error != null && state.currentRecipes.isEmpty()) {
-                        item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(32.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
-                            ) {
-                                Text(
-                                    text = "加载失败",
-                                    color = GlassStyle.TextPrimary,
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = state.error ?: "",
-                                    color = GlassStyle.TextSecondary,
-                                    fontSize = 14.sp
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Button(
-                                    onClick = { viewModel.handleIntent(RecipesIntent.LoadRecipes) },
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = Color.White.copy(
-                                            alpha = 0.24f
-                                        )
-                                    )
-                                ) {
-                                    Text("重试", color = GlassStyle.TextPrimary)
-                                }
-                            }
-                        }
-                    } else {
-                        items(state.currentRecipes) { recipe ->
-                            RecipeCard(
-                                recipe = recipe,
-                                isSelected = recipe.id in state.selectedRecipeIds,
-                                onClick = {
-                                    if (isFromHome) {
-                                        viewModel.handleIntent(RecipesIntent.ToggleSelection(recipe.id))
-                                    } else {
-                                        onNavigateToDetail(recipe.id.toString())
-                                    }
-                                },
-                                showSelectionBorder = isFromHome
-                            )
-                        }
-                    }
-                }
-            }
-        }
-
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier.align(Alignment.BottomCenter)
-        )
-    }
-}
-
-@Composable
-fun RecipeCard(
-    recipe: RecipeMenu,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    showSelectionBorder: Boolean = false
-) {
-    Card(
-        modifier = Modifier
-            .padding(8.dp)
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .then(
-                // 如果选中并且允许显示边框，添加金色边框
-                if (isSelected && showSelectionBorder) Modifier.border(
-                    width = 1.5.dp,
-                    color = GlassStyle.Stroke,
-                    shape = RoundedCornerShape(24.dp)
-                ) else Modifier
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.align(Alignment.BottomCenter),
             )
-            .glassPanel(RoundedCornerShape(24.dp)),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.Transparent
-        )
-    ) {
-        // 使用 Box 堆叠图片和文字
-        Box(
-            modifier = Modifier
-                .height(140.dp) // 增加高度让图片更大一点
-                .fillMaxWidth()
-                .background(Color.White.copy(alpha = 0.15f))
-        ) {
-            // 底层：图片
-            val displayImg = recipe.img ?: recipe.imageUrl
-            if (displayImg != null) {
-                AsyncImage(
-                    model = displayImg,
-                    contentDescription = recipe.name,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-            }
-
-            // 右上角：标签
-            if (recipe.tag.isNotEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .padding(6.dp)
-                        .background(Color.White.copy(alpha = 0.85f), RoundedCornerShape(8.dp))
-                        .align(Alignment.TopEnd)
-                ) {
-                    Text(
-                        text = recipe.tag,
-                        fontSize = 10.sp,
-                        color = GlassStyle.TextPrimary,
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                    )
-                }
-            }
-
-            // 底部：半透明渐变背景 + 文字信息
-            Column(
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .fillMaxWidth()
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(
-                                Color.Transparent,
-                                Color.White.copy(alpha = 0.7f),
-                                Color.White.copy(alpha = 0.95f)
-                            )
-                        )
-                    )
-                    .padding(start = 8.dp, end = 8.dp, bottom = 8.dp, top = 24.dp)
-            ) {
-                Text(
-                    recipe.name,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
-                    color = GlassStyle.TextPrimary,
-                    maxLines = 1
-                )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(recipe.duration, fontSize = 10.sp, color = GlassStyle.TextSecondary)
-                    Text(
-                        " | ",
-                        fontSize = 10.sp,
-                        color = GlassStyle.TextSecondary.copy(alpha = 0.6f)
-                    )
-                    Text(recipe.difficulty, fontSize = 10.sp, color = GlassStyle.TextPrimary)
-                }
-            }
         }
     }
 }

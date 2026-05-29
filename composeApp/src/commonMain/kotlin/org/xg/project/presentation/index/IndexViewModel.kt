@@ -54,7 +54,8 @@ class IndexViewModel(
                 is org.xg.project.domain.Result.Error -> {
                     _state.value = _state.value.copy(
                         isLoading = false,
-                        error = result.message
+                        todayRecord = null,
+                        error = null,
                     )
                 }
             }

@@ -6,22 +6,35 @@ import org.xg.project.domain.model.RecipeMenu
 data class RecipesState(
     val isLoading: Boolean = false,
     val allRecipes: List<RecipeMenu> = emptyList(),
-    val selectedMealType: MealType = MealType.BREAKFAST,
+    val selectedMealFilter: MealType? = null,
+    val searchQuery: String = "",
     val selectedRecipeIds: Set<Int> = emptySet(),
-    val error: String? = null
+    val error: String? = null,
 ) {
     val currentRecipes: List<RecipeMenu>
-        get() = allRecipes.filter { it.mealType == selectedMealType }
+        get() {
+            val mealFiltered = selectedMealFilter?.let { filter ->
+                allRecipes.filter { it.mealType == filter }
+            } ?: allRecipes
+            val query = searchQuery.trim()
+            if (query.isEmpty()) return mealFiltered
+            return mealFiltered.filter { recipe ->
+                recipe.name.contains(query, ignoreCase = true) ||
+                    recipe.tag.contains(query, ignoreCase = true) ||
+                    recipe.difficulty.contains(query, ignoreCase = true)
+            }
+        }
 }
 
 sealed class RecipesIntent {
-    object LoadRecipes : RecipesIntent()
-    data class ChangeMealType(val mealType: MealType) : RecipesIntent()
+    data object LoadRecipes : RecipesIntent()
+    data class ChangeMealFilter(val mealType: MealType?) : RecipesIntent()
+    data class UpdateSearchQuery(val query: String) : RecipesIntent()
     data class ToggleSelection(val recipeId: Int) : RecipesIntent()
-    object SaveSelections : RecipesIntent()
+    data object SaveSelections : RecipesIntent()
 }
 
 sealed interface RecipesEffect {
-    object SaveSuccess : RecipesEffect
+    data object SaveSuccess : RecipesEffect
     data class ShowError(val message: String) : RecipesEffect
 }

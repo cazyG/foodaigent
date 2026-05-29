@@ -26,7 +26,8 @@ class RecipesViewModel(
     fun handleIntent(intent: RecipesIntent) {
         when (intent) {
             is RecipesIntent.LoadRecipes -> loadRecipes()
-            is RecipesIntent.ChangeMealType -> changeMealType(intent)
+            is RecipesIntent.ChangeMealFilter -> changeMealFilter(intent)
+            is RecipesIntent.UpdateSearchQuery -> updateSearchQuery(intent)
             is RecipesIntent.ToggleSelection -> toggleSelection(intent)
             is RecipesIntent.SaveSelections -> saveSelections()
         }
@@ -60,13 +61,17 @@ class RecipesViewModel(
         }
     }
 
-    private fun changeMealType(intent: RecipesIntent.ChangeMealType) {
+    private fun changeMealFilter(intent: RecipesIntent.ChangeMealFilter) {
         _state.update {
             it.copy(
-                selectedMealType = intent.mealType,
-                selectedRecipeIds = emptySet()
+                selectedMealFilter = intent.mealType,
+                selectedRecipeIds = emptySet(),
             )
         }
+    }
+
+    private fun updateSearchQuery(intent: RecipesIntent.UpdateSearchQuery) {
+        _state.update { it.copy(searchQuery = intent.query) }
     }
 
     private fun toggleSelection(intent: RecipesIntent.ToggleSelection) {

@@ -101,8 +101,6 @@ private val LoginWideBreakpoint = 720.dp
 private val LoginCardShape = RoundedCornerShape(24.dp)
 private val LoginPillShape = RoundedCornerShape(26.dp)
 private val LoginFieldMinHeight = 52.dp
-private val LoginCardElevation = 28.dp
-private val LoginCardOuterInset = 16.dp
 private val LoginCardShadowColor = Color.Black.copy(alpha = 0.01f)
 private const val LoginImageWeight = 16f
 private const val LoginFormWeight = 9f
@@ -167,32 +165,18 @@ private fun LoginWideLayout(
     uiState: LoginUiState,
     onIntent: (LoginIntent) -> Unit,
 ) {
-    Box(
+    Row(
         modifier = Modifier
             .fillMaxSize()
-            .padding(LoginCardOuterInset),
+            .background(LoginColors.CardWhite),
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .shadow(
-                    elevation = LoginCardElevation,
-                    shape = LoginCardShape,
-                    clip = false,
-                    ambientColor = LoginCardShadowColor,
-                    spotColor = LoginCardShadowColor,
-                )
-                .clip(LoginCardShape)
-                .background(LoginColors.CardWhite, LoginCardShape),
-        ) {
-            LoginBrandingPanel(modifier = Modifier.weight(LoginImageWeight).fillMaxHeight())
-            LoginFormPanel(
-                modifier = Modifier.weight(LoginFormWeight),
-                uiState = uiState,
-                onIntent = onIntent,
-                variant = LoginFormVariant.Wide,
-            )
-        }
+        LoginBrandingPanel(modifier = Modifier.weight(LoginImageWeight).fillMaxHeight())
+        LoginFormPanel(
+            modifier = Modifier.weight(LoginFormWeight),
+            uiState = uiState,
+            onIntent = onIntent,
+            variant = LoginFormVariant.Wide,
+        )
     }
 }
 

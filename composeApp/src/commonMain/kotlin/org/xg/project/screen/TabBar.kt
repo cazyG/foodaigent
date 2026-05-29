@@ -31,15 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import org.xg.project.Routes.BottomTabRoute
-
-private data class TabItem(val label: String, val icon: ImageVector, val route: BottomTabRoute)
-
-private val tabItems = listOf(
-    TabItem("首页", Icons.Default.Home, BottomTabRoute.Home),
-    TabItem("食谱库", Icons.Default.Book, BottomTabRoute.Recipes),
-    TabItem("历史", Icons.Default.History, BottomTabRoute.History),
-    TabItem("我的", Icons.Default.Person, BottomTabRoute.Profile),
-)
+import org.xg.project.screen.navigation.appTabNavItems
 
 @Composable
 fun BottomTabBar(
@@ -61,7 +53,7 @@ fun BottomTabBar(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            tabItems.forEach { tab ->
+            appTabNavItems.forEach { tab ->
                 val isActive = tab.route == activeTab
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -91,52 +83,3 @@ fun BottomTabBar(
     }
 }
 
-@Composable
-fun SideNavigationBar(
-    activeTab: BottomTabRoute,
-    onTabClick: (BottomTabRoute) -> Unit
-) {
-    Card(
-        Modifier
-            .padding(horizontal = 8.dp, vertical = 8.dp)
-            .width(90.dp)
-            .fillMaxHeight()
-            .glassPanelStrong(RoundedCornerShape(16.dp)),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(0.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-    ) {
-        Column(
-            Modifier.fillMaxSize().padding(vertical = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(32.dp)
-        ) {
-            tabItems.forEach { tab ->
-                val isActive = tab.route == activeTab
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                    modifier = Modifier
-                        .clickable {
-                            onTabClick(tab.route)
-                        }
-                        .padding(8.dp)
-                ) {
-                    Icon(
-                        imageVector = tab.icon,
-                        contentDescription = tab.label,
-                        modifier = Modifier.size(32.dp),
-                        tint = if (isActive) Color(0xFFF97316) else Color(0xFFC2C2C2)
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = tab.label,
-                        fontSize = 12.sp,
-                        fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
-                        color = if (isActive) Color(0xFFF97316) else Color(0xFFC2C2C2),
-                    )
-                }
-            }
-        }
-    }
-}
