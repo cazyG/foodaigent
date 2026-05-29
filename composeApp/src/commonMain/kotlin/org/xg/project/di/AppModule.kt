@@ -11,6 +11,7 @@ import org.xg.project.presentation.manualrecipeinput.usecase.CreateRecipeUseCase
 import org.xg.project.presentation.manualrecipeinput.usecase.UploadImageUseCase
 import org.xg.project.presentation.history.HistoryViewModel
 import org.xg.project.presentation.index.IndexViewModel
+import org.xg.project.presentation.login.LoginViewModel
 import org.xg.project.presentation.manualrecipeinput.ManualRecipeInputViewModel
 import org.xg.project.presentation.profile.ProfileViewModel
 import org.xg.project.presentation.recipes.RecipesViewModel
@@ -35,4 +36,5 @@ val appModule = module {
     viewModelOf(::RecipesViewModel)
     viewModelOf(::ProfileViewModel)
     viewModelOf(::ManualRecipeInputViewModel)
+    viewModelOf(::LoginViewModel)
 }
