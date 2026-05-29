@@ -11,16 +11,19 @@ import org.jetbrains.compose.resources.painterResource
 
 fun main() = application {
     val windowState = rememberWindowState(
-        width = 800.dp,
-        height = 600.dp,
-        position = WindowPosition.Aligned(androidx.compose.ui.Alignment.Center)
+        width = 1280.dp,
+        height = 800.dp,
+        position = WindowPosition.Aligned(androidx.compose.ui.Alignment.Center),
     )
 
     Window(
         onCloseRequest = ::exitApplication,
         title = "锅铲黄炒",
         icon = painterResource(Res.drawable.app_icon),
-        state = windowState
+        state = windowState,
+//        alwaysOnTop = true,//是否成为悬浮窗
+        undecorated = true,   // 移除系统标题栏和边框
+        transparent = true,   // 窗口背景透明，才能显示我们自己绘制的圆角
     ) {
         App()
     }

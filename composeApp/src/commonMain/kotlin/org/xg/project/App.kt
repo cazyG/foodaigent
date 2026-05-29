@@ -6,6 +6,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -43,6 +44,20 @@ import org.xg.project.screen.RecipeDetailScreen
 import org.xg.project.screen.LoginScreen
 import org.xg.project.screen.GlassStyle
 
+private fun BottomTabRoute.toSaveableName(): String = when (this) {
+    BottomTabRoute.Home -> "tab_home"
+    BottomTabRoute.Recipes -> "tab_recipes"
+    BottomTabRoute.History -> "tab_history"
+    BottomTabRoute.Profile -> "tab_profile"
+}
+
+private fun bottomTabRouteFromSaveableName(name: String): BottomTabRoute = when (name) {
+    "tab_recipes" -> BottomTabRoute.Recipes
+    "tab_history" -> BottomTabRoute.History
+    "tab_profile" -> BottomTabRoute.Profile
+    else -> BottomTabRoute.Home
+}
+
 @Composable
 fun App() {
     // Coil3 初始化网络请求组件
@@ -68,10 +83,18 @@ fun App() {
                     Unit
                 }
 
-                androidx.compose.foundation.layout.Box(
+                val isLoginScreen = rootBackStack.lastOrNull() is AppRoute.Login
+
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(GlassStyle.BgGradient)
+                        .then(
+                            if (isLoginScreen) {
+                                Modifier.background(Color.Transparent)
+                            } else {
+                                Modifier.background(GlassStyle.BgGradient)
+                            },
+                        ),
                 ) {
                     NavDisplay(
                         backStack = rootBackStack,
@@ -137,12 +160,16 @@ private fun HomeNavDisplay(
     onNavigateToManualInput: () -> Unit,
     onNavigateToRecipeDetail: (String) -> Unit
 ) {
-    val selectedTab = rememberSaveable { mutableStateOf<BottomTabRoute>(BottomTabRoute.Home) }
+    val selectedTabName = rememberSaveable { mutableStateOf(BottomTabRoute.Home.toSaveableName()) }
+    val selectedTab = bottomTabRouteFromSaveableName(selectedTabName.value)
+    val selectTab: (BottomTabRoute) -> Unit = { tab ->
+        selectedTabName.value = tab.toSaveableName()
+    }
     val homeBackStack = rememberAppNavBackStack(BottomTabRoute.Home)
     val recipesBackStack = rememberAppNavBackStack(BottomTabRoute.Recipes)
     val historyBackStack = rememberAppNavBackStack(BottomTabRoute.History)
     val profileBackStack = rememberAppNavBackStack(BottomTabRoute.Profile)
-    val activeBackStack = when (selectedTab.value) {
+    val activeBackStack = when (selectedTab) {
         BottomTabRoute.Home -> homeBackStack
         BottomTabRoute.Recipes -> recipesBackStack
         BottomTabRoute.History -> historyBackStack
@@ -167,8 +194,8 @@ private fun HomeNavDisplay(
             bottomBar = {
                 if (!isWideScreen) {
                     BottomTabBar(
-                        activeTab = selectedTab.value,
-                        onTabClick = { selectedTab.value = it }
+                        activeTab = selectedTab,
+                        onTabClick = selectTab,
                     )
                 }
             },
@@ -177,8 +204,8 @@ private fun HomeNavDisplay(
             Row(modifier = Modifier.padding(innerPadding)) {
                 if (isWideScreen) {
                     SideNavigationBar(
-                        activeTab = selectedTab.value,
-                        onTabClick = { selectedTab.value = it }
+                        activeTab = selectedTab,
+                        onTabClick = selectTab,
                     )
                 }
 
@@ -192,7 +219,7 @@ private fun HomeNavDisplay(
                                 onAddPlan = { mealType ->
                                     recipesBackStack.clear()
                                     recipesBackStack.add(RecipesInternalRoute.FromHome(mealType.name))
-                                    selectedTab.value = BottomTabRoute.Recipes
+                                    selectTab(BottomTabRoute.Recipes)
                                 }
                             )
                         }
@@ -212,7 +239,7 @@ private fun HomeNavDisplay(
                                 onNavigateToManualInput = onNavigateToManualInput,
                                 onBack = popActiveBackStack,
                                 onSaveSuccess = {
-                                    selectedTab.value = BottomTabRoute.Home
+                                    selectTab(BottomTabRoute.Home)
                                     recipesBackStack.clear()
                                     recipesBackStack.add(BottomTabRoute.Recipes)
                                 }

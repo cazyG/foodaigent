@@ -1,25 +1,34 @@
 package org.xg.project.screen
 
 import aigent.composeapp.generated.resources.Res
-import aigent.composeapp.generated.resources.login_hero
+import aigent.composeapp.generated.resources.login_left_bg
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
@@ -61,8 +70,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import org.jetbrains.compose.resources.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -85,6 +98,16 @@ import org.xg.project.presentation.login.globalError
 import org.xg.project.presentation.login.isSubmitting
 
 private val LoginWideBreakpoint = 720.dp
+private val LoginCardShape = RoundedCornerShape(24.dp)
+private val LoginPillShape = RoundedCornerShape(26.dp)
+private val LoginFieldMinHeight = 52.dp
+private val LoginCardElevation = 28.dp
+private val LoginCardOuterInset = 16.dp
+private val LoginCardShadowColor = Color.Black.copy(alpha = 0.01f)
+private const val LoginImageWeight = 16f
+private const val LoginFormWeight = 9f
+private const val LoginBrandingHoverScale = 1.06f
+private val LoginCompactScreenPadding = 16.dp
 
 private object LoginColors {
     val PageBackground = Color(0xFFF3F4F6)
@@ -117,7 +140,6 @@ fun LoginScreen(
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
-            .background(LoginColors.PageBackground)
             .imePadding(),
     ) {
         if (maxWidth >= LoginWideBreakpoint) {
@@ -126,10 +148,16 @@ fun LoginScreen(
                 onIntent = viewModel::handleIntent,
             )
         } else {
-            LoginCompactLayout(
-                uiState = uiState,
-                onIntent = viewModel::handleIntent,
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(LoginColors.PageBackground),
+            ) {
+                LoginCompactLayout(
+                    uiState = uiState,
+                    onIntent = viewModel::handleIntent,
+                )
+            }
         }
     }
 }
@@ -142,22 +170,24 @@ private fun LoginWideLayout(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
-        contentAlignment = Alignment.Center,
+            .padding(LoginCardOuterInset),
     ) {
         Row(
             modifier = Modifier
-                .widthIn(max = 1100.dp)
-                .fillMaxWidth()
-                .heightIn(min = 520.dp)
-                .clip(RoundedCornerShape(24.dp))
-                .background(LoginColors.CardWhite),
+                .fillMaxSize()
+                .shadow(
+                    elevation = LoginCardElevation,
+                    shape = LoginCardShape,
+                    clip = false,
+                    ambientColor = LoginCardShadowColor,
+                    spotColor = LoginCardShadowColor,
+                )
+                .clip(LoginCardShape)
+                .background(LoginColors.CardWhite, LoginCardShape),
         ) {
-            LoginBrandingPanel(modifier = Modifier.weight(1f))
+            LoginBrandingPanel(modifier = Modifier.weight(LoginImageWeight).fillMaxHeight())
             LoginFormPanel(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight(),
+                modifier = Modifier.weight(LoginFormWeight),
                 uiState = uiState,
                 onIntent = onIntent,
                 variant = LoginFormVariant.Wide,
@@ -177,38 +207,51 @@ private fun LoginCompactLayout(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
-            .padding(horizontal = 20.dp, vertical = 16.dp),
+            .statusBarsPadding()
+            .navigationBarsPadding(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        LoginCompactHeader()
-        Spacer(modifier = Modifier.height(20.dp))
+        LoginCompactHeader(
+            modifier = Modifier.padding(
+                horizontal = LoginCompactScreenPadding,
+                vertical = 12.dp,
+            ),
+        )
+        Spacer(modifier = Modifier.height(16.dp))
         LoginFormPanel(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = LoginCompactScreenPadding),
             uiState = uiState,
             onIntent = onIntent,
             variant = LoginFormVariant.Compact,
         )
-        Spacer(modifier = Modifier.height(28.dp))
-        LoginCompactFooter()
+        Spacer(modifier = Modifier.height(24.dp))
+        LoginCompactFooter(
+            modifier = Modifier.padding(
+                horizontal = LoginCompactScreenPadding,
+                vertical = 16.dp,
+            ),
+        )
     }
 }
 
 @Composable
-private fun LoginCompactHeader() {
+private fun LoginCompactHeader(modifier: Modifier = Modifier) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             imageVector = Icons.Default.Restaurant,
             contentDescription = null,
             tint = LoginColors.BrandBrown,
-            modifier = Modifier.size(28.dp),
+            modifier = Modifier.size(24.dp),
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = "锅铲黄小厨",
-            fontSize = 20.sp,
+            fontSize = 17.sp,
             fontWeight = FontWeight.Bold,
             color = LoginColors.BrandBrown,
         )
@@ -216,17 +259,21 @@ private fun LoginCompactHeader() {
 }
 
 @Composable
-private fun LoginCompactFooter() {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+private fun LoginCompactFooter(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
         Text(
             text = "锅铲黄小厨",
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
             color = LoginColors.TextSecondary,
+            textAlign = TextAlign.Center,
         )
         Spacer(modifier = Modifier.height(12.dp))
         Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -251,17 +298,36 @@ private fun LoginCompactFooter() {
 
 @Composable
 private fun LoginBrandingPanel(modifier: Modifier = Modifier) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+    val imageScale by animateFloatAsState(
+        targetValue = if (isHovered) LoginBrandingHoverScale else 1f,
+        animationSpec = tween(
+            durationMillis = 450,
+            easing = FastOutSlowInEasing,
+        ),
+        label = "loginBrandingImageScale",
+    )
+
     Box(
         modifier = modifier
             .fillMaxHeight()
-            .background(LoginColors.BrandOrange),
+            .clip(RectangleShape)
+            .background(LoginColors.BrandOrange)
+            .hoverable(interactionSource = interactionSource),
     ) {
         Image(
-            painter = painterResource(Res.drawable.login_hero),
+            painter = painterResource(Res.drawable.login_left_bg),
             contentDescription = "新鲜食材与厨房场景",
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    scaleX = imageScale
+                    scaleY = imageScale
+                    transformOrigin = TransformOrigin(0.5f, 1f)
+                },
             contentScale = ContentScale.Crop,
-            alignment = Alignment.Center,
+            alignment = Alignment.BottomCenter,
         )
         Box(
             modifier = Modifier
@@ -270,9 +336,9 @@ private fun LoginBrandingPanel(modifier: Modifier = Modifier) {
                     Brush.verticalGradient(
                         colorStops = arrayOf(
                             0f to Color.Transparent,
-                            0.45f to Color.Transparent,
-                            0.75f to Color.Black.copy(alpha = 0.28f),
-                            1f to Color.Black.copy(alpha = 0.52f),
+                            0.5f to Color.Transparent,
+                            0.78f to Color.Black.copy(alpha = 0.22f),
+                            1f to Color.Black.copy(alpha = 0.48f),
                         ),
                     ),
                 ),
@@ -280,17 +346,19 @@ private fun LoginBrandingPanel(modifier: Modifier = Modifier) {
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(28.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+                .padding(horizontal = 28.dp, vertical = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 Icon(
                     imageVector = Icons.Default.Restaurant,
                     contentDescription = null,
                     tint = Color.White,
                     modifier = Modifier.size(22.dp),
                 )
-                Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "锅铲黄小厨",
                     color = Color.White,
@@ -317,60 +385,118 @@ private fun LoginFormPanel(
     onIntent: (LoginIntent) -> Unit,
     variant: LoginFormVariant,
 ) {
-    val credentials = uiState.formCredentials
-    val fieldErrors = uiState.fieldErrors
-    val isSubmitting = uiState.isSubmitting
-    val globalError = uiState.globalError
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     var rememberMe by rememberSaveable { mutableStateOf(false) }
 
     val scrollState = rememberScrollState()
     val shape = if (variant == LoginFormVariant.Compact) {
-        RoundedCornerShape(20.dp)
+        LoginCardShape
     } else {
         RoundedCornerShape(0.dp)
     }
+    val horizontalPadding = if (variant == LoginFormVariant.Wide) 40.dp else 20.dp
+    val verticalPadding = if (variant == LoginFormVariant.Wide) 36.dp else 24.dp
+    val horizontalAlignment = if (variant == LoginFormVariant.Wide) {
+        Alignment.Start
+    } else {
+        Alignment.CenterHorizontally
+    }
 
-    Column(
-        modifier = modifier
-            .then(
-                if (variant == LoginFormVariant.Compact) {
-                    Modifier
-                        .clip(shape)
-                        .background(LoginColors.CardWhite)
-                        .border(1.dp, LoginColors.InputBorder.copy(alpha = 0.35f), shape)
-                } else {
-                    Modifier.background(LoginColors.CardWhite)
-                },
-            )
-            .verticalScroll(scrollState)
-            .padding(
-                horizontal = if (variant == LoginFormVariant.Wide) 40.dp else 24.dp,
-                vertical = if (variant == LoginFormVariant.Wide) 36.dp else 28.dp,
-            ),
-        horizontalAlignment = if (variant == LoginFormVariant.Wide) {
-            Alignment.Start
+    val panelModifier = modifier.then(
+        if (variant == LoginFormVariant.Compact) {
+            Modifier
+                .shadow(
+                    elevation = 16.dp,
+                    shape = shape,
+                    clip = false,
+                    ambientColor = LoginCardShadowColor,
+                    spotColor = LoginCardShadowColor,
+                )
+                .clip(shape)
+                .background(LoginColors.CardWhite)
+                .border(1.dp, LoginColors.InputBorder.copy(alpha = 0.35f), shape)
         } else {
-            Alignment.CenterHorizontally
+            Modifier
+                .fillMaxHeight()
+                .background(LoginColors.CardWhite)
         },
-    ) {
+    )
+
+    if (variant == LoginFormVariant.Wide) {
+        Box(modifier = panelModifier) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = horizontalPadding, vertical = verticalPadding),
+                horizontalAlignment = horizontalAlignment,
+            ) {
+                LoginFormFields(
+                    uiState = uiState,
+                    onIntent = onIntent,
+                    variant = variant,
+                    passwordVisible = passwordVisible,
+                    onPasswordVisibleChange = { passwordVisible = it },
+                    rememberMe = rememberMe,
+                    onRememberMeChange = { rememberMe = it },
+                )
+            }
+        }
+    } else {
+        Column(
+            modifier = panelModifier.padding(
+                horizontal = horizontalPadding,
+                vertical = verticalPadding,
+            ),
+            horizontalAlignment = horizontalAlignment,
+        ) {
+            LoginFormFields(
+                uiState = uiState,
+                onIntent = onIntent,
+                variant = variant,
+                passwordVisible = passwordVisible,
+                onPasswordVisibleChange = { passwordVisible = it },
+                rememberMe = rememberMe,
+                onRememberMeChange = { rememberMe = it },
+            )
+        }
+    }
+}
+
+@Composable
+private fun LoginFormFields(
+    uiState: LoginUiState,
+    onIntent: (LoginIntent) -> Unit,
+    variant: LoginFormVariant,
+    passwordVisible: Boolean,
+    onPasswordVisibleChange: (Boolean) -> Unit,
+    rememberMe: Boolean,
+    onRememberMeChange: (Boolean) -> Unit,
+) {
+    val credentials = uiState.formCredentials
+    val fieldErrors = uiState.fieldErrors
+    val isSubmitting = uiState.isSubmitting
+    val globalError = uiState.globalError
+
+    Column {
         Text(
             text = "欢迎来到黄小厨",
-            fontSize = if (variant == LoginFormVariant.Wide) 28.sp else 26.sp,
+            fontSize = if (variant == LoginFormVariant.Wide) 28.sp else 22.sp,
             fontWeight = FontWeight.Bold,
             color = LoginColors.TextPrimary,
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(6.dp))
         Text(
             text = if (variant == LoginFormVariant.Wide) {
                 "登录您的账号以开始您的烹饪之旅"
             } else {
                 "开启您的美味烹饪之旅"
             },
-            fontSize = 14.sp,
+            fontSize = if (variant == LoginFormVariant.Wide) 14.sp else 13.sp,
             color = LoginColors.TextSecondary,
+            lineHeight = if (variant == LoginFormVariant.Compact) 18.sp else 20.sp,
         )
-        Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(if (variant == LoginFormVariant.Wide) 28.dp else 22.dp))
 
         if (globalError != null) {
             Text(
@@ -415,7 +541,7 @@ private fun LoginFormPanel(
             errorText = fieldErrors.password,
             isPassword = true,
             passwordVisible = passwordVisible,
-            onTogglePasswordVisibility = { passwordVisible = !passwordVisible },
+            onTogglePasswordVisibility = { onPasswordVisibleChange(!passwordVisible) },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(
                 onDone = { onIntent(LoginIntent.Submit) },
@@ -433,7 +559,7 @@ private fun LoginFormPanel(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(
                         checked = rememberMe,
-                        onCheckedChange = { rememberMe = it },
+                        onCheckedChange = onRememberMeChange,
                         colors = CheckboxDefaults.colors(
                             checkedColor = LoginColors.BrandOrange,
                         ),
@@ -465,7 +591,7 @@ private fun LoginFormPanel(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp),
-            shape = RoundedCornerShape(26.dp),
+            shape = LoginPillShape,
             colors = ButtonDefaults.buttonColors(
                 containerColor = LoginColors.BrandOrange,
                 disabledContainerColor = LoginColors.BrandOrange.copy(alpha = 0.6f),
@@ -530,24 +656,23 @@ private fun LoginTextField(
     keyboardActions: KeyboardActions = KeyboardActions.Default,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        if (variant == LoginFormVariant.Compact) {
-            Text(
-                text = label,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                color = LoginColors.TextPrimary,
-                modifier = Modifier.padding(bottom = 6.dp),
-            )
-        }
+        Text(
+            text = label,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium,
+            color = LoginColors.TextPrimary,
+            modifier = Modifier.padding(bottom = 6.dp),
+        )
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
-            label = if (variant == LoginFormVariant.Wide) {
-                { Text(label) }
-            } else {
-                null
+            placeholder = {
+                Text(
+                    text = placeholder,
+                    color = LoginColors.TextSecondary.copy(alpha = 0.7f),
+                    fontSize = 14.sp,
+                )
             },
-            placeholder = { Text(placeholder, color = LoginColors.TextSecondary.copy(alpha = 0.7f)) },
             leadingIcon = {
                 Icon(
                     imageVector = leadingIcon,
@@ -558,7 +683,10 @@ private fun LoginTextField(
             },
             trailingIcon = if (isPassword && onTogglePasswordVisibility != null) {
                 {
-                    IconButton(onClick = onTogglePasswordVisibility) {
+                    IconButton(
+                        onClick = onTogglePasswordVisibility,
+                        modifier = Modifier.size(40.dp),
+                    ) {
                         Icon(
                             imageVector = if (passwordVisible) {
                                 Icons.Default.VisibilityOff
@@ -567,6 +695,7 @@ private fun LoginTextField(
                             },
                             contentDescription = null,
                             tint = LoginColors.TextSecondary,
+                            modifier = Modifier.size(20.dp),
                         )
                     }
                 }
@@ -585,8 +714,10 @@ private fun LoginTextField(
             },
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(14.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .defaultMinSize(minHeight = LoginFieldMinHeight),
+            shape = LoginPillShape,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = LoginColors.InputBackground,
                 unfocusedContainerColor = LoginColors.InputBackground,
