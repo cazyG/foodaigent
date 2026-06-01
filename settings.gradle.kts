@@ -9,6 +9,13 @@ pluginManagement {
         maven("https://maven.aliyun.com/repository/gradle-plugin")
         maven("https://maven.aliyun.com/repository/public")
     }
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id.startsWith("org.jetbrains.kotlin")) {
+                useVersion("2.3.20")
+            }
+        }
+    }
 }
 
 dependencyResolutionManagement {

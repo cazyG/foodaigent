@@ -50,7 +50,7 @@ kotlin {
         commonMain.dependencies {
             implementation(libs.runtime)
             implementation(libs.foundation)
-            implementation(libs.material3.v190)
+            implementation(libs.jetbrains.material3)
             implementation(libs.ui)
             implementation(libs.components.resources)
             implementation(libs.ui.tooling.preview.v1101)
