@@ -2,6 +2,7 @@ package org.xg.project.presentation.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import org.xg.project.data.session.UserSessionRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,7 +13,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class LoginViewModel : ViewModel() {
+class LoginViewModel(
+    private val userSessionRepository: UserSessionRepository,
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow<LoginUiState>(LoginUiState.Ready())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
@@ -75,6 +78,7 @@ class LoginViewModel : ViewModel() {
             _uiState.value = LoginUiState.Submitting(credentials)
             try {
                 performLogin(credentials)
+                userSessionRepository.setLoggedInUser(credentials.username)
                 _uiState.value = LoginUiState.Ready()
                 _effect.emit(LoginEffect.NavigateHome)
             } catch (e: Exception) {

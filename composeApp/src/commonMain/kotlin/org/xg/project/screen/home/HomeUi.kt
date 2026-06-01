@@ -93,11 +93,12 @@ fun MealType.accentColor(): Color = when (this) {
     MealType.SNACK -> HomeColors.SnackAccent
 }
 
+/** 今日餐单区块序号：早餐 1、午餐 2、晚餐 3、宵夜 4 */
 fun MealType.slotIndex(): String = when (this) {
-    MealType.BREAKFAST -> "01"
-    MealType.LUNCH -> "02"
-    MealType.DINNER -> "03"
-    MealType.SNACK -> "04"
+    MealType.BREAKFAST -> "1"
+    MealType.LUNCH -> "2"
+    MealType.DINNER -> "3"
+    MealType.SNACK -> "4"
 }
 
 private fun DayOfWeek.toChineseLabel(): String = when (this) {

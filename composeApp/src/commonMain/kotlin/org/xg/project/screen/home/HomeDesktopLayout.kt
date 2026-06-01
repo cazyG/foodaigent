@@ -52,10 +52,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.xg.project.Routes.BottomTabRoute
+import org.xg.project.data.session.UserAccount
 import org.xg.project.domain.model.MealType
 import org.xg.project.screen.navigation.AppDesktopSidebar
 
-private val DesktopRightRailWidth = 260.dp
+private val DesktopRightRailWidth = 300.dp
 private val DesktopCardShape = RoundedCornerShape(10.dp)
 private val DesktopPanelShape = RoundedCornerShape(10.dp)
 private val DesktopToggleShape = RoundedCornerShape(8.dp)
@@ -72,6 +73,8 @@ fun HomeDesktopLayout(
     showSidebar: Boolean = true,
     activeTab: BottomTabRoute = BottomTabRoute.Home,
     onTabClick: (BottomTabRoute) -> Unit = {},
+    onProfileClick: () -> Unit = {},
+    userAccount: UserAccount? = null,
     modifier: Modifier = Modifier,
 ) {
     val scrollState = rememberScrollState()
@@ -87,6 +90,8 @@ fun HomeDesktopLayout(
                     HomeDesktopSidebar(
                         activeTab = activeTab,
                         onTabClick = onTabClick,
+                        onProfileClick = onProfileClick,
+                        userAccount = userAccount,
                         modifier = Modifier.fillMaxHeight(),
                     )
                 }
@@ -176,23 +181,47 @@ fun HomeDesktopMainSection(
         }
         Spacer(modifier = Modifier.height(24.dp))
         Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-            content.mealSlots.chunked(2).forEach { rowSlots ->
+            val breakfast = content.mealSlots.firstOrNull { it.mealType == MealType.BREAKFAST }
+            val lunch = content.mealSlots.firstOrNull { it.mealType == MealType.LUNCH }
+            val dinner = content.mealSlots.firstOrNull { it.mealType == MealType.DINNER }
+            val snack = content.mealSlots.firstOrNull { it.mealType == MealType.SNACK }
+
+            if (breakfast != null && lunch != null) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(20.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    rowSlots.forEach { slot ->
-                        HomeDesktopMealCard(
-                            slot = slot,
-                            onAddPlan = { onAddPlan(slot.mealType) },
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(220.dp),
-                        )
-                    }
-                    if (rowSlots.size == 1) {
-                        Spacer(modifier = Modifier.weight(1f))
-                    }
+                    HomeDesktopMealCard(
+                        slot = breakfast,
+                        onAddPlan = { onAddPlan(breakfast.mealType) },
+                        modifier = Modifier.weight(1f).height(200.dp),
+                    )
+                    HomeDesktopMealCard(
+                        slot = lunch,
+                        onAddPlan = { onAddPlan(lunch.mealType) },
+                        modifier = Modifier.weight(1f).height(200.dp),
+                    )
+                }
+            }
+            dinner?.let { slot ->
+                HomeDesktopMealCard(
+                    slot = slot,
+                    onAddPlan = { onAddPlan(slot.mealType) },
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 180.dp),
+                )
+            }
+            snack?.let { slot ->
+                if (slot.items.isEmpty()) {
+                    HomeDesktopEmptySnackCard(
+                        slot = slot,
+                        onAddPlan = { onAddPlan(slot.mealType) },
+                    )
+                } else {
+                    HomeDesktopMealCard(
+                        slot = slot,
+                        onAddPlan = { onAddPlan(slot.mealType) },
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 160.dp),
+                    )
                 }
             }
         }
@@ -203,43 +232,28 @@ fun HomeDesktopMainSection(
 private fun HomeDesktopSidebar(
     activeTab: BottomTabRoute,
     onTabClick: (BottomTabRoute) -> Unit,
+    onProfileClick: () -> Unit,
+    userAccount: UserAccount?,
     modifier: Modifier = Modifier,
 ) {
     AppDesktopSidebar(
         activeTab = activeTab,
         onTabClick = onTabClick,
+        onProfileClick = onProfileClick,
+        userAccount = userAccount,
         modifier = modifier,
-        footer = {
-            Column {
-                Button(
-                    onClick = { },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = HomeColors.BrandBrown),
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = null, tint = Color.White)
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text("上传新菜谱", fontSize = HomeDesktopFonts.actionButton, color = Color.White)
-                }
-                Spacer(modifier = Modifier.height(20.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.clickable { },
-                ) {
-                    Icon(
-                        Icons.Default.ExitToApp,
-                        contentDescription = null,
-                        tint = HomeColors.TextSecondary,
-                        modifier = Modifier.size(18.dp),
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        "退出登录",
-                        fontSize = HomeDesktopFonts.mealMetaSmall,
-                        color = HomeColors.TextSecondary,
-                    )
-                }
+        footerTop = {
+            Button(
+                onClick = { },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = HomeColors.BrandBrown),
+            ) {
+                Icon(Icons.Default.Add, contentDescription = null, tint = Color.White)
+                Spacer(modifier = Modifier.width(6.dp))
+                Text("上传新菜谱", fontSize = HomeDesktopFonts.actionButton, color = Color.White)
             }
+            Spacer(modifier = Modifier.height(20.dp))
         },
     )
 }
@@ -384,171 +398,160 @@ fun HomeDesktopMealCard(
         colors = CardDefaults.cardColors(containerColor = HomeColors.CardWhite),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+        if (item == null) {
+            HomeDesktopEmptyMealCardContent(
+                slot = slot,
+                periodIconColor = periodIconColor,
+                periodIconBg = periodIconBg,
+                onAddPlan = onAddPlan,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+            )
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
             ) {
-                Text(
-                    text = slot.title,
-                    fontSize = HomeDesktopFonts.mealTitle,
-                    fontWeight = FontWeight.Bold,
-                    color = HomeColors.TextPrimary,
+                HomeMealSlotCardHeader(
+                    slot = slot,
+                    periodIconColor = periodIconColor,
+                    periodIconBg = periodIconBg,
+                    largeIndex = true,
                 )
-                Box(
+                Spacer(modifier = Modifier.weight(1f))
+                Column(
                     modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(periodIconBg),
-                    contentAlignment = Alignment.Center,
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color(0xFFF9FAFB))
+                        .padding(12.dp),
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Restaurant,
-                        contentDescription = null,
-                        tint = periodIconColor,
-                        modifier = Modifier.size(18.dp),
+                    Text(
+                        text = item.name,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = HomeDesktopFonts.mealMeta,
+                        color = HomeColors.TextPrimary,
                     )
+                    if (item.desc.isNotBlank()) {
+                        Text(
+                            text = item.desc,
+                            fontSize = HomeDesktopFonts.mealMetaSmall,
+                            color = HomeColors.TextSecondary,
+                            modifier = Modifier.padding(top = 4.dp),
+                        )
+                    }
                 }
             }
-            Spacer(modifier = Modifier.weight(1f))
-                if (item == null) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp)
-                            .border(1.dp, HomeColors.DashedBorder, RoundedCornerShape(8.dp))
-                            .clickable(onClick = onAddPlan),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                Icons.Default.Add,
-                                contentDescription = null,
-                                tint = HomeColors.BrandOrange,
-                                modifier = Modifier.size(18.dp),
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = "去添加计划",
-                                color = HomeColors.BrandOrange,
-                                fontWeight = FontWeight.Medium,
-                                fontSize = HomeDesktopFonts.mealAction,
-                            )
-                        }
-                    }
-                } else {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(Color(0xFFF9FAFB))
-                            .padding(12.dp),
-                    ) {
-                        Text(
-                            text = item.name,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = HomeDesktopFonts.mealMeta,
-                            color = HomeColors.TextPrimary,
-                        )
-                        if (item.desc.isNotBlank()) {
-                            Text(
-                                text = item.desc,
-                                fontSize = HomeDesktopFonts.mealMetaSmall,
-                                color = HomeColors.TextSecondary,
-                                modifier = Modifier.padding(top = 4.dp),
-                            )
-                        }
-                    }
-                }
+        }
+    }
+}
+
+@Composable
+private fun HomeDesktopEmptyMealCardContent(
+    slot: MealSlotUi,
+    periodIconColor: Color,
+    periodIconBg: Color,
+    onAddPlan: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier) {
+        HomeMealSlotCardHeader(
+            slot = slot,
+            periodIconColor = periodIconColor,
+            periodIconBg = periodIconBg,
+            largeIndex = true,
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        HomeDesktopAddPlanButton(
+            onClick = onAddPlan,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+@Composable
+private fun HomeDesktopEmptySnackCard(
+    slot: MealSlotUi,
+    onAddPlan: () -> Unit,
+) {
+    val periodIconColor = Color(0xFF7EB6D4)
+    val periodIconBg = periodIconColor.copy(alpha = 0.15f)
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = DesktopCardShape,
+        colors = CardDefaults.cardColors(containerColor = HomeColors.CardWhite),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+        ) {
+            HomeMealSlotCardHeader(
+                slot = slot,
+                periodIconColor = periodIconColor,
+                periodIconBg = periodIconBg,
+                largeIndex = true,
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            HomeDesktopAddPlanButton(
+                onClick = onAddPlan,
+                label = "添加深夜食堂",
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
+}
+
+@Composable
+private fun HomeDesktopAddPlanButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    label: String = "去添加计划",
+) {
+    Box(
+        modifier = modifier
+            .height(52.dp)
+            .border(1.dp, HomeColors.DashedBorder, RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                Icons.Default.Add,
+                contentDescription = null,
+                tint = HomeColors.BrandOrange,
+                modifier = Modifier.size(18.dp),
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = label,
+                color = HomeColors.BrandOrange,
+                fontWeight = FontWeight.Medium,
+                fontSize = HomeDesktopFonts.mealAction,
+            )
         }
     }
 }
 
 @Composable
 private fun HomeDesktopRightRail(
-    heroImageUrl: String?,
+    @Suppress("UNUSED_PARAMETER") heroImageUrl: String?,
     modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(20.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        HomeDesktopSeasonalPanel(imageUrl = heroImageUrl)
-        HomeChefTipCard(modifier = Modifier.width(220.dp))
-    }
-}
-
-@Composable
-private fun HomeDesktopSeasonalPanel(imageUrl: String?) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(text = "✦", color = HomeColors.BrandOrange, fontSize = HomeDesktopFonts.sectionTitle)
-            Spacer(modifier = Modifier.width(6.dp))
-            Text(
-                text = "当季灵感",
-                fontSize = HomeDesktopFonts.sectionTitle,
-                fontWeight = FontWeight.Bold,
-                color = HomeColors.TextPrimary,
-            )
-        }
-        Spacer(modifier = Modifier.height(10.dp))
-        Card(
-            modifier = Modifier.width(220.dp),
-            shape = DesktopPanelShape,
-            elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
-        ) {
-            Box(modifier = Modifier.height(280.dp)) {
-                HomeMealImage(
-                    imageUrl = imageUrl,
-                    scale = 1f,
-                    modifier = Modifier.fillMaxSize(),
-                )
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.35f)),
-                )
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .padding(20.dp),
-                ) {
-                    Text(
-                        text = "有机生活，从今天开始",
-                        color = Color.White,
-                        fontSize = HomeDesktopFonts.inspirationTitle,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "探索 20+ 款健康时令食谱，让厨房充满活力与烟火气。",
-                        color = Color.White.copy(alpha = 0.92f),
-                        fontSize = HomeDesktopFonts.inspirationBody,
-                        lineHeight = 22.sp,
-                    )
-                    Spacer(modifier = Modifier.height(14.dp))
-                    Text(
-                        text = "探索灵感食谱",
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(Color.White)
-                            .clickable { }
-                            .padding(horizontal = 18.dp, vertical = 10.dp),
-                        color = HomeColors.BrandBrown,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = HomeDesktopFonts.inspirationButton,
-                    )
-                }
-            }
-        }
+        HomePromoCard()
+        HomeNutritionGoalsPanel()
+        HomeChefTipCard()
     }
 }
 

@@ -203,9 +203,7 @@ fun HomeMealImage(
 
 @Composable
 fun HomeAddPlanCard(
-    mealLabel: String,
-    timeRange: String,
-    accent: Color,
+    slot: MealSlotUi,
     modifier: Modifier = Modifier,
     onAddPlan: () -> Unit,
 ) {
@@ -218,38 +216,11 @@ fun HomeAddPlanCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(accent.copy(alpha = 0.15f), RoundedCornerShape(10.dp)),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Restaurant,
-                        contentDescription = null,
-                        tint = accent,
-                        modifier = Modifier.size(22.dp),
-                    )
-                }
-                Spacer(modifier = Modifier.width(12.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = mealLabel,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = HomeColors.TextPrimary,
-                    )
-                    Text(
-                        text = timeRange,
-                        fontSize = 12.sp,
-                        color = HomeColors.TextSecondary,
-                    )
-                }
-            }
+            HomeMealSlotCardHeader(
+                slot = slot,
+                periodIconColor = slot.accent,
+                periodIconBg = slot.accent.copy(alpha = 0.15f),
+            )
             Spacer(modifier = Modifier.height(12.dp))
             Box(
                 modifier = Modifier
@@ -268,7 +239,7 @@ fun HomeAddPlanCard(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "+ 去添加计划",
+                        text = "去添加计划",
                         color = HomeColors.BrandOrange,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium,
@@ -290,9 +261,7 @@ fun HomeTimelineMealCard(
     val item = slot.items.firstOrNull()
     if (item == null) {
         HomeAddPlanCard(
-            mealLabel = slot.title,
-            timeRange = slot.timeRange,
-            accent = slot.accent,
+            slot = slot,
             modifier = modifier,
             onAddPlan = onAddPlan,
         )
@@ -377,6 +346,54 @@ fun HomeTimelineMealCard(
 }
 
 @Composable
+fun HomeMealSlotCardHeader(
+    slot: MealSlotUi,
+    periodIconColor: Color,
+    periodIconBg: Color,
+    largeIndex: Boolean = false,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Top,
+    ) {
+        Column {
+            Text(
+                text = slot.mealType.slotIndex(),
+                fontSize = if (largeIndex) 28.sp else 13.sp,
+                fontWeight = if (largeIndex) FontWeight.Bold else FontWeight.Normal,
+                color = if (largeIndex) {
+                    periodIconColor.copy(alpha = 0.85f)
+                } else {
+                    HomeColors.TextSecondary
+                },
+            )
+            Text(
+                text = slot.title,
+                fontSize = if (largeIndex) HomeDesktopFonts.mealTitle else 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = HomeColors.TextPrimary,
+            )
+        }
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .clip(if (largeIndex) RoundedCornerShape(8.dp) else CircleShape)
+                .background(periodIconBg),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Default.Restaurant,
+                contentDescription = null,
+                tint = periodIconColor,
+                modifier = Modifier.size(18.dp),
+            )
+        }
+    }
+}
+
+@Composable
 fun HomeWideMealSlotCard(
     slot: MealSlotUi,
     modifier: Modifier = Modifier,
@@ -399,20 +416,11 @@ fun HomeWideMealSlotCard(
                     .padding(20.dp),
                 verticalArrangement = Arrangement.SpaceBetween,
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = slot.mealType.slotIndex(),
-                        fontSize = 13.sp,
-                        color = HomeColors.TextSecondary,
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = slot.title,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = HomeColors.TextPrimary,
-                    )
-                }
+                HomeMealSlotCardHeader(
+                    slot = slot,
+                    periodIconColor = slot.accent,
+                    periodIconBg = slot.accent.copy(alpha = 0.15f),
+                )
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -423,7 +431,7 @@ fun HomeWideMealSlotCard(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = "+ 去添加计划",
+                        text = "去添加计划",
                         color = HomeColors.BrandOrange,
                         fontWeight = FontWeight.Medium,
                     )
@@ -496,43 +504,58 @@ fun HomeNutritionGoalsPanel(modifier: Modifier = Modifier) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
-            Text(
-                text = "今日营养目标",
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                color = HomeColors.TextPrimary,
-            )
-            Text(
-                text = "已完成 85%",
-                fontSize = 13.sp,
-                color = HomeColors.BrandOrange,
-                modifier = Modifier.padding(top = 4.dp, bottom = 14.dp),
-            )
-            NutritionBar("热量", 0.85f, HomeColors.BrandBrown)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "今日营养目标",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = HomeColors.TextPrimary,
+                )
+                Text(
+                    text = "总完成度 85%",
+                    fontSize = 13.sp,
+                    color = HomeColors.BrandOrange,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+            Spacer(modifier = Modifier.height(14.dp))
+            NutritionBar("热量", 0.77f, HomeColors.BrandBrown, "1540/2000 kcal")
             Spacer(modifier = Modifier.height(10.dp))
-            NutritionBar("蛋白质", 0.72f, Color(0xFF60A5FA))
+            NutritionBar("蛋白质", 0.73f, Color(0xFF60A5FA), "88/120 g")
             Spacer(modifier = Modifier.height(10.dp))
-            NutritionBar("膳食纤维", 0.58f, Color(0xFF34D399))
+            NutritionBar("膳食纤维", 0.93f, Color(0xFF34D399), "28/30 g")
         }
     }
 }
 
 @Composable
-private fun NutritionBar(label: String, progress: Float, color: Color) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = label,
-            fontSize = 12.sp,
-            color = HomeColors.TextSecondary,
-            modifier = Modifier.width(52.dp),
-        )
+private fun NutritionBar(label: String, progress: Float, color: Color, detail: String) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = label,
+                fontSize = 12.sp,
+                color = HomeColors.TextSecondary,
+            )
+            Text(
+                text = detail,
+                fontSize = 11.sp,
+                color = HomeColors.TextSecondary,
+            )
+        }
+        Spacer(modifier = Modifier.height(6.dp))
         LinearProgressIndicator(
             progress = { progress },
             modifier = Modifier
-                .weight(1f)
+                .fillMaxWidth()
                 .height(8.dp)
                 .clip(RoundedCornerShape(4.dp)),
             color = color,
@@ -551,7 +574,7 @@ fun HomeChefTipCard(modifier: Modifier = Modifier) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = "小厨贴士",
+                text = "小厨提示",
                 fontWeight = FontWeight.Bold,
                 fontSize = HomeDesktopFonts.tipTitle,
                 color = HomeColors.BrandBrown,
@@ -577,21 +600,21 @@ fun HomePromoCard(modifier: Modifier = Modifier) {
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
             Text(
-                text = "时令限定",
+                text = "季节限定",
                 fontSize = 12.sp,
                 color = HomeColors.BrandOrange,
                 fontWeight = FontWeight.SemiBold,
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = "冬日养生：栗子烧排骨",
+                text = "暖冬养生：板栗排骨",
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
                 color = HomeColors.TextPrimary,
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "查看灵感食谱 >",
+                text = "查看今日推荐 >",
                 fontSize = 13.sp,
                 color = HomeColors.BrandBrown,
                 fontWeight = FontWeight.Medium,

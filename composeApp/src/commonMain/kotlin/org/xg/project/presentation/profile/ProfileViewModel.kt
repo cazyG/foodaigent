@@ -7,9 +7,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.xg.project.data.repository.FoodRepository
+import org.xg.project.data.session.UserSessionRepository
 
 class ProfileViewModel(
-    private val repository: FoodRepository = FoodRepository()
+    private val repository: FoodRepository,
+    private val userSessionRepository: UserSessionRepository,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ProfileState())
     val state: StateFlow<ProfileState> = _state.asStateFlow()
@@ -34,7 +36,7 @@ class ProfileViewModel(
             
             _state.value = _state.value.copy(
                 isLoading = false,
-                userName = "美食探索家",
+                userName = userSessionRepository.currentUser.value?.displayName ?: "美食探索家",
                 bio = "热爱美食，分享快乐",
                 totalOrders = 86,
                 totalReviews = 42,

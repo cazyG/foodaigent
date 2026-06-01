@@ -234,7 +234,7 @@ private fun HomeCompactTimeline(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            text = "${slot.title} ${slot.timeRange}",
+                            text = "${slot.mealType.slotIndex()}. ${slot.title} ${slot.timeRange}",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = HomeColors.BrandBrown,

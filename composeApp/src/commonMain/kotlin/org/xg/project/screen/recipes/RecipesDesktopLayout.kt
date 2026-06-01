@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.xg.project.Routes.BottomTabRoute
+import org.xg.project.data.session.UserAccount
 import org.xg.project.domain.model.RecipeMenu
 import org.xg.project.presentation.recipes.RecipesIntent
 import org.xg.project.screen.home.HomeColors
@@ -50,6 +51,8 @@ fun RecipesDesktopLayout(
     onSaveOrManual: () -> Unit,
     saveButtonLabel: String,
     showSidebar: Boolean = true,
+    onProfileClick: () -> Unit = {},
+    userAccount: UserAccount? = null,
     gridColumns: Int = 4,
     modifier: Modifier = Modifier,
 ) {
@@ -63,6 +66,8 @@ fun RecipesDesktopLayout(
                 activeTab = activeTab,
                 onTabClick = onTabClick,
                 onManualEntry = onNavigateToManualInput,
+                onProfileClick = onProfileClick,
+                userAccount = userAccount,
                 modifier = Modifier.fillMaxHeight(),
             )
         }
@@ -126,45 +131,28 @@ private fun RecipesDesktopSidebar(
     activeTab: BottomTabRoute,
     onTabClick: (BottomTabRoute) -> Unit,
     onManualEntry: () -> Unit,
+    onProfileClick: () -> Unit,
+    userAccount: UserAccount?,
     modifier: Modifier = Modifier,
 ) {
     AppDesktopSidebar(
         activeTab = activeTab,
         onTabClick = onTabClick,
+        onProfileClick = onProfileClick,
+        userAccount = userAccount,
         modifier = modifier,
-        subtitle = "Kitchen Master",
-        footer = {
-            Column {
-                Button(
-                    onClick = onManualEntry,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = RecipesColors.BrandBrown),
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = null, tint = Color.White)
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text("+ 手动录入", color = Color.White, fontSize = RecipesFonts.actionButton)
-                }
-                Spacer(modifier = Modifier.height(24.dp))
-                HorizontalDivider(color = Color(0xFFE5E7EB))
-                Spacer(modifier = Modifier.height(16.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .background(HomeColors.BrandOrange.copy(alpha = 0.25f)),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(Icons.Default.Person, contentDescription = null, tint = RecipesColors.BrandBrown)
-                    }
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Column {
-                        Text("Chef Huang", fontSize = RecipesFonts.profileName, fontWeight = FontWeight.SemiBold)
-                        Text("Gold Member", fontSize = RecipesFonts.profileBadge, color = RecipesColors.TextSecondary)
-                    }
-                }
+        footerTop = {
+            Button(
+                onClick = onManualEntry,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = RecipesColors.BrandBrown),
+            ) {
+                Icon(Icons.Default.Add, contentDescription = null, tint = Color.White)
+                Spacer(modifier = Modifier.width(6.dp))
+                Text("+ 手动录入", color = Color.White, fontSize = RecipesFonts.actionButton)
             }
+            Spacer(modifier = Modifier.height(20.dp))
         },
     )
 }

@@ -5,6 +5,8 @@ import org.koin.dsl.module
 import org.xg.project.data.remote.UploadService
 import org.xg.project.data.remote.httpClient
 import org.xg.project.data.repository.FoodRepository
+import org.xg.project.data.session.UserSessionRepository
+import org.xg.project.presentation.navigation.AppNavigationCoordinator
 import org.xg.project.domain.usecase.CheckMealReviewEligibilityUseCase
 import org.xg.project.presentation.manualrecipeinput.usecase.BuildRecipeDraftUseCase
 import org.xg.project.presentation.manualrecipeinput.usecase.CreateRecipeUseCase
@@ -23,6 +25,8 @@ val appModule = module {
 
     // Repository
     single { FoodRepository() }
+    single { UserSessionRepository() }
+    single { AppNavigationCoordinator() }
 
     // UseCases
     factory { CheckMealReviewEligibilityUseCase() }

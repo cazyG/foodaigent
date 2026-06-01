@@ -25,13 +25,13 @@ data class RecipeMenu(
     val submitter: String? = null,
     val submitTime: Long? = null
 ){
-    object RecipeMenuIngredientsSerializer : KSerializer<List<RecipeDraftIngredient>> {
+    object RecipeMenuIngredientsSerializer : KSerializer<List<RecipeMenuIngredients>> {
         override val descriptor: SerialDescriptor = Json
             .serializersModule
-            .serializer<List<RecipeDraftIngredient>>()
+            .serializer<List<RecipeMenuIngredients>>()
             .descriptor
 
-        override fun deserialize(decoder: Decoder): List<RecipeDraftIngredient> {
+        override fun deserialize(decoder: Decoder): List<RecipeMenuIngredients> {
             val stringValue = decoder.decodeString()
             return if (stringValue.isBlank()) {
                 emptyList()
@@ -40,7 +40,7 @@ data class RecipeMenu(
             }
         }
 
-        override fun serialize(encoder: Encoder, value: List<RecipeDraftIngredient>) {
+        override fun serialize(encoder: Encoder, value: List<RecipeMenuIngredients>) {
             val jsonString = Json.encodeToString(value)
             encoder.encodeString(jsonString)
         }

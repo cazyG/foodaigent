@@ -15,9 +15,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import org.koin.compose.koinInject
+import org.xg.project.data.session.UserSessionRepository
+import org.xg.project.presentation.navigation.AppNavigationCoordinator
+import org.xg.project.presentation.navigation.AppNavigationEvent
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Transparent
@@ -150,13 +157,16 @@ fun App() {
                                 )
                             }
                             entry<AppRoute.ManualRecipeInput> {
+                                val navigationCoordinator = koinInject<AppNavigationCoordinator>()
                                 ManualRecipeInputScreen(
                                     onBack = popRootBackStack,
                                     onSave = {
-                                        // 手动录入完成后，返回上一级。
-                                        // 注意：这里可能需要通知 RecipesScreen 刷新列表，目前使用重新进入或状态管理来更新
                                         popRootBackStack()
-                                    }
+                                    },
+                                    onNavigateToProfile = {
+                                        navigationCoordinator.openProfileTab()
+                                        popRootBackStack()
+                                    },
                                 )
                             }
                             entry<AppRoute.RecipeDetail> { route ->
@@ -177,10 +187,21 @@ private fun HomeNavDisplay(
     onNavigateToManualInput: () -> Unit,
     onNavigateToRecipeDetail: (String) -> Unit
 ) {
+    val userSessionRepository = koinInject<UserSessionRepository>()
+    val navigationCoordinator = koinInject<AppNavigationCoordinator>()
+    val currentUser by userSessionRepository.currentUser.collectAsState()
     val selectedTabName = rememberSaveable { mutableStateOf(BottomTabRoute.Home.toSaveableName()) }
     val selectedTab = bottomTabRouteFromSaveableName(selectedTabName.value)
     val selectTab: (BottomTabRoute) -> Unit = { tab ->
         selectedTabName.value = tab.toSaveableName()
+    }
+
+    LaunchedEffect(navigationCoordinator) {
+        navigationCoordinator.events.collect { event ->
+            when (event) {
+                AppNavigationEvent.OpenProfileTab -> selectTab(BottomTabRoute.Profile)
+            }
+        }
     }
     val homeBackStack = rememberAppNavBackStack(BottomTabRoute.Home)
     val recipesBackStack = rememberAppNavBackStack(BottomTabRoute.Recipes)
@@ -231,9 +252,11 @@ private fun HomeNavDisplay(
                     AppDesktopSidebar(
                         activeTab = selectedTab,
                         onTabClick = selectTab,
+                        onProfileClick = { selectTab(BottomTabRoute.Profile) },
+                        userAccount = currentUser,
                         modifier = Modifier.fillMaxHeight(),
-                        footer = {
-                            AppSidebarFooter(
+                        footerTop = {
+                            AppSidebarFooterTop(
                                 selectedTab = selectedTab,
                                 onNavigateToManualInput = onNavigateToManualInput,
                             )
@@ -249,7 +272,17 @@ private fun HomeNavDisplay(
                         entry<BottomTabRoute.Home> {
                             HomeScreen(
                                 onAddPlan = { mealType ->
-                                    recipesBackStack.clear()
+                                    // 保留食谱库原始页面状态，只叠加「从首页进入」的临时层，
+                                    // 这样返回时可以回到原食谱库，而不是丢失原状态。
+                                    if (recipesBackStack.isEmpty()) {
+                                        recipesBackStack.add(BottomTabRoute.Recipes)
+                                    }
+                                    while (recipesBackStack.lastOrNull() is RecipesInternalRoute.FromHome) {
+                                        recipesBackStack.removeAt(recipesBackStack.lastIndex)
+                                    }
+                                    if (recipesBackStack.lastOrNull() !is BottomTabRoute.Recipes) {
+                                        recipesBackStack.add(BottomTabRoute.Recipes)
+                                    }
                                     recipesBackStack.add(RecipesInternalRoute.FromHome(mealType.name))
                                     selectTab(BottomTabRoute.Recipes)
                                 },
@@ -272,8 +305,12 @@ private fun HomeNavDisplay(
                                 onBack = popActiveBackStack,
                                 onSaveSuccess = {
                                     selectTab(BottomTabRoute.Home)
-                                    recipesBackStack.clear()
-                                    recipesBackStack.add(BottomTabRoute.Recipes)
+                                    if (recipesBackStack.lastOrNull() is RecipesInternalRoute.FromHome) {
+                                        recipesBackStack.removeAt(recipesBackStack.lastIndex)
+                                    }
+                                    if (recipesBackStack.isEmpty()) {
+                                        recipesBackStack.add(BottomTabRoute.Recipes)
+                                    }
                                 },
                             )
                         }
@@ -290,7 +327,7 @@ private fun HomeNavDisplay(
 }
 
 @Composable
-private fun AppSidebarFooter(
+private fun AppSidebarFooterTop(
     selectedTab: BottomTabRoute,
     onNavigateToManualInput: () -> Unit,
 ) {

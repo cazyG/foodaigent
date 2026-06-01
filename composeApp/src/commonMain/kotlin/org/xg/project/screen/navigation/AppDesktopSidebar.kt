@@ -8,11 +8,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
@@ -20,6 +22,7 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,10 +31,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import org.xg.project.Routes.BottomTabRoute
+import org.xg.project.data.session.UserAccount
 import org.xg.project.screen.home.HomeColors
 
 val AppSidebarWidth = 240.dp
@@ -53,9 +60,11 @@ val appTabNavItems = listOf(
 fun AppDesktopSidebar(
     activeTab: BottomTabRoute,
     onTabClick: (BottomTabRoute) -> Unit,
+    onProfileClick: () -> Unit,
+    userAccount: UserAccount?,
     modifier: Modifier = Modifier,
-    subtitle: String = "厨房里的温暖时光",
-    footer: @Composable () -> Unit = {},
+    subtitle: String = "KitchenMaster",
+    footerTop: @Composable () -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -106,7 +115,81 @@ fun AppDesktopSidebar(
                 )
             }
         }
-        footer()
+        Column {
+            footerTop()
+            AppDesktopSidebarUserProfile(
+                userAccount = userAccount,
+                onClick = onProfileClick,
+            )
+        }
+    }
+}
+
+@Composable
+fun AppDesktopSidebarUserProfile(
+    userAccount: UserAccount?,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val displayName = userAccount?.displayName ?: "黄小厨"
+    val tierLabel = userAccount?.tierLabel ?: "Pro Tier"
+    val avatarUrl = userAccount?.avatarUrl
+
+    Column(modifier = modifier.fillMaxWidth()) {
+        HorizontalDivider(color = Color(0xFFE5E7EB))
+        Spacer(modifier = Modifier.height(16.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp))
+                .clickable(onClick = onClick)
+                .padding(vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(HomeColors.BrandOrange.copy(alpha = 0.22f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (!avatarUrl.isNullOrBlank()) {
+                    AsyncImage(
+                        model = avatarUrl,
+                        contentDescription = displayName,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop,
+                    )
+                } else {
+                    Icon(
+                        Icons.Default.Person,
+                        contentDescription = null,
+                        tint = HomeColors.BrandBrown,
+                        modifier = Modifier.size(22.dp),
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.width(10.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = displayName,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = HomeColors.TextPrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    text = tierLabel,
+                    fontSize = 12.sp,
+                    color = HomeColors.TextSecondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
     }
 }
 

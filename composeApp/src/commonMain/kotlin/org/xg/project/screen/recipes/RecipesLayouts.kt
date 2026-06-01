@@ -59,6 +59,7 @@ fun RecipesCompactContent(
             onIntent = onIntent,
             onRecipeOpen = onRecipeOpen,
             showPageHeader = false,
+            showPageSubtitle = true,
         )
     }
 }
@@ -139,6 +140,7 @@ fun RecipesMediumContent(
     ) {
         RecipesMediumHeader(
             isFromHome = isFromHome,
+            recommendedCount = content.recommendedCount,
             saveButtonLabel = saveButtonLabel,
             onBack = onBack,
             onSaveOrManual = onSaveOrManual,
@@ -151,6 +153,7 @@ fun RecipesMediumContent(
             onIntent = onIntent,
             onRecipeOpen = onRecipeOpen,
             modifier = Modifier.weight(1f),
+            showPageHeader = false,
         )
     }
 }
@@ -158,6 +161,7 @@ fun RecipesMediumContent(
 @Composable
 private fun RecipesMediumHeader(
     isFromHome: Boolean,
+    recommendedCount: Int,
     saveButtonLabel: String,
     onBack: () -> Unit,
     onSaveOrManual: () -> Unit,
@@ -189,7 +193,7 @@ private fun RecipesMediumHeader(
                     color = RecipesColors.TextPrimary,
                 )
                 Text(
-                    text = "发现您的下一次美味创作",
+                    text = "发现您的下一次美味创作，今日推荐 $recommendedCount 道精品菜谱",
                     fontSize = RecipesFonts.pageSubtitle,
                     color = RecipesColors.TextSecondary,
                 )

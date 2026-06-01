@@ -256,11 +256,17 @@ fun RecipesContentBody(
     onRecipeOpen: (RecipeMenu) -> Unit,
     modifier: Modifier = Modifier,
     showPageHeader: Boolean = true,
+    showPageSubtitle: Boolean = false,
     searchMaxWidth: androidx.compose.ui.unit.Dp? = null,
 ) {
     Column(modifier = modifier.fillMaxSize()) {
         if (showPageHeader) {
             RecipesPageHeader(
+                recommendedCount = content.recommendedCount,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            )
+        } else if (showPageSubtitle) {
+            RecipesPageSubtitle(
                 recommendedCount = content.recommendedCount,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             )
@@ -324,12 +330,21 @@ fun RecipesPageHeader(
             color = RecipesColors.TextPrimary,
         )
         Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = "发现您的下一次美味创作，今日推荐 $recommendedCount 道精品菜谱",
-            fontSize = RecipesFonts.pageSubtitle,
-            color = RecipesColors.TextSecondary,
-        )
+        RecipesPageSubtitle(recommendedCount = recommendedCount)
     }
+}
+
+@Composable
+fun RecipesPageSubtitle(
+    recommendedCount: Int,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        text = "发现您的下一次美味创作，今日推荐 $recommendedCount 道精品菜谱",
+        fontSize = RecipesFonts.pageSubtitle,
+        color = RecipesColors.TextSecondary,
+        modifier = modifier,
+    )
 }
 
 @Composable
