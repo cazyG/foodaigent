@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 
 class LoginViewModel : ViewModel() {
 
-    private val _uiState = MutableStateFlow(LoginUiState())
+    private val _uiState = MutableStateFlow<LoginUiState>(LoginUiState.Ready())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
     private val _effect = MutableSharedFlow<LoginEffect>()
@@ -22,45 +22,89 @@ class LoginViewModel : ViewModel() {
 
     fun handleIntent(intent: LoginIntent) {
         when (intent) {
-            is LoginIntent.UpdateUsername -> _uiState.update {
-                it.copy(
-                    formCredentials = it.formCredentials.copy(username = intent.value),
-                    fieldErrors = it.fieldErrors.copy(username = null),
-                    globalError = null,
+            is LoginIntent.UpdateUsername -> updateUsername(intent.value)
+            is LoginIntent.UpdatePassword -> updatePassword(intent.value)
+            is LoginIntent.Submit -> submit()
+        }
+    }
+
+    private fun updateUsername(value: String) {
+        _uiState.update { state ->
+            when (state) {
+                is LoginUiState.Ready -> state.copy(
+                    credentials = state.credentials.copy(username = value),
+                    fieldErrors = LoginFieldErrors(),
                 )
-            }
-            is LoginIntent.UpdatePassword -> _uiState.update {
-                it.copy(
-                    formCredentials = it.formCredentials.copy(password = intent.value),
-                    fieldErrors = it.fieldErrors.copy(password = null),
-                    globalError = null,
+                is LoginUiState.Failed -> LoginUiState.Ready(
+                    credentials = state.credentials.copy(username = value),
                 )
+                is LoginUiState.Submitting -> state
             }
-            LoginIntent.Submit -> submit()
+        }
+    }
+
+    private fun updatePassword(value: String) {
+        _uiState.update { state ->
+            when (state) {
+                is LoginUiState.Ready -> state.copy(
+                    credentials = state.credentials.copy(password = value),
+                    fieldErrors = LoginFieldErrors(),
+                )
+                is LoginUiState.Failed -> LoginUiState.Ready(
+                    credentials = state.credentials.copy(password = value),
+                )
+                is LoginUiState.Submitting -> state
+            }
         }
     }
 
     private fun submit() {
-        val credentials = _uiState.value.formCredentials
-        val usernameError = credentials.username.trim().takeIf { it.isEmpty() }?.let { "请输入用户名" }
-        val passwordError = credentials.password.takeIf { it.isEmpty() }?.let { "请输入密码" }
-        if (usernameError != null || passwordError != null) {
-            _uiState.update {
-                it.copy(
-                    fieldErrors = LoginFieldErrors(
-                        username = usernameError,
-                        password = passwordError,
-                    ),
-                )
-            }
+        val credentials = when (val state = _uiState.value) {
+            is LoginUiState.Ready -> state.credentials
+            is LoginUiState.Failed -> state.credentials
+            is LoginUiState.Submitting -> return
+        }
+
+        val fieldErrors = validate(credentials)
+        if (fieldErrors.hasErrors) {
+            _uiState.value = LoginUiState.Ready(credentials, fieldErrors)
             return
         }
 
         viewModelScope.launch {
-            _uiState.update { it.copy(isSubmitting = true, globalError = null) }
-            delay(400)
-            _uiState.update { it.copy(isSubmitting = false) }
-            _effect.emit(LoginEffect.NavigateHome)
+            _uiState.value = LoginUiState.Submitting(credentials)
+            try {
+                performLogin(credentials)
+                _uiState.value = LoginUiState.Ready()
+                _effect.emit(LoginEffect.NavigateHome)
+            } catch (e: Exception) {
+                _uiState.value = LoginUiState.Failed(
+                    credentials = credentials,
+                    message = e.message ?: "登录失败，请稍后重试",
+                    cause = e,
+                )
+            }
+        }
+    }
+
+    private fun validate(credentials: LoginCredentials): LoginFieldErrors {
+        val usernameError = when {
+            credentials.username.isBlank() -> "请输入用户名"
+            else -> null
+        }
+        val passwordError = when {
+            credentials.password.isBlank() -> "请输入密码"
+            credentials.password.length < 6 -> "密码至少 6 位"
+            else -> null
+        }
+        return LoginFieldErrors(username = usernameError, password = passwordError)
+    }
+
+    private suspend fun performLogin(credentials: LoginCredentials) {
+        delay(400)
+        // TODO: 接入真实认证 API
+        if (credentials.username == "error") {
+            throw IllegalStateException("用户名或密码错误")
         }
     }
 }
