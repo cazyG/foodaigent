@@ -20,7 +20,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -87,6 +89,7 @@ fun ManualRecipeFormContent(
                         minutes = content.durationMinutes,
                         onIntent = onIntent,
                         modifier = Modifier.weight(1f),
+                        compact = true,
                     )
                     ManualRecipeDifficultyCard(
                         stars = content.difficultyStars,
@@ -332,6 +335,7 @@ private fun ManualRecipeDurationCard(
     onIntent: (ManualRecipeInputIntent) -> Unit,
     modifier: Modifier = Modifier,
     useSlider: Boolean = false,
+    compact: Boolean = false,
 ) {
     Column(
         modifier = modifier
@@ -345,14 +349,14 @@ private fun ManualRecipeDurationCard(
             color = ManualRecipeColors.TextSecondary,
         )
         Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "$minutes 分钟",
-            fontSize = ManualRecipeFonts.durationValue,
-            fontWeight = FontWeight.Bold,
-            color = ManualRecipeColors.TextPrimary,
-        )
-        Spacer(modifier = Modifier.height(8.dp))
         if (useSlider) {
+            Text(
+                text = "$minutes 分钟",
+                fontSize = ManualRecipeFonts.durationValue,
+                fontWeight = FontWeight.Bold,
+                color = ManualRecipeColors.TextPrimary,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
             Slider(
                 value = minutes.toFloat(),
                 onValueChange = { onIntent(ManualRecipeInputIntent.UpdateDuration(it.toInt())) },
@@ -364,7 +368,42 @@ private fun ManualRecipeDurationCard(
                 Text("30min", fontSize = ManualRecipeFonts.helper, color = ManualRecipeColors.TextSecondary)
                 Text("60min+", fontSize = ManualRecipeFonts.helper, color = ManualRecipeColors.TextSecondary)
             }
+        } else if (compact) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                DurationStepButton(
+                    icon = Icons.Default.Remove,
+                    enabled = minutes > 5,
+                    onClick = {
+                        onIntent(ManualRecipeInputIntent.UpdateDuration((minutes - 5).coerceIn(5, 180)))
+                    },
+                )
+                Text(
+                    text = "$minutes 分钟",
+                    fontSize = ManualRecipeFonts.durationValue,
+                    fontWeight = FontWeight.Bold,
+                    color = ManualRecipeColors.TextPrimary,
+                    maxLines = 1,
+                )
+                DurationStepButton(
+                    icon = Icons.Default.Add,
+                    enabled = minutes < 180,
+                    onClick = {
+                        onIntent(ManualRecipeInputIntent.UpdateDuration((minutes + 5).coerceIn(5, 180)))
+                    },
+                )
+            }
         } else {
+            Text(
+                text = "$minutes 分钟",
+                fontSize = ManualRecipeFonts.durationValue,
+                fontWeight = FontWeight.Bold,
+                color = ManualRecipeColors.TextPrimary,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 DurationButton("-5") {
                     onIntent(ManualRecipeInputIntent.UpdateDuration((minutes - 5).coerceIn(5, 180)))
@@ -374,6 +413,30 @@ private fun ManualRecipeDurationCard(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun DurationStepButton(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    enabled: Boolean,
+    onClick: () -> Unit,
+) {
+    val tint = if (enabled) ManualRecipeColors.TextPrimary else ManualRecipeColors.TextSecondary.copy(alpha = 0.4f)
+    Box(
+        modifier = Modifier
+            .size(36.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(ManualRecipeColors.FieldBackground)
+            .clickable(enabled = enabled, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = tint,
+            modifier = Modifier.size(20.dp),
+        )
     }
 }
 
@@ -406,7 +469,10 @@ private fun ManualRecipeDifficultyCard(
             color = ManualRecipeColors.TextSecondary,
         )
         Spacer(modifier = Modifier.height(8.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
             (1..5).forEach { star ->
                 Text(
                     text = if (star <= stars) "★" else "☆",
