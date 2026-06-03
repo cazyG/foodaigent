@@ -286,6 +286,7 @@ private fun HomeNavDisplay(
                                     recipesBackStack.add(RecipesInternalRoute.FromHome(mealType.name))
                                     selectTab(BottomTabRoute.Recipes)
                                 },
+                                onNavigateToProfile = { selectTab(BottomTabRoute.Profile) },
                             )
                         }
                         entry<BottomTabRoute.Recipes> {

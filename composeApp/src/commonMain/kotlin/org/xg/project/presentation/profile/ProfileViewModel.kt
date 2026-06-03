@@ -6,11 +6,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import org.xg.project.data.repository.FoodRepository
 import org.xg.project.data.session.UserSessionRepository
+import org.xg.project.screen.profile.AchievementStyle
+import org.xg.project.screen.profile.MemberDietaryStyle
+import org.xg.project.screen.profile.PreferenceStyle
+import org.xg.project.screen.profile.ProfileAchievementUi
+import org.xg.project.screen.profile.ProfileMemberUi
+import org.xg.project.screen.profile.ProfilePreferenceUi
 
 class ProfileViewModel(
-    private val repository: FoodRepository,
     private val userSessionRepository: UserSessionRepository,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ProfileState())
@@ -18,42 +22,61 @@ class ProfileViewModel(
 
     fun handleIntent(intent: ProfileIntent) {
         when (intent) {
-            is ProfileIntent.UpdateUserInfo -> updateUserInfo(intent.name, intent.bio)
+            is ProfileIntent.UpdateUserInfo -> updateUserInfo(intent.name)
             ProfileIntent.LoadUserProfile -> loadUserProfile()
+            ProfileIntent.Logout -> logout()
         }
     }
 
     private fun loadUserProfile() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true)
-            // 模拟网络请求，实际项目中从 Repository 获取数据
-            kotlinx.coroutines.delay(500)
-            
-            val radarData = when (val result = repository.fetchTasteRadar()) {
-                is org.xg.project.domain.Result.Success -> result.data
-                is org.xg.project.domain.Result.Error -> emptyMap()
-            }
-            
+            val displayName = userSessionRepository.currentUser.value?.displayName ?: "锅铲黄小厨"
+            val avatarUrl = userSessionRepository.currentUser.value?.avatarUrl
+
             _state.value = _state.value.copy(
                 isLoading = false,
-                userName = userSessionRepository.currentUser.value?.displayName ?: "美食探索家",
-                bio = "热爱美食，分享快乐",
-                totalOrders = 86,
-                totalReviews = 42,
-                averageStars = 4.6f,
-                tasteRadarData = radarData
+                userName = displayName,
+                avatarUrl = avatarUrl,
+                familyName = "${displayName.take(2)}的温馨家园",
+                members = defaultMembers(),
+                preferences = defaultPreferences(),
+                achievements = defaultAchievements(),
             )
         }
     }
 
-    private fun updateUserInfo(name: String, bio: String) {
+    private fun updateUserInfo(name: String) {
         viewModelScope.launch {
-            // 模拟更新用户信息
-            _state.value = _state.value.copy(userName = name, bio = bio)
+            _state.value = _state.value.copy(userName = name)
         }
+    }
+
+    private fun logout() {
+        userSessionRepository.clearSession()
     }
 
     init {
         loadUserProfile()
     }
+
+    private fun defaultMembers(): List<ProfileMemberUi> = listOf(
+        ProfileMemberUi("妈妈", "低脂饮食", MemberDietaryStyle.LowFat),
+        ProfileMemberUi("爸爸", "高蛋白", MemberDietaryStyle.HighProtein),
+        ProfileMemberUi("小明", "成长餐", MemberDietaryStyle.Growth),
+        ProfileMemberUi("小红", "过敏原回避", MemberDietaryStyle.AllergenFree),
+    )
+
+    private fun defaultPreferences(): List<ProfilePreferenceUi> = listOf(
+        ProfilePreferenceUi("低盐低糖", "全家口味更清淡健康", PreferenceStyle.Orange),
+        ProfilePreferenceUi("儿童友好", "适合孩子的成长食谱", PreferenceStyle.Orange),
+        ProfilePreferenceUi("营养均衡", "每日搭配更科学", PreferenceStyle.Orange),
+        ProfilePreferenceUi("微辣适中", "兼顾大人与孩子的口味", PreferenceStyle.Blue),
+    )
+
+    private fun defaultAchievements(): List<ProfileAchievementUi> = listOf(
+        ProfileAchievementUi("烹饪大师", AchievementStyle.Chef),
+        ProfileAchievementUi("家庭大厨", AchievementStyle.FamilyChef),
+        ProfileAchievementUi("健康周打卡", AchievementStyle.HealthCheck),
+    )
 }

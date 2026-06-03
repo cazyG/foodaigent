@@ -35,6 +35,7 @@ import org.xg.project.screen.home.toHomeContentUi
 @Composable
 fun HomeScreen(
     onAddPlan: (MealType) -> Unit,
+    onNavigateToProfile: () -> Unit = {},
     viewModel: IndexViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
@@ -83,6 +84,7 @@ fun HomeScreen(
                             HomeCompactContent(
                                 content = content,
                                 onAddPlan = onAddPlan,
+                                onProfileClick = onNavigateToProfile,
                                 modifier = Modifier.weight(1f),
                             )
                         }
@@ -90,6 +92,7 @@ fun HomeScreen(
                             HomeWideContent(
                                 content = content,
                                 onAddPlan = onAddPlan,
+                                onProfileClick = onNavigateToProfile,
                                 modifier = Modifier.weight(1f),
                             )
                         }
@@ -97,6 +100,7 @@ fun HomeScreen(
                             HomeMediumContent(
                                 content = content,
                                 onAddPlan = onAddPlan,
+                                onProfileClick = onNavigateToProfile,
                                 modifier = Modifier.weight(1f),
                             )
                         }

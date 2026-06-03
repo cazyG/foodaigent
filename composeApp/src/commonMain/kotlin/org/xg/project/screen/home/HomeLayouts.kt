@@ -1,6 +1,7 @@
 package org.xg.project.screen.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,6 +46,7 @@ private val CompactHorizontalPadding = 16.dp
 fun HomeCompactContent(
     content: HomeContentUi,
     onAddPlan: (MealType) -> Unit,
+    onProfileClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val scrollState = rememberScrollState()
@@ -57,6 +59,7 @@ fun HomeCompactContent(
             .padding(bottom = 16.dp),
     ) {
         HomeCompactTopBar(
+            onProfileClick = onProfileClick,
             modifier = Modifier.padding(
                 horizontal = CompactHorizontalPadding,
                 vertical = 12.dp,
@@ -92,12 +95,14 @@ fun HomeCompactContent(
 fun HomeMediumContent(
     content: HomeContentUi,
     onAddPlan: (MealType) -> Unit,
+    onProfileClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     HomeDesktopLayout(
         content = content,
         onAddPlan = onAddPlan,
         showAppChrome = false,
+        onProfileClick = onProfileClick,
         modifier = modifier,
     )
 }
@@ -106,6 +111,7 @@ fun HomeMediumContent(
 fun HomeWideContent(
     content: HomeContentUi,
     onAddPlan: (MealType) -> Unit,
+    onProfileClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     HomeDesktopLayout(
@@ -113,12 +119,16 @@ fun HomeWideContent(
         onAddPlan = onAddPlan,
         showAppChrome = true,
         showSidebar = false,
+        onProfileClick = onProfileClick,
         modifier = modifier,
     )
 }
 
 @Composable
-private fun HomeCompactTopBar(modifier: Modifier = Modifier) {
+private fun HomeCompactTopBar(
+    onProfileClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -149,7 +159,8 @@ private fun HomeCompactTopBar(modifier: Modifier = Modifier) {
             modifier = Modifier
                 .size(36.dp)
                 .clip(CircleShape)
-                .background(HomeColors.BrandOrange.copy(alpha = 0.2f)),
+                .background(HomeColors.BrandOrange.copy(alpha = 0.2f))
+                .clickable(onClick = onProfileClick),
             contentAlignment = Alignment.Center,
         ) {
             Icon(

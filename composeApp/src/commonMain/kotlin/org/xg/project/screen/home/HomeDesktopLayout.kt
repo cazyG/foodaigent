@@ -100,7 +100,7 @@ fun HomeDesktopLayout(
                         .weight(1f)
                         .fillMaxHeight(),
                 ) {
-                    HomeDesktopTopBar()
+                    HomeDesktopTopBar(onProfileClick = onProfileClick)
                     Row(
                         modifier = Modifier
                             .weight(1f)
@@ -259,7 +259,7 @@ private fun HomeDesktopSidebar(
 }
 
 @Composable
-private fun HomeDesktopTopBar() {
+private fun HomeDesktopTopBar(onProfileClick: () -> Unit = {}) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -315,7 +315,8 @@ private fun HomeDesktopTopBar() {
                 modifier = Modifier
                     .size(36.dp)
                     .clip(CircleShape)
-                    .background(HomeColors.BrandOrange.copy(alpha = 0.25f)),
+                    .background(HomeColors.BrandOrange.copy(alpha = 0.25f))
+                    .clickable(onClick = onProfileClick),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
