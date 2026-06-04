@@ -45,6 +45,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import org.koin.compose.koinInject
 import org.xg.project.data.model.ResponseResult
 import org.xg.project.data.repository.FoodRepository
 import org.xg.project.domain.model.RecipeMenu
@@ -63,13 +64,14 @@ fun RecipeDetailScreen(
     recipeId: String,
     onBack: () -> Unit,
 ) {
+    val repository: FoodRepository = koinInject()
     val recipeState by produceState<RecipeMenu?>(initialValue = null, key1 = recipeId) {
         val id = recipeId.toIntOrNull()
         if (id == null) {
             value = null
             return@produceState
         }
-        val result = FoodRepository().getAllRecipe()
+        val result = repository.getAllRecipe()
         value = when (result) {
             is ResponseResult.Success -> result.data.firstOrNull { it.id == id }
             is ResponseResult.Error -> null

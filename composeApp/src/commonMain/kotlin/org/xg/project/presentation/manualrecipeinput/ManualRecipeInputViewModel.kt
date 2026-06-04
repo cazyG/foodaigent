@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import org.xg.project.data.remote.UploadService
-import org.xg.project.data.remote.httpClient
 import org.xg.project.data.repository.FoodRepository
 import org.xg.project.domain.Result
 import org.xg.project.domain.model.Ingredient
@@ -21,11 +20,11 @@ import kotlin.time.Clock
 import kotlin.random.Random
 
 class ManualRecipeInputViewModel(
-    private val uploadService: UploadService = UploadService(httpClient),
-    private val foodRepository: FoodRepository = FoodRepository(),
-    private val buildRecipeDraftUseCase: BuildRecipeDraftUseCase = BuildRecipeDraftUseCase(),
-    private val createRecipeUseCase: CreateRecipeUseCase = CreateRecipeUseCase(foodRepository),
-    private val uploadImageUseCase: UploadImageUseCase = UploadImageUseCase(uploadService)
+    private val uploadService: UploadService,
+    private val foodRepository: FoodRepository,
+    private val buildRecipeDraftUseCase: BuildRecipeDraftUseCase,
+    private val createRecipeUseCase: CreateRecipeUseCase,
+    private val uploadImageUseCase: UploadImageUseCase,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ManualRecipeInputState())
     val state: StateFlow<ManualRecipeInputState> = _state.asStateFlow()

@@ -161,6 +161,7 @@ fun App() {
                                 ManualRecipeInputScreen(
                                     onBack = popRootBackStack,
                                     onSave = {
+                                        navigationCoordinator.refreshRecipes()
                                         popRootBackStack()
                                     },
                                     onNavigateToProfile = {
@@ -195,11 +196,13 @@ private fun HomeNavDisplay(
     val selectTab: (BottomTabRoute) -> Unit = { tab ->
         selectedTabName.value = tab.toSaveableName()
     }
+    val recipesRefreshKey = remember { mutableStateOf(0) }
 
     LaunchedEffect(navigationCoordinator) {
         navigationCoordinator.events.collect { event ->
             when (event) {
                 AppNavigationEvent.OpenProfileTab -> selectTab(BottomTabRoute.Profile)
+                AppNavigationEvent.RefreshRecipes -> recipesRefreshKey.value++
             }
         }
     }
@@ -213,7 +216,6 @@ private fun HomeNavDisplay(
         BottomTabRoute.History -> historyBackStack
         BottomTabRoute.Profile -> profileBackStack
     }
-    val recipesRefreshKey = remember { mutableStateOf(0) }
     val popActiveBackStack = {
         if (activeBackStack.size > 1) {
             activeBackStack.removeAt(activeBackStack.lastIndex)
@@ -317,7 +319,7 @@ private fun HomeNavDisplay(
                         }
                         entry<BottomTabRoute.History> { HistoryScreen() }
                         entry<BottomTabRoute.Profile> {
-                            ProfileScreen()
+                            ProfileScreen(refreshTrigger = recipesRefreshKey.value)
                         }
                     }
                 )

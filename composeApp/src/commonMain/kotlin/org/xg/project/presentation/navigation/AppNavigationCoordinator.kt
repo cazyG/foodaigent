@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 
 sealed interface AppNavigationEvent {
     data object OpenProfileTab : AppNavigationEvent
+    data object RefreshRecipes : AppNavigationEvent
 }
 
 class AppNavigationCoordinator {
@@ -14,5 +15,9 @@ class AppNavigationCoordinator {
 
     fun openProfileTab() {
         _events.tryEmit(AppNavigationEvent.OpenProfileTab)
+    }
+
+    fun refreshRecipes() {
+        _events.tryEmit(AppNavigationEvent.RefreshRecipes)
     }
 }

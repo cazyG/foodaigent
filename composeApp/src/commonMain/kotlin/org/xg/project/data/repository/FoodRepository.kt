@@ -10,6 +10,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.number
 import kotlinx.datetime.todayIn
 import kotlin.time.Clock
+import org.xg.project.data.remote.ApiConfig
 import org.xg.project.data.remote.decodeBaseResponse
 import org.xg.project.data.remote.httpClient
 import org.xg.project.data.remote.toUserFriendlyNetworkMessage
@@ -23,7 +24,8 @@ import org.xg.project.domain.model.RecipeMenu
 
 class FoodRepository {
 
-    private val baseUrl = "http://43.167.217.211:8090/api"
+    private val baseUrl = ApiConfig.API_BASE_URL
+
 
     suspend fun fetchDailyRecords(): Result<List<DailyMenuRecord>> {
         val remoteResult = fetchDailyRecordsFromRemote()

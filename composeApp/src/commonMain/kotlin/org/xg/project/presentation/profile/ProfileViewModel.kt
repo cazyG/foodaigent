@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.xg.project.data.model.ResponseResult
+import org.xg.project.data.repository.FoodRepository
 import org.xg.project.data.session.UserSessionRepository
 import org.xg.project.screen.profile.AchievementStyle
 import org.xg.project.screen.profile.MemberDietaryStyle
@@ -16,6 +18,7 @@ import org.xg.project.screen.profile.ProfilePreferenceUi
 
 class ProfileViewModel(
     private val userSessionRepository: UserSessionRepository,
+    private val foodRepository: FoodRepository,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ProfileState())
     val state: StateFlow<ProfileState> = _state.asStateFlow()
@@ -34,16 +37,42 @@ class ProfileViewModel(
             val displayName = userSessionRepository.currentUser.value?.displayName ?: "锅铲黄小厨"
             val avatarUrl = userSessionRepository.currentUser.value?.avatarUrl
 
+            val recipeCount = when (val result = foodRepository.getAllRecipe()) {
+                is ResponseResult.Success -> result.data.size
+                is ResponseResult.Error -> _state.value.favoriteRecipes
+                is ResponseResult.Loading -> _state.value.favoriteRecipes
+            }
+
+            val preferences = when (val radarResult = foodRepository.fetchTasteRadar()) {
+                is org.xg.project.domain.Result.Success -> tasteRadarToPreferences(radarResult.data)
+                is org.xg.project.domain.Result.Error -> defaultPreferences()
+            }
+
             _state.value = _state.value.copy(
                 isLoading = false,
                 userName = displayName,
                 avatarUrl = avatarUrl,
                 familyName = "${displayName.take(2)}的温馨家园",
+                favoriteRecipes = recipeCount,
                 members = defaultMembers(),
-                preferences = defaultPreferences(),
+                preferences = preferences,
                 achievements = defaultAchievements(),
             )
         }
+    }
+
+    private fun tasteRadarToPreferences(radar: Map<String, Float>): List<ProfilePreferenceUi> {
+        if (radar.isEmpty()) return defaultPreferences()
+        return radar.entries
+            .sortedByDescending { it.value }
+            .take(4)
+            .mapIndexed { index, (label, value) ->
+                ProfilePreferenceUi(
+                    label = label,
+                    description = "偏好强度 ${(value * 100).toInt()}%",
+                    style = if (index % 2 == 0) PreferenceStyle.Orange else PreferenceStyle.Blue,
+                )
+            }
     }
 
     private fun updateUserInfo(name: String) {

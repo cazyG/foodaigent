@@ -11,8 +11,8 @@ import org.xg.project.domain.model.MealType
 import org.xg.project.domain.usecase.CheckMealReviewEligibilityUseCase
 
 class IndexViewModel(
-    private val repository: FoodRepository = FoodRepository(),
-    private val checkReviewEligibility: CheckMealReviewEligibilityUseCase = CheckMealReviewEligibilityUseCase()
+    private val repository: FoodRepository,
+    private val checkReviewEligibility: CheckMealReviewEligibilityUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(IndexState())

@@ -14,7 +14,7 @@ import org.xg.project.data.model.ResponseResult
 import org.xg.project.data.repository.FoodRepository
 
 class RecipesViewModel(
-    private val repository: FoodRepository = FoodRepository()
+    private val repository: FoodRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(RecipesState())

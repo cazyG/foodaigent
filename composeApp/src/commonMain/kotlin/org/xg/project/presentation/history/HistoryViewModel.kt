@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 import org.xg.project.data.repository.FoodRepository
 
 class HistoryViewModel(
-    private val repository: FoodRepository = FoodRepository()
+    private val repository: FoodRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HistoryState())
