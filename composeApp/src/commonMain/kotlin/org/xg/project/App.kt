@@ -34,6 +34,7 @@ import androidx.navigation3.ui.NavDisplay
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.network.ktor3.KtorNetworkFetcherFactory
+import io.github.vinceglb.filekit.coil.addPlatformFileSupport
 import org.koin.compose.KoinApplication
 import org.koin.dsl.koinConfiguration
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -92,6 +93,7 @@ fun App() {
 //            .logger(DebugLogger())
             .components {
                 add(KtorNetworkFetcherFactory())
+                addPlatformFileSupport()
             }
             .build()
     }

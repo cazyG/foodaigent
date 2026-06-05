@@ -6,15 +6,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import io.github.vinceglb.filekit.PlatformFile
+import io.github.vinceglb.filekit.dialogs.FileKitType
+import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
+import io.github.vinceglb.filekit.name
+import io.github.vinceglb.filekit.readBytes
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.xg.project.data.session.UserSessionRepository
-import io.github.ismoy.imagepickerkmp.domain.config.GalleryConfig
-import io.github.ismoy.imagepickerkmp.domain.extensions.loadBytes
-import io.github.ismoy.imagepickerkmp.features.imagepicker.config.ImagePickerKMPConfig
-import io.github.ismoy.imagepickerkmp.features.imagepicker.model.ImagePickerResult
-import io.github.ismoy.imagepickerkmp.features.imagepicker.ui.rememberImagePickerKMP
 import org.koin.compose.viewmodel.koinViewModel
 import org.xg.project.presentation.manualrecipeinput.ManualRecipeInputIntent
 import org.xg.project.presentation.manualrecipeinput.ManualRecipeInputUiEvent
@@ -38,35 +39,23 @@ fun ManualRecipeInputScreen(
     val state by viewModel.state.collectAsState()
     val content = state.toManualRecipeContentUi()
 
-    val pickerConfig = remember {
-        ImagePickerKMPConfig(
-            galleryConfig = GalleryConfig(
-                allowMultiple = false,
-                selectionLimit = 1,
-            ),
-        )
-    }
-    val picker = rememberImagePickerKMP(config = pickerConfig)
-    val result = picker.result
-
-    LaunchedEffect(result) {
-        when (result) {
-            is ImagePickerResult.Success -> {
-                val file = result.photos.firstOrNull()
-                val imageBytes = file?.loadBytes()
-                if (imageBytes != null) {
-                    viewModel.handleIntent(
-                        ManualRecipeInputIntent.UploadImage(
-                            file?.fileName ?: "",
-                            imageBytes,
-                        ),
-                    )
-                }
+    val scope = rememberCoroutineScope()
+    val imagePickerLauncher = rememberFilePickerLauncher(
+        type = FileKitType.Image,
+    ) { file: PlatformFile? ->
+        if (file == null) return@rememberFilePickerLauncher
+        scope.launch {
+            try {
+                val imageBytes = file.readBytes()
+                viewModel.handleIntent(
+                    ManualRecipeInputIntent.UploadImage(
+                        file.name,
+                        imageBytes,
+                    ),
+                )
+            } catch (e: Exception) {
+                println("图片选择错误: ${e.message}")
             }
-            is ImagePickerResult.Error -> {
-                println("图片选择错误: ${result.exception.message}")
-            }
-            else -> Unit
         }
     }
 
@@ -87,7 +76,7 @@ fun ManualRecipeInputScreen(
     }
     val onPickImage = {
         if (!state.isUploading) {
-            picker.launchGallery()
+            imagePickerLauncher.launch()
         }
     }
 

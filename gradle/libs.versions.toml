@@ -18,7 +18,7 @@ composeMultiplatform = "1.10.3"
 composeWebviewMultiplatform = "0.0.11"
 composeWebviewMultiplatformVersion = "2.0.3"
 foundation = "1.10.3"
-imagepickerkmp = "1.0.38"
+filekit = "0.14.1"
 icons-xtended = "1.7.3"
 junit = "4.13.2"
 kotlin = "2.3.20"
@@ -43,7 +43,9 @@ compose-webview-multiplatform = { module = "io.github.dengzhouli:compose-webview
 androidx-adaptive-navigation = { module = "org.jetbrains.compose.material3.adaptive:adaptive-navigation3", version.ref = "adaptive" }
 foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "foundation" }
 jetbrains-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3" }
-imagepickerkmp = { module = "io.github.ismoy:imagepickerkmp", version.ref = "imagepickerkmp" }
+filekit-core = { module = "io.github.vinceglb:filekit-core", version.ref = "filekit" }
+filekit-dialogs-compose = { module = "io.github.vinceglb:filekit-dialogs-compose", version.ref = "filekit" }
+filekit-coil = { module = "io.github.vinceglb:filekit-coil", version.ref = "filekit" }
 kevinnzou-compose-webview-multiplatform = { module = "io.github.kevinnzou:compose-webview-multiplatform", version.ref = "composeWebviewMultiplatformVersion" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-testJunit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }

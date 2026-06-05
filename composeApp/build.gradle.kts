@@ -76,7 +76,9 @@ kotlin {
             implementation(libs.koin.compose.viewmodel)
 //            implementation(libs.kevinnzou.compose.webview.multiplatform)
 //            implementation(libs.compose.webview.multiplatform)
-            implementation(libs.imagepickerkmp)
+            implementation(libs.filekit.core)
+            implementation(libs.filekit.dialogs.compose)
+            implementation(libs.filekit.coil)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
