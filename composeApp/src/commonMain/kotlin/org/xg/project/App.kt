@@ -67,6 +67,7 @@ import org.xg.project.screen.navigation.AppDesktopSidebar
 import org.xg.project.screen.navigation.isTabletLandscape
 import org.xg.project.screen.recipes.RecipesColors
 import org.xg.project.screen.recipes.RecipesFonts
+import org.xg.project.ui.appTypography
 
 private fun BottomTabRoute.toSaveableName(): String = when (this) {
     BottomTabRoute.Home -> "tab_home"
@@ -97,7 +98,7 @@ fun App() {
     KoinApplication(
         configuration = koinConfiguration(declaration = { modules(appModule) }),
         content = {
-            MaterialTheme {
+            MaterialTheme(typography = appTypography()) {
                 val rootBackStack = rememberAppNavBackStack(AppRoute.Login)
                 
                 val popRootBackStack = {
