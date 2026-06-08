@@ -132,11 +132,25 @@ compose.desktop {
         mainClass = "org.xg.project.MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            targetFormats(
+                TargetFormat.Dmg,
+                TargetFormat.Msi,
+                TargetFormat.Deb,
+                TargetFormat.AppImage,
+            )
             packageName = "org.xg.project"
             packageVersion = "1.0.0"
+            description = "锅铲黄炒 - 智能菜谱助手"
+            vendor = "org.xg.project"
             macOS {
                 entitlementsFile.set(project.file("entitlements.plist"))
+                iconFile.set(project.file("src/commonMain/composeResources/drawable/app_icon.png"))
+            }
+            windows {
+                iconFile.set(project.file("icons/app_icon.ico"))
+            }
+            linux {
+                iconFile.set(project.file("src/commonMain/composeResources/drawable/app_icon.png"))
             }
         }
     }
