@@ -132,11 +132,12 @@ compose.desktop {
         mainClass = "org.xg.project.MainKt"
 
         nativeDistributions {
+            // AppImage is Linux-only; including it on macOS breaks IDE Gradle sync
+            // (notarizeAppImage task: "AppImage cannot be notarized!").
             targetFormats(
                 TargetFormat.Dmg,
                 TargetFormat.Msi,
                 TargetFormat.Deb,
-                TargetFormat.AppImage,
             )
             packageName = "org.xg.project"
             packageVersion = "1.0.0"
