@@ -15,9 +15,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,6 +30,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.unit.dp
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import coil3.ImageLoader
@@ -102,8 +104,8 @@ fun App() {
         configuration = koinConfiguration(declaration = { modules(appModule) }),
         content = {
             MaterialTheme(typography = appTypography()) {
-                TrayBridgeEffect()
                 val rootBackStack = rememberAppNavBackStack(AppRoute.Login)
+                TrayBridgeEffect(rootBackStack = rootBackStack)
                 
                 val popRootBackStack = {
                     if (rootBackStack.size > 1) {
@@ -202,6 +204,18 @@ private fun HomeNavDisplay(
         selectedTabName.value = tab.toSaveableName()
     }
     val recipesRefreshKey = remember { mutableStateOf(0) }
+
+    val targetTab by navigationCoordinator.targetTab.collectAsState()
+
+    LaunchedEffect(targetTab) {
+        when (targetTab) {
+            BottomTabRoute.Profile -> selectTab(BottomTabRoute.Profile)
+            else -> Unit
+        }
+        if (targetTab != null) {
+            navigationCoordinator.clearTargetTab()
+        }
+    }
 
     LaunchedEffect(navigationCoordinator) {
         navigationCoordinator.events.collect { event ->
@@ -335,17 +349,49 @@ private fun HomeNavDisplay(
 }
 
 @Composable
-private fun TrayBridgeEffect() {
+private fun TrayBridgeEffect(rootBackStack: NavBackStack<NavKey>) {
     val navigationCoordinator = koinInject<AppNavigationCoordinator>()
-    DisposableEffect(navigationCoordinator) {
-        TrayNavigationBridge.onOpenSettings = {
-            navigationCoordinator.openProfileTab()
-        }
-        onDispose {
-            TrayNavigationBridge.onOpenSettings = null
-            TrayNavigationBridge.onOpenFeedback = null
+    val userSessionRepository = koinInject<UserSessionRepository>()
+    val currentUser by userSessionRepository.currentUser.collectAsState()
+
+    LaunchedEffect(rootBackStack, navigationCoordinator, currentUser) {
+        TrayNavigationBridge.openSettingsRequests.collect {
+            navigateToProfileFromTray(
+                rootBackStack = rootBackStack,
+                navigationCoordinator = navigationCoordinator,
+                isLoggedIn = currentUser != null,
+            )
         }
     }
+}
+
+private fun navigateToProfileFromTray(
+    rootBackStack: NavBackStack<NavKey>,
+    navigationCoordinator: AppNavigationCoordinator,
+    isLoggedIn: Boolean,
+) {
+    if (!isLoggedIn) return
+
+    val topRoute = rootBackStack.lastOrNull()
+    when (topRoute) {
+        is AppRoute.ManualRecipeInput, is AppRoute.RecipeDetail -> {
+            while (rootBackStack.size > 1) {
+                rootBackStack.removeAt(rootBackStack.lastIndex)
+            }
+        }
+        is AppRoute.Login -> {
+            rootBackStack.clear()
+            rootBackStack.add(AppRoute.Home)
+        }
+        else -> Unit
+    }
+
+    if (rootBackStack.lastOrNull() !is AppRoute.Home) {
+        rootBackStack.clear()
+        rootBackStack.add(AppRoute.Home)
+    }
+
+    navigationCoordinator.openProfileTab()
 }
 
 @Composable

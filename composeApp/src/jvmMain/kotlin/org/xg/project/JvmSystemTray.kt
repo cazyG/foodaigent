@@ -67,14 +67,10 @@ class JvmSystemTrayController internal constructor(
                 onOpen = onShowWindow,
                 onSettings = {
                     onShowWindow()
-                    TrayNavigationBridge.onOpenSettings?.invoke()
+                    TrayNavigationBridge.requestOpenSettings()
                 },
                 onFeedback = {
-                    if (TrayNavigationBridge.onOpenFeedback != null) {
-                        TrayNavigationBridge.onOpenFeedback?.invoke()
-                    } else {
-                        openFeedbackInBrowser()
-                    }
+                    openFeedbackInBrowser()
                 },
                 onExit = onExit,
             )

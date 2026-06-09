@@ -65,6 +65,11 @@ fun main() = application {
         icon = windowIcon,
         state = windowState,
     ) {
-        App()
+        DesktopEscapeToTrayHandler(
+            enabled = isWindowVisible,
+            onHideToTray = ::hideMainWindow,
+        ) {
+            App()
+        }
     }
 }
