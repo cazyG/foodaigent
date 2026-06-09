@@ -5,6 +5,9 @@ import org.koin.dsl.module
 import org.xg.project.data.remote.UploadService
 import org.xg.project.data.remote.httpClient
 import org.xg.project.data.repository.FoodRepository
+import org.xg.project.data.repository.HealthRepository
+import org.xg.project.data.repository.ProductRepository
+import org.xg.project.data.repository.UserRepository
 import org.xg.project.data.session.UserSessionRepository
 import org.xg.project.presentation.navigation.AppNavigationCoordinator
 import org.xg.project.domain.usecase.CheckMealReviewEligibilityUseCase
@@ -13,6 +16,7 @@ import org.xg.project.presentation.manualrecipeinput.usecase.CreateRecipeUseCase
 import org.xg.project.presentation.manualrecipeinput.usecase.UploadImageUseCase
 import org.xg.project.presentation.history.HistoryViewModel
 import org.xg.project.presentation.index.IndexViewModel
+import org.xg.project.presentation.register.RegisterViewModel
 import org.xg.project.presentation.login.LoginViewModel
 import org.xg.project.presentation.manualrecipeinput.ManualRecipeInputViewModel
 import org.xg.project.presentation.profile.ProfileViewModel
@@ -25,6 +29,9 @@ val appModule = module {
 
     // Repository
     single { FoodRepository() }
+    single { UserRepository() }
+    single { ProductRepository() }
+    single { HealthRepository() }
     single { UserSessionRepository() }
     single { AppNavigationCoordinator() }
 
@@ -41,4 +48,5 @@ val appModule = module {
     viewModelOf(::ProfileViewModel)
     viewModelOf(::ManualRecipeInputViewModel)
     viewModelOf(::LoginViewModel)
+    viewModelOf(::RegisterViewModel)
 }

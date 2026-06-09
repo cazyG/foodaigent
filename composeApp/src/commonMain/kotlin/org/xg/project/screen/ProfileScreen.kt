@@ -10,7 +10,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
+import org.xg.project.presentation.profile.ProfileEffect
 import org.xg.project.presentation.profile.ProfileIntent
 import org.xg.project.presentation.profile.ProfileViewModel
 import org.xg.project.screen.home.HomeColors
@@ -22,9 +24,18 @@ import org.xg.project.screen.profile.toProfileContentUi
 @Composable
 fun ProfileScreen(
     refreshTrigger: Int = 0,
+    onNavigateLogin: () -> Unit = {},
     viewModel: ProfileViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
+
+    LaunchedEffect(viewModel) {
+        viewModel.effect.collectLatest { effect ->
+            when (effect) {
+                ProfileEffect.NavigateLogin -> onNavigateLogin()
+            }
+        }
+    }
 
     LaunchedEffect(refreshTrigger) {
         viewModel.handleIntent(ProfileIntent.LoadUserProfile)

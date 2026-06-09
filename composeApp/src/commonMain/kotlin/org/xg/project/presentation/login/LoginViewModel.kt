@@ -2,8 +2,10 @@ package org.xg.project.presentation.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import org.xg.project.data.repository.UserRepository
 import org.xg.project.data.session.UserSessionRepository
-import kotlinx.coroutines.delay
+import org.xg.project.domain.Result
+import org.xg.project.domain.model.User
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -15,6 +17,7 @@ import kotlinx.coroutines.launch
 
 class LoginViewModel(
     private val userSessionRepository: UserSessionRepository,
+    private val userRepository: UserRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<LoginUiState>(LoginUiState.Ready())
@@ -77,8 +80,8 @@ class LoginViewModel(
         viewModelScope.launch {
             _uiState.value = LoginUiState.Submitting(credentials)
             try {
-                performLogin(credentials)
-                userSessionRepository.setLoggedInUser(credentials.username)
+                val user = performLogin(credentials)
+                userSessionRepository.setLoggedInUser(user)
                 _uiState.value = LoginUiState.Ready()
                 _effect.emit(LoginEffect.NavigateHome)
             } catch (e: Exception) {
@@ -104,11 +107,10 @@ class LoginViewModel(
         return LoginFieldErrors(username = usernameError, password = passwordError)
     }
 
-    private suspend fun performLogin(credentials: LoginCredentials) {
-        delay(400)
-        // TODO: 接入真实认证 API
-        if (credentials.username == "error") {
-            throw IllegalStateException("用户名或密码错误")
+    private suspend fun performLogin(credentials: LoginCredentials): User {
+        return when (val result = userRepository.authenticate(credentials.username, credentials.password)) {
+            is Result.Success -> result.data
+            is Result.Error -> throw IllegalStateException(result.message)
         }
     }
 }

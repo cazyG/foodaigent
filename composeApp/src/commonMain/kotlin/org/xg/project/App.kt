@@ -52,7 +52,7 @@ import org.xg.project.screen.ManualRecipeInputScreen
 import org.xg.project.screen.ProfileScreen
 import org.xg.project.screen.RecipesScreen
 import org.xg.project.screen.RecipeDetailScreen
-import org.xg.project.screen.LoginScreen
+import org.xg.project.screen.auth.AuthScreen
 import org.xg.project.screen.GlassStyle
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -146,11 +146,11 @@ fun App() {
                         },
                         entryProvider = entryProvider {
                             entry<AppRoute.Login> {
-                                LoginScreen(
-                                    onLoginSuccess = {
+                                AuthScreen(
+                                    onAuthSuccess = {
                                         rootBackStack.clear()
                                         rootBackStack.add(AppRoute.Home)
-                                    }
+                                    },
                                 )
                             }
                             entry<AppRoute.Home> {
@@ -160,7 +160,11 @@ fun App() {
                                     },
                                     onNavigateToRecipeDetail = { recipeId ->
                                         rootBackStack.add(AppRoute.RecipeDetail(recipeId))
-                                    }
+                                    },
+                                    onLogout = {
+                                        rootBackStack.clear()
+                                        rootBackStack.add(AppRoute.Login)
+                                    },
                                 )
                             }
                             entry<AppRoute.ManualRecipeInput> {
@@ -193,7 +197,8 @@ fun App() {
 @Composable
 private fun HomeNavDisplay(
     onNavigateToManualInput: () -> Unit,
-    onNavigateToRecipeDetail: (String) -> Unit
+    onNavigateToRecipeDetail: (String) -> Unit,
+    onLogout: () -> Unit,
 ) {
     val userSessionRepository = koinInject<UserSessionRepository>()
     val navigationCoordinator = koinInject<AppNavigationCoordinator>()
@@ -273,7 +278,11 @@ private fun HomeNavDisplay(
                     AppDesktopSidebar(
                         activeTab = selectedTab,
                         onTabClick = selectTab,
-                        onProfileClick = { selectTab(BottomTabRoute.Profile) },
+                        onProfileClick = {
+                            if (selectedTab != BottomTabRoute.Profile) {
+                                selectTab(BottomTabRoute.Profile)
+                            }
+                        },
                         userAccount = currentUser,
                         modifier = Modifier.fillMaxHeight(),
                         footerTop = {
@@ -338,7 +347,13 @@ private fun HomeNavDisplay(
                         }
                         entry<BottomTabRoute.History> { HistoryScreen() }
                         entry<BottomTabRoute.Profile> {
-                            ProfileScreen(refreshTrigger = recipesRefreshKey.value)
+                            ProfileScreen(
+                                refreshTrigger = recipesRefreshKey.value,
+                                onNavigateLogin = {
+                                    selectTab(BottomTabRoute.Home)
+                                    onLogout()
+                                },
+                            )
                         }
                     }
                 )

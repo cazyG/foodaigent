@@ -2,8 +2,11 @@ package org.xg.project.presentation.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.xg.project.data.model.ResponseResult
@@ -22,6 +25,9 @@ class ProfileViewModel(
 ) : ViewModel() {
     private val _state = MutableStateFlow(ProfileState())
     val state: StateFlow<ProfileState> = _state.asStateFlow()
+
+    private val _effect = MutableSharedFlow<ProfileEffect>()
+    val effect: SharedFlow<ProfileEffect> = _effect.asSharedFlow()
 
     fun handleIntent(intent: ProfileIntent) {
         when (intent) {
@@ -82,7 +88,10 @@ class ProfileViewModel(
     }
 
     private fun logout() {
-        userSessionRepository.clearSession()
+        viewModelScope.launch {
+            userSessionRepository.clearSession()
+            _effect.emit(ProfileEffect.NavigateLogin)
+        }
     }
 
     init {

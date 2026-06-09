@@ -56,6 +56,13 @@ val appTabNavItems = listOf(
     AppTabNavItem("我的", Icons.Default.Person, BottomTabRoute.Profile),
 )
 
+/** PC 侧边栏导航项（不含「我的」，个人中心通过底部头像进入）。 */
+val appDesktopSidebarNavItems = listOf(
+    AppTabNavItem("首页", Icons.Default.Home, BottomTabRoute.Home),
+    AppTabNavItem("食谱库", Icons.Default.Book, BottomTabRoute.Recipes),
+    AppTabNavItem("历史", Icons.Default.History, BottomTabRoute.History),
+)
+
 @Composable
 fun AppDesktopSidebar(
     activeTab: BottomTabRoute,
@@ -106,7 +113,7 @@ fun AppDesktopSidebar(
                 }
             }
             Spacer(modifier = Modifier.height(28.dp))
-            appTabNavItems.forEach { item ->
+            appDesktopSidebarNavItems.forEach { item ->
                 AppDesktopSidebarNavItem(
                     label = item.label,
                     icon = item.icon,

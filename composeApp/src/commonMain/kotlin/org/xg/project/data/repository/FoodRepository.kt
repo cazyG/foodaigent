@@ -18,6 +18,7 @@ import org.xg.project.data.model.ResponseResult
 import org.xg.project.domain.model.DailyMenuRecord
 import org.xg.project.domain.model.MealType
 import org.xg.project.domain.model.MenuItemData
+import org.xg.project.domain.model.CreateRecipeData
 import org.xg.project.domain.model.RecipeDraft
 import org.xg.project.domain.Result
 import org.xg.project.domain.model.RecipeMenu
@@ -81,7 +82,7 @@ class FoodRepository {
         }
     }
 
-    suspend fun createRecipe(recipeDraft: RecipeDraft): Result<CreateRecipeResponse> {
+    suspend fun createRecipe(recipeDraft: RecipeDraft): Result<CreateRecipeData> {
         return try {
             val response = httpClient.post("$baseUrl/recipe") {
                 contentType(ContentType.Application.Json)
@@ -112,10 +113,6 @@ class FoodRepository {
         snack = emptyList(),
     )
 
-    @kotlinx.serialization.Serializable
-    data class CreateRecipeResponse(
-        val recipeId: Int,
-    )
 }
 
 private fun List<RecipeMenu>.toDailyMenuRecord(date: String): DailyMenuRecord {

@@ -7,22 +7,34 @@ import org.xg.project.data.model.BaseResponse
 import org.xg.project.domain.Result
 
 suspend inline fun <reified T> HttpResponse.decodeBaseResponse(): Result<T> {
-    if (!status.isSuccess()) {
-        return Result.Error(
-            message = "请求失败 (${status.value})",
-            canRetry = status.value >= 500,
-        )
-    }
     return try {
         val payload = body<BaseResponse<T>>()
-        if (payload.success) {
+        if (status.isSuccess() && payload.success) {
             Result.Success(payload.data)
         } else {
-            Result.Error(payload.message.ifBlank { "请求失败" })
+            Result.Error(
+                message = payload.message.ifBlank { httpStatusMessage(status.value) },
+                canRetry = status.value >= 500,
+            )
         }
     } catch (e: Exception) {
-        Result.Error(toUserFriendlyNetworkMessage(e))
+        if (!status.isSuccess()) {
+            Result.Error(
+                message = httpStatusMessage(status.value),
+                canRetry = status.value >= 500,
+            )
+        } else {
+            Result.Error(toUserFriendlyNetworkMessage(e))
+        }
     }
+}
+
+fun httpStatusMessage(code: Int): String = when (code) {
+    400 -> "请求参数无效"
+    404 -> "资源不存在"
+    409 -> "用户名或邮箱已被注册"
+    500 -> "服务器异常，请稍后重试"
+    else -> "请求失败 ($code)"
 }
 
 fun toUserFriendlyNetworkMessage(throwable: Throwable): String {

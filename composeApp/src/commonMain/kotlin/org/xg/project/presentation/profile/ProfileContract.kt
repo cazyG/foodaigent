@@ -27,3 +27,7 @@ sealed class ProfileIntent {
     data object LoadUserProfile : ProfileIntent()
     data object Logout : ProfileIntent()
 }
+
+sealed interface ProfileEffect {
+    data object NavigateLogin : ProfileEffect
+}
