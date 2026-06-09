@@ -40,8 +40,6 @@ fun main() = application {
         JvmSystemTrayController.install(
             tooltip = APP_TITLE,
             onShowWindow = ::showMainWindow,
-            onHideWindow = ::hideMainWindow,
-            isWindowVisible = { isWindowVisible },
             onExit = ::exitApplication,
         )
     }
@@ -53,7 +51,6 @@ fun main() = application {
     }
 
     LaunchedEffect(isWindowVisible) {
-        trayController?.updateMenuLabels()
         if (isWindowVisible) {
             runCatching {
                 Desktop.getDesktop().requestForeground(true)

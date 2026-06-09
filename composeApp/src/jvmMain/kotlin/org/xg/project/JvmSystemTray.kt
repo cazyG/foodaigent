@@ -1,5 +1,6 @@
 package org.xg.project
 
+import java.awt.Desktop
 import java.awt.Font
 import java.awt.Image
 import java.awt.SystemTray
@@ -7,26 +8,17 @@ import java.awt.TrayIcon
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.image.BufferedImage
+import java.net.URI
 import javax.imageio.ImageIO
-import javax.swing.JMenuItem
-import javax.swing.JPopupMenu
 import javax.swing.SwingUtilities
 
 /**
- * 使用 Swing [JPopupMenu] 代替 Compose [androidx.compose.ui.window.Tray] 的 AWT PopupMenu，
- * 避免 Windows 系统托盘菜单中文显示为方块。
+ * 使用 Swing [javax.swing.JPopupMenu] 代替 Compose Tray 的 AWT PopupMenu，
+ * 避免 Windows 系统托盘菜单中文显示为方块，并提供圆角现代化样式。
  */
 class JvmSystemTrayController internal constructor(
     private val trayIcon: TrayIcon,
-    private val toggleItem: JMenuItem,
-    private val isWindowVisible: () -> Boolean,
 ) {
-    fun updateMenuLabels() {
-        SwingUtilities.invokeLater {
-            toggleItem.text = if (isWindowVisible()) "隐藏窗口" else "打开主窗口"
-        }
-    }
-
     fun dispose() {
         if (!SystemTray.isSupported()) return
         runCatching {
@@ -37,12 +29,11 @@ class JvmSystemTrayController internal constructor(
     companion object {
         private const val ICON_RESOURCE =
             "composeResources/aigent.composeapp.generated.resources/drawable/app_icon.png"
+        private const val FEEDBACK_URL = "https://github.com/cazyG/foodaigent/issues"
 
         fun install(
             tooltip: String,
             onShowWindow: () -> Unit,
-            onHideWindow: () -> Unit,
-            isWindowVisible: () -> Boolean,
             onExit: () -> Unit,
         ): JvmSystemTrayController? {
             if (!SystemTray.isSupported()) return null
@@ -52,8 +43,6 @@ class JvmSystemTrayController internal constructor(
                 controller = installOnEdt(
                     tooltip = tooltip,
                     onShowWindow = onShowWindow,
-                    onHideWindow = onHideWindow,
-                    isWindowVisible = isWindowVisible,
                     onExit = onExit,
                 )
             }
@@ -69,33 +58,26 @@ class JvmSystemTrayController internal constructor(
         private fun installOnEdt(
             tooltip: String,
             onShowWindow: () -> Unit,
-            onHideWindow: () -> Unit,
-            isWindowVisible: () -> Boolean,
             onExit: () -> Unit,
         ): JvmSystemTrayController? {
             val trayImage = loadTrayImage() ?: return null
             val menuFont = preferredChineseMenuFont()
-            val popup = JPopupMenu().apply { font = menuFont }
-
-            val toggleItem = JMenuItem().apply {
-                font = menuFont
-                addActionListener {
-                    if (isWindowVisible()) {
-                        onHideWindow()
+            val popup = createModernTrayPopup(
+                font = menuFont,
+                onOpen = onShowWindow,
+                onSettings = {
+                    onShowWindow()
+                    TrayNavigationBridge.onOpenSettings?.invoke()
+                },
+                onFeedback = {
+                    if (TrayNavigationBridge.onOpenFeedback != null) {
+                        TrayNavigationBridge.onOpenFeedback?.invoke()
                     } else {
-                        onShowWindow()
+                        openFeedbackInBrowser()
                     }
-                }
-            }
-
-            val exitItem = JMenuItem("退出").apply {
-                font = menuFont
-                addActionListener { onExit() }
-            }
-
-            popup.add(toggleItem)
-            popup.addSeparator()
-            popup.add(exitItem)
+                },
+                onExit = onExit,
+            )
 
             val trayIcon = TrayIcon(trayImage, tooltip).apply {
                 isImageAutoSize = true
@@ -117,8 +99,6 @@ class JvmSystemTrayController internal constructor(
 
                         private fun showPopupIfNeeded(event: MouseEvent) {
                             if (!event.isPopupTrigger) return
-                            toggleItem.text =
-                                if (isWindowVisible()) "隐藏窗口" else "打开主窗口"
                             popup.show(event.component, event.x, event.y)
                         }
                     },
@@ -127,12 +107,16 @@ class JvmSystemTrayController internal constructor(
 
             return runCatching {
                 SystemTray.getSystemTray().add(trayIcon)
-                JvmSystemTrayController(
-                    trayIcon = trayIcon,
-                    toggleItem = toggleItem,
-                    isWindowVisible = isWindowVisible,
-                ).also { it.updateMenuLabels() }
+                JvmSystemTrayController(trayIcon = trayIcon)
             }.getOrNull()
+        }
+
+        private fun openFeedbackInBrowser() {
+            runCatching {
+                if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                    Desktop.getDesktop().browse(URI(FEEDBACK_URL))
+                }
+            }
         }
 
         private fun loadTrayImage(): Image? {
@@ -167,7 +151,7 @@ class JvmSystemTrayController internal constructor(
                 os.contains("mac") -> "PingFang SC"
                 else -> "Noto Sans CJK SC"
             }
-            return Font(fontName, Font.PLAIN, 12)
+            return Font(fontName, Font.PLAIN, 13)
         }
     }
 }
