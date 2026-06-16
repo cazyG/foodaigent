@@ -48,3 +48,17 @@ sealed class RecipesInternalRoute : NavKey {
     @SerialName("recipes_from_home")
     data class FromHome(val mealType: String) : RecipesInternalRoute()
 }
+
+fun BottomTabRoute.toSaveableName(): String = when (this) {
+    BottomTabRoute.Home -> "tab_home"
+    BottomTabRoute.Recipes -> "tab_recipes"
+    BottomTabRoute.History -> "tab_history"
+    BottomTabRoute.Profile -> "tab_profile"
+}
+
+fun bottomTabFromSaveableName(name: String): BottomTabRoute = when (name) {
+    "tab_recipes" -> BottomTabRoute.Recipes
+    "tab_history" -> BottomTabRoute.History
+    "tab_profile" -> BottomTabRoute.Profile
+    else -> BottomTabRoute.Home
+}

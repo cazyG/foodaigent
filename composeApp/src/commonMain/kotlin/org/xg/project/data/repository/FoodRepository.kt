@@ -61,7 +61,7 @@ class FoodRepository {
         }
     }
 
-    private suspend fun fetchRecipes(): Result<List<RecipeMenu>> {
+     suspend fun fetchRecipes(): Result<List<RecipeMenu>> {
         return try {
             val response = httpClient.get("$baseUrl/recipe")
             response.decodeBaseResponse()

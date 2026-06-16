@@ -1,12 +1,10 @@
-package org.xg.project
+package org.xg.project.screen.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.navigation3.runtime.NavBackStack
 import androidx.savedstate.serialization.SavedStateConfiguration
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.modules.subclass
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import org.xg.project.Routes.AppRoute
@@ -32,4 +30,10 @@ val appSavedStateConfiguration = SavedStateConfiguration {
 @Composable
 fun rememberAppNavBackStack(vararg initialDestinations: NavKey): NavBackStack<NavKey> {
     return rememberNavBackStack(appSavedStateConfiguration, *initialDestinations)
+}
+
+fun NavBackStack<NavKey>.popOne() {
+    if (size > 1) {
+        removeAt(lastIndex)
+    }
 }
