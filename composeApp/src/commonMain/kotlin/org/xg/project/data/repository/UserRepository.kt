@@ -39,15 +39,6 @@ class UserRepository {
         }
     }
 
-    suspend fun getUserById(id: Int): Result<User> {
-        return try {
-            val response = httpClient.get("$baseUrl/users/$id")
-            response.decodeBaseResponse()
-        } catch (e: Exception) {
-            Result.Error(toUserFriendlyNetworkMessage(e))
-        }
-    }
-
     /**
      * 后端当前无独立登录接口，通过用户列表匹配用户名与密码完成鉴权。
      */

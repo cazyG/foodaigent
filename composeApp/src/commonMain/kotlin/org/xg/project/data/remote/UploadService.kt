@@ -63,18 +63,16 @@ class UploadService(private val httpClient: HttpClient) {
         return try {
             when (val presignedResult = getPresignedUrl(fileName)) {
                 is Result.Success -> {
-                    val uploadResult = uploadFile(
+                    uploadFile(
                         presignedResult.data.data.putUrl,
                         presignedResult.data.data.getUrl,
                         presignedResult.data.data.headers,
                         imageBytes
                     )
-                    uploadResult
                 }
                 is Result.Error -> presignedResult
             }
         } catch (e: Exception) {
-            e.printStackTrace()
             Result.Error(e.message ?: "Unknown error")
         }
     }

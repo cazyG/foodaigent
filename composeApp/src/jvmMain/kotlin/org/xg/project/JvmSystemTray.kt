@@ -11,6 +11,7 @@ import java.awt.image.BufferedImage
 import java.net.URI
 import javax.imageio.ImageIO
 import javax.swing.SwingUtilities
+import org.xg.project.core.navigation.TrayNavigationBridge
 
 /**
  * 使用 Swing [javax.swing.JPopupMenu] 代替 Compose Tray 的 AWT PopupMenu，

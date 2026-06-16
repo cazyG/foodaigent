@@ -8,9 +8,9 @@ import coil3.network.ktor3.KtorNetworkFetcherFactory
 import io.github.vinceglb.filekit.coil.addPlatformFileSupport
 import org.koin.compose.KoinApplication
 import org.koin.dsl.koinConfiguration
-import org.xg.project.di.appModule
-import org.xg.project.screen.navigation.AppRootNavHost
-import org.xg.project.ui.appTypography
+import org.xg.project.core.di.appModule
+import org.xg.project.core.navigation.AppRootNavHost
+import org.xg.project.core.ui.appTypography
 
 @Composable
 fun App() {

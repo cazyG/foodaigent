@@ -32,6 +32,3 @@ fun UserResponse.toUser(): User = User(
     email = email,
     password = password,
 )
-
-/** @deprecated 使用 [RegisterRequest] */
-typealias CreateUserRequest = RegisterRequest
