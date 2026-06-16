@@ -1,7 +1,7 @@
 package org.xg.project.feature.manualrecipe
 
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -15,7 +15,8 @@ import io.github.vinceglb.filekit.name
 import io.github.vinceglb.filekit.readBytes
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
-import org.xg.project.core.navigation.isDesktopWidth
+import org.xg.project.core.navigation.AppAdaptiveLayout
+import org.xg.project.core.navigation.currentAppAdaptiveLayout
 
 @Composable
 fun ManualRecipeInputScreen(
@@ -63,11 +64,11 @@ fun ManualRecipeInputScreen(
             imagePickerLauncher.launch()
         }
     }
+    val adaptiveLayout = currentAppAdaptiveLayout()
 
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-        val layoutWidth = maxWidth
-        when {
-            isDesktopWidth(layoutWidth) -> {
+    Box(modifier = Modifier.fillMaxSize()) {
+        when (adaptiveLayout) {
+            AppAdaptiveLayout.Expanded -> {
                 ManualRecipeDesktopLayout(
                     content = content,
                     onIntent = viewModel::onIntent,
@@ -78,19 +79,16 @@ fun ManualRecipeInputScreen(
                     onProfileClick = onNavigateToProfile,
                 )
             }
-            layoutWidth >= ManualRecipeBreakpoints.CompactMax -> {
-                ManualRecipeTabletLayout(
+            AppAdaptiveLayout.Medium -> {
+                ManualRecipeCompactLayout(
                     content = content,
-                    layoutWidth = layoutWidth,
                     onIntent = viewModel::onIntent,
                     onPickImage = onPickImage,
                     onBack = resetAndBack,
                     onSave = onSaveClick,
-                    userAccount = state.userAccount,
-                    onProfileClick = onNavigateToProfile,
                 )
             }
-            else -> {
+            AppAdaptiveLayout.Compact -> {
                 ManualRecipeCompactLayout(
                     content = content,
                     onIntent = viewModel::onIntent,

@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
@@ -53,7 +52,8 @@ import coil3.compose.AsyncImage
 import org.koin.compose.viewmodel.koinViewModel
 import org.xg.project.domain.model.DailyMenuRecord
 import org.xg.project.domain.model.MenuItemData
-import org.xg.project.core.navigation.isTabletLandscape
+import org.xg.project.core.navigation.currentAppAdaptiveLayout
+import org.xg.project.core.navigation.isMediumOrExpanded
 
 private val HistoryBg = Color(0xFFF3F5FB)
 private val HistoryCard = Color.White
@@ -89,17 +89,15 @@ private data class HistoryContentUi(
 fun HistoryScreen(viewModel: HistoryViewModel = koinViewModel()) {
     val state by viewModel.uiState.collectAsState()
     val content = remember(state.dailyRecords) { state.dailyRecords.toHistoryContentUi() }
+    val adaptiveLayout = currentAppAdaptiveLayout()
 
-    BoxWithConstraints(modifier = Modifier.fillMaxSize().background(HistoryBg)) {
-        // History 页面运行在应用主内容区（左侧有导航栏），可用宽度会小于整窗宽度；
-        // 使用更贴近主内容区的阈值，避免在 PC 上误判为移动布局。
-        val desktopMode = isTabletLandscape(maxWidth, maxHeight) && maxWidth >= 900.dp
+    Box(modifier = Modifier.fillMaxSize().background(HistoryBg)) {
         when {
             state.isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = HistoryAccent)
             }
 
-            desktopMode -> DesktopHistoryLayout(content = content)
+            adaptiveLayout.isMediumOrExpanded -> DesktopHistoryLayout(content = content)
             else -> MobileHistoryLayout(content = content)
         }
     }

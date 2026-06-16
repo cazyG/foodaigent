@@ -129,41 +129,6 @@ fun ManualRecipeDesktopLayout(
 }
 
 @Composable
-fun ManualRecipeTabletLayout(
-    content: ManualRecipeContentUi,
-    layoutWidth: androidx.compose.ui.unit.Dp,
-    onIntent: (ManualRecipeInputIntent) -> Unit,
-    onPickImage: () -> Unit,
-    onBack: () -> Unit,
-    onSave: () -> Unit,
-    userAccount: UserAccount? = null,
-    onProfileClick: () -> Unit = {},
-    modifier: Modifier = Modifier,
-) {
-    if (layoutWidth >= 900.dp) {
-        ManualRecipeDesktopLayout(
-            content = content,
-            onIntent = onIntent,
-            onPickImage = onPickImage,
-            onBack = onBack,
-            onSave = onSave,
-            userAccount = userAccount,
-            onProfileClick = onProfileClick,
-            modifier = modifier,
-        )
-    } else {
-        ManualRecipeCompactLayout(
-            content = content,
-            onIntent = onIntent,
-            onPickImage = onPickImage,
-            onBack = onBack,
-            onSave = onSave,
-            modifier = modifier,
-        )
-    }
-}
-
-@Composable
 private fun ManualRecipeMobileTopBar(
     onBack: () -> Unit,
     onSave: () -> Unit,

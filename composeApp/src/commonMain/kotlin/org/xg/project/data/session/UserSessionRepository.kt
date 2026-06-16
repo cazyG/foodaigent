@@ -8,7 +8,7 @@ import org.xg.project.domain.model.User
 data class UserAccount(
     val id: Int? = null,
     val displayName: String,
-    val tierLabel: String = "Pro Tier",
+    val tierLabel: String = "",
     val avatarUrl: String? = null,
 )
 
@@ -20,14 +20,14 @@ class UserSessionRepository {
         _currentUser.value = UserAccount(
             id = user.id,
             displayName = formatDisplayName(user.username),
-            tierLabel = "Pro Tier",
+            tierLabel = "",
         )
     }
 
     fun setLoggedInUser(username: String) {
         _currentUser.value = UserAccount(
             displayName = formatDisplayName(username),
-            tierLabel = "Pro Tier",
+            tierLabel = "",
         )
     }
 

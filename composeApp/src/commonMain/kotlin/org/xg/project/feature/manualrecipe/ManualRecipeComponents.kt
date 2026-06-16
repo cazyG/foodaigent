@@ -5,7 +5,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -269,25 +268,22 @@ private fun ManualRecipeMealTypeSection(
             fontWeight = FontWeight.SemiBold,
             color = ManualRecipeColors.TextPrimary,
         )
-        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            val cols = if (maxWidth >= 520.dp) columns else 2
-            val rows = MealType.entries.chunked(cols)
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                rows.forEach { row ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        row.forEach { mealType ->
-                            ManualRecipeMealTypeChip(
-                                mealType = mealType,
-                                selected = content.selectedMealType == mealType.name,
-                                onClick = { onIntent(ManualRecipeInputIntent.SelectMealType(mealType.name)) },
-                                modifier = Modifier.weight(1f),
-                            )
-                        }
-                        repeat(cols - row.size) { Spacer(modifier = Modifier.weight(1f)) }
+        val rows = MealType.entries.chunked(columns)
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            rows.forEach { row ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    row.forEach { mealType ->
+                        ManualRecipeMealTypeChip(
+                            mealType = mealType,
+                            selected = content.selectedMealType == mealType.name,
+                            onClick = { onIntent(ManualRecipeInputIntent.SelectMealType(mealType.name)) },
+                            modifier = Modifier.weight(1f),
+                        )
                     }
+                    repeat(columns - row.size) { Spacer(modifier = Modifier.weight(1f)) }
                 }
             }
         }

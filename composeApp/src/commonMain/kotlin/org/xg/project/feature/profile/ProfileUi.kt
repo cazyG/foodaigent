@@ -1,13 +1,7 @@
 package org.xg.project.feature.profile
 
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import org.xg.project.feature.profile.ProfileState
-
-object ProfileBreakpoints {
-    /** 双栏桌面布局（平板横屏及以上） */
-    val DesktopMin = 720.dp
-}
 
 object ProfileColors {
     val PageBackground = Color(0xFFF8F9FB)

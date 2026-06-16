@@ -1,7 +1,6 @@
 package org.xg.project.feature.home
 
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
@@ -10,11 +9,6 @@ import org.xg.project.domain.model.DailyMenuRecord
 import org.xg.project.domain.model.MealType
 import org.xg.project.domain.model.MenuItemData
 import org.xg.project.feature.home.HomeState
-
-object HomeBreakpoints {
-    val CompactMax = 720.dp
-    val WideMin = 1100.dp
-}
 
 /** 宽屏桌面端字号比例 */
 object HomeDesktopFonts {

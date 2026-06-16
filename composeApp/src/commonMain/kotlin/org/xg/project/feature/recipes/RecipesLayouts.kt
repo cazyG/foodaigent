@@ -120,7 +120,6 @@ private fun RecipesCompactTopBar(
 fun RecipesMediumContent(
     content: RecipesContentUi,
     isFromHome: Boolean,
-    layoutWidth: androidx.compose.ui.unit.Dp,
     onIntent: (RecipesIntent) -> Unit,
     onNavigateToManualInput: () -> Unit,
     onRecipeOpen: (RecipeMenu) -> Unit,
@@ -129,10 +128,6 @@ fun RecipesMediumContent(
     saveButtonLabel: String,
     modifier: Modifier = Modifier,
 ) {
-    val columns = when {
-        layoutWidth >= 960.dp -> 3
-        else -> 2
-    }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -149,7 +144,7 @@ fun RecipesMediumContent(
         RecipesContentBody(
             content = content,
             isFromHome = isFromHome,
-            gridColumns = columns,
+            gridColumns = 2,
             onIntent = onIntent,
             onRecipeOpen = onRecipeOpen,
             modifier = Modifier.weight(1f),
@@ -242,34 +237,3 @@ fun RecipesWideContent(
     )
 }
 
-@Composable
-fun RecipesTabletContent(
-    content: RecipesContentUi,
-    isFromHome: Boolean,
-    layoutWidth: androidx.compose.ui.unit.Dp,
-    onIntent: (RecipesIntent) -> Unit,
-    onNavigateToManualInput: () -> Unit,
-    onRecipeOpen: (RecipeMenu) -> Unit,
-    onSaveOrManual: () -> Unit,
-    saveButtonLabel: String,
-    modifier: Modifier = Modifier,
-) {
-    val columns = when {
-        layoutWidth >= 960.dp -> 3
-        else -> 2
-    }
-    RecipesDesktopLayout(
-        content = content,
-        isFromHome = isFromHome,
-        activeTab = BottomTabRoute.Recipes,
-        onTabClick = {},
-        onIntent = onIntent,
-        onNavigateToManualInput = onNavigateToManualInput,
-        onRecipeOpen = onRecipeOpen,
-        onSaveOrManual = onSaveOrManual,
-        saveButtonLabel = saveButtonLabel,
-        showSidebar = false,
-        gridColumns = columns,
-        modifier = modifier,
-    )
-}

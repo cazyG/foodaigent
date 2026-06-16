@@ -40,7 +40,8 @@ coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCo
 coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coilCompose" }
 components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "componentsResources" }
 compose-webview-multiplatform = { module = "io.github.dengzhouli:compose-webview-multiplatform", version.ref = "composeWebviewMultiplatform" }
-androidx-adaptive-navigation = { module = "org.jetbrains.compose.material3.adaptive:adaptive-navigation3", version.ref = "adaptive" }
+material3-adaptive = { module = "org.jetbrains.compose.material3.adaptive:adaptive", version.ref = "adaptive" }
+material3-adaptive-navigation-suite = { module = "org.jetbrains.compose.material3:material3-adaptive-navigation-suite", version.ref = "material3" }
 foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "foundation" }
 jetbrains-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3" }
 filekit-core = { module = "io.github.vinceglb:filekit-core", version.ref = "filekit" }

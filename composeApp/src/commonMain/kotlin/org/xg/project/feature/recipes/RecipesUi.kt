@@ -1,16 +1,10 @@
 package org.xg.project.feature.recipes
 
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.xg.project.domain.model.MealType
 import org.xg.project.domain.model.RecipeMenu
 import org.xg.project.feature.recipes.RecipesState
-
-object RecipesBreakpoints {
-    val CompactMax = 720.dp
-    val WideMin = 1100.dp
-}
 
 object RecipesColors {
     val PageBackground = Color(0xFFF5F5F5)

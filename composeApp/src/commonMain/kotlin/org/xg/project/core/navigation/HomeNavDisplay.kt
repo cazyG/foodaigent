@@ -2,12 +2,15 @@ package org.xg.project.core.navigation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.navigationsuite.ExperimentalMaterial3AdaptiveNavigationSuiteApi
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuite
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldLayout
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -17,28 +20,29 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion.Transparent
+import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import org.koin.compose.koinInject
-import org.xg.project.data.session.UserSessionRepository
 import org.xg.project.core.ui.GlassStyle
 import org.xg.project.feature.history.HistoryScreen
 import org.xg.project.feature.home.HomeScreen
 import org.xg.project.feature.profile.ProfileScreen
 import org.xg.project.feature.recipes.RecipesScreen
 
+private val AppNavigationRailWidth = 92.dp
+private val AppNavigationRailItemHorizontalPadding = 10.dp
+
+@OptIn(ExperimentalMaterial3AdaptiveNavigationSuiteApi::class)
 @Composable
 internal fun HomeNavDisplay(
     onNavigateToManualInput: () -> Unit,
     onNavigateToRecipeDetail: (String) -> Unit,
     onLogout: () -> Unit,
 ) {
-    val userSessionRepository = koinInject<UserSessionRepository>()
     val navigationCoordinator = koinInject<AppNavigationCoordinator>()
-    val currentUser by userSessionRepository.currentUser.collectAsState()
     val selectedTabName = rememberSaveable { mutableStateOf(BottomTabRoute.Home.toSaveableName()) }
     val selectedTab = bottomTabFromSaveableName(selectedTabName.value)
     val selectTab: (BottomTabRoute) -> Unit = { tab ->
@@ -74,55 +78,58 @@ internal fun HomeNavDisplay(
         BottomTabRoute.Profile -> profileBackStack
     }
 
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-        val tabletLandscape = isTabletLandscape(maxWidth, maxHeight)
+    Box(modifier = Modifier.fillMaxSize()) {
+        val navigationSuiteType =
+            if (currentAppAdaptiveLayout() == AppAdaptiveLayout.Compact) {
+                NavigationSuiteType.NavigationBar
+            } else {
+                NavigationSuiteType.NavigationRail
+            }
+        val useSideNavigation = navigationSuiteType != NavigationSuiteType.NavigationBar
 
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .then(
-                    if (tabletLandscape) {
+                    if (useSideNavigation) {
                         Modifier.background(Color.White)
                     } else {
                         Modifier.background(GlassStyle.BgGradient)
                     },
                 ),
         ) {
-            Scaffold(
-                bottomBar = {
-                    if (!tabletLandscape) {
-                        BottomTabBar(
-                            activeTab = selectedTab,
-                            onTabClick = selectTab,
+            NavigationSuiteScaffoldLayout(
+                navigationSuite = {
+                    NavigationSuite(
+                        layoutType = navigationSuiteType,
+                        modifier = if (useSideNavigation) {
+                            Modifier
+                                .width(AppNavigationRailWidth)
+                                .padding(vertical = 8.dp)
+                        } else {
+                            Modifier
+                        },
+                    ) {
+                        appNavigationSuiteItems(
+                            selectedTab = selectedTab,
+                            selectTab = selectTab,
+                            useSideNavigation = useSideNavigation,
                         )
                     }
                 },
-                containerColor = Transparent,
-            ) { innerPadding ->
-                Row(modifier = Modifier.padding(innerPadding)) {
-                    if (tabletLandscape) {
-                        AppDesktopSidebar(
-                            activeTab = selectedTab,
-                            onTabClick = selectTab,
-                            onProfileClick = {
-                                if (selectedTab != BottomTabRoute.Profile) {
-                                    selectTab(BottomTabRoute.Profile)
-                                }
-                            },
-                            userAccount = currentUser,
-                            modifier = Modifier.fillMaxHeight(),
-                            footerTop = {
-                                AppSidebarFooterTop(
-                                    selectedTab = selectedTab,
-                                    onNavigateToManualInput = onNavigateToManualInput,
-                                )
-                            },
-                        )
-                    }
-
+                layoutType = navigationSuiteType,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(
+                            start = if (useSideNavigation) 12.dp else 0.dp,
+                            end = if (useSideNavigation) 12.dp else 0.dp,
+                        ),
+                ) {
                     NavDisplay(
                         backStack = activeBackStack,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.fillMaxSize(),
                         onBack = { activeBackStack.popOne() },
                         entryProvider = homeTabEntries(
                             recipesBackStack = recipesBackStack,
@@ -136,6 +143,31 @@ internal fun HomeNavDisplay(
                 }
             }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3AdaptiveNavigationSuiteApi::class)
+private fun androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScope.appNavigationSuiteItems(
+    selectedTab: BottomTabRoute,
+    selectTab: (BottomTabRoute) -> Unit,
+    useSideNavigation: Boolean,
+) {
+    appTabNavItems.forEach { item ->
+        item(
+            selected = selectedTab == item.route,
+            onClick = { selectTab(item.route) },
+            icon = {
+                Icon(item.icon, contentDescription = null)
+            },
+            label = {
+                Text(item.label)
+            },
+            modifier = if (useSideNavigation) {
+                Modifier.padding(horizontal = AppNavigationRailItemHorizontalPadding, vertical = 4.dp)
+            } else {
+                Modifier
+            },
+        )
     }
 }
 

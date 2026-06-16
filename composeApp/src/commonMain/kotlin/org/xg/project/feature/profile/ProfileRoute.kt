@@ -1,7 +1,6 @@
 package org.xg.project.feature.profile
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
@@ -12,11 +11,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
+import org.xg.project.core.navigation.currentAppAdaptiveLayout
+import org.xg.project.core.navigation.isMediumOrExpanded
 import org.xg.project.feature.profile.ProfileEffect
 import org.xg.project.feature.profile.ProfileIntent
 import org.xg.project.feature.profile.ProfileViewModel
 import org.xg.project.feature.home.HomeColors
-import org.xg.project.feature.profile.ProfileBreakpoints
 import org.xg.project.feature.profile.ProfileCompactLayout
 import org.xg.project.feature.profile.ProfileDesktopLayout
 import org.xg.project.feature.profile.toProfileContentUi
@@ -28,6 +28,7 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
+    val adaptiveLayout = currentAppAdaptiveLayout()
 
     LaunchedEffect(viewModel) {
         viewModel.effect.collectLatest { effect ->
@@ -41,7 +42,7 @@ fun ProfileScreen(
         viewModel.onIntent(ProfileIntent.LoadUserProfile)
     }
 
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize()) {
         if (state.isLoading) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -49,7 +50,7 @@ fun ProfileScreen(
             ) {
                 CircularProgressIndicator(color = HomeColors.BrandOrange)
             }
-            return@BoxWithConstraints
+            return@Box
         }
 
         val content = state.toProfileContentUi()
@@ -61,7 +62,7 @@ fun ProfileScreen(
             onLogoutClick = { viewModel.onIntent(ProfileIntent.Logout) },
         )
 
-        if (maxWidth >= ProfileBreakpoints.DesktopMin) {
+        if (adaptiveLayout.isMediumOrExpanded) {
             ProfileDesktopLayout(
                 content = content,
                 onInviteClick = callbacks.onInviteClick,

@@ -2,12 +2,6 @@ package org.xg.project.feature.manualrecipe
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
-import org.xg.project.core.navigation.AppLayoutBreakpoints
-
-object ManualRecipeBreakpoints {
-    val CompactMax = AppLayoutBreakpoints.TabletMin
-    val DesktopMin = AppLayoutBreakpoints.DesktopMin
-}
 
 object ManualRecipeColors {
     val PageBackground = Color(0xFFF5F5F5)

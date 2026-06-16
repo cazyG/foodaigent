@@ -1,7 +1,6 @@
 package org.xg.project.feature.recipes
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -17,8 +16,9 @@ import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
 import org.xg.project.domain.model.MealType
 import org.xg.project.domain.model.RecipeMenu
-import org.xg.project.core.navigation.isTabletLandscape
-import org.xg.project.core.navigation.isDesktopWidth
+import org.xg.project.core.navigation.AppAdaptiveLayout
+import org.xg.project.core.navigation.currentAppAdaptiveLayout
+import org.xg.project.core.navigation.isMediumOrExpanded
 
 @Composable
 fun RecipesScreen(
@@ -80,68 +80,51 @@ fun RecipesScreen(
             onNavigateToDetail(recipe.id.toString())
         }
     }
+    val adaptiveLayout = currentAppAdaptiveLayout()
 
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-        val layoutWidth = maxWidth
-        val tabletLandscape = isTabletLandscape(maxWidth, maxHeight)
-
-        Box(modifier = Modifier.fillMaxSize()) {
-            when {
-                state.isLoading -> RecipesLoadingState()
-                tabletLandscape && isDesktopWidth(layoutWidth) && !isFromHome -> {
-                    RecipesWideContent(
-                        content = content,
-                        isFromHome = isFromHome,
-                        onIntent = viewModel::onIntent,
-                        onNavigateToManualInput = onNavigateToManualInput,
-                        onRecipeOpen = onRecipeOpen,
-                        onSaveOrManual = onSaveOrManual,
-                        saveButtonLabel = saveButtonLabel,
-                    )
-                }
-                tabletLandscape && layoutWidth >= RecipesBreakpoints.CompactMax && !isFromHome -> {
-                    RecipesTabletContent(
-                        content = content,
-                        isFromHome = isFromHome,
-                        layoutWidth = layoutWidth,
-                        onIntent = viewModel::onIntent,
-                        onNavigateToManualInput = onNavigateToManualInput,
-                        onRecipeOpen = onRecipeOpen,
-                        onSaveOrManual = onSaveOrManual,
-                        saveButtonLabel = saveButtonLabel,
-                    )
-                }
-                layoutWidth >= RecipesBreakpoints.CompactMax -> {
-                    RecipesMediumContent(
-                        content = content,
-                        isFromHome = isFromHome,
-                        layoutWidth = layoutWidth,
-                        onIntent = viewModel::onIntent,
-                        onNavigateToManualInput = onNavigateToManualInput,
-                        onRecipeOpen = onRecipeOpen,
-                        onBack = onBack,
-                        onSaveOrManual = onSaveOrManual,
-                        saveButtonLabel = saveButtonLabel,
-                    )
-                }
-                else -> {
-                    RecipesCompactContent(
-                        content = content,
-                        isFromHome = isFromHome,
-                        onIntent = viewModel::onIntent,
-                        onNavigateToManualInput = onNavigateToManualInput,
-                        onRecipeOpen = onRecipeOpen,
-                        onBack = onBack,
-                        onSaveOrManual = onSaveOrManual,
-                        saveButtonLabel = saveButtonLabel,
-                    )
-                }
+    Box(modifier = Modifier.fillMaxSize()) {
+        when {
+            state.isLoading -> RecipesLoadingState()
+            adaptiveLayout == AppAdaptiveLayout.Expanded && !isFromHome -> {
+                RecipesWideContent(
+                    content = content,
+                    isFromHome = isFromHome,
+                    onIntent = viewModel::onIntent,
+                    onNavigateToManualInput = onNavigateToManualInput,
+                    onRecipeOpen = onRecipeOpen,
+                    onSaveOrManual = onSaveOrManual,
+                    saveButtonLabel = saveButtonLabel,
+                )
             }
-
-            SnackbarHost(
-                hostState = snackbarHostState,
-                modifier = Modifier.align(Alignment.BottomCenter),
-            )
+            adaptiveLayout.isMediumOrExpanded -> {
+                RecipesMediumContent(
+                    content = content,
+                    isFromHome = isFromHome,
+                    onIntent = viewModel::onIntent,
+                    onNavigateToManualInput = onNavigateToManualInput,
+                    onRecipeOpen = onRecipeOpen,
+                    onBack = onBack,
+                    onSaveOrManual = onSaveOrManual,
+                    saveButtonLabel = saveButtonLabel,
+                )
+            }
+            else -> {
+                RecipesCompactContent(
+                    content = content,
+                    isFromHome = isFromHome,
+                    onIntent = viewModel::onIntent,
+                    onNavigateToManualInput = onNavigateToManualInput,
+                    onRecipeOpen = onRecipeOpen,
+                    onBack = onBack,
+                    onSaveOrManual = onSaveOrManual,
+                    saveButtonLabel = saveButtonLabel,
+                )
+            }
         }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter),
+        )
     }
 }

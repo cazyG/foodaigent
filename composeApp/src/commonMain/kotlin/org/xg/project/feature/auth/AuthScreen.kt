@@ -62,6 +62,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
+import org.xg.project.core.navigation.currentAppAdaptiveLayout
+import org.xg.project.core.navigation.isMediumOrExpanded
 
 @Composable
 fun AuthScreen(
@@ -69,6 +71,7 @@ fun AuthScreen(
     viewModel: AuthViewModel = koinViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val adaptiveLayout = currentAppAdaptiveLayout()
 
     LaunchedEffect(viewModel) {
         viewModel.effect.collectLatest { effect ->
@@ -78,12 +81,12 @@ fun AuthScreen(
         }
     }
 
-    BoxWithConstraints(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .imePadding(),
     ) {
-        if (maxWidth >= AuthWideBreakpoint) {
+        if (adaptiveLayout.isMediumOrExpanded) {
             AuthWideAnimatedLayout(
                 page = uiState.page,
                 loginUiState = uiState.loginUiState,

@@ -30,7 +30,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Lock
@@ -71,7 +71,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.painterResource
 
-internal val AuthWideBreakpoint = 720.dp
 internal val AuthCardShape = RoundedCornerShape(24.dp)
 internal val AuthPillShape = RoundedCornerShape(26.dp)
 internal val AuthFieldMinHeight = 52.dp
@@ -524,7 +523,7 @@ internal fun AuthWideSocialButtons() {
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
     ) {
-        AuthSocialIconButton(Icons.Default.Chat)
+        AuthSocialIconButton(Icons.AutoMirrored.Filled.Chat)
         AuthSocialIconButton(Icons.Default.Language)
         AuthSocialIconButton(Icons.Default.PhoneIphone)
     }
@@ -536,7 +535,7 @@ internal fun AuthCompactSocialButtons() {
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(32.dp, Alignment.CenterHorizontally),
     ) {
-        AuthSocialLabelButton(icon = Icons.Default.Chat, label = "微信", iconTint = Color(0xFF07C160))
+        AuthSocialLabelButton(icon = Icons.AutoMirrored.Filled.Chat, label = "微信", iconTint = Color(0xFF07C160))
         AuthSocialLabelButton(icon = Icons.Default.PhoneIphone, label = "手机号", iconTint = AuthColors.BrandBrown)
     }
 }
@@ -547,7 +546,7 @@ internal fun AuthRegisterSocialButtons() {
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
     ) {
-        AuthSocialIconButton(Icons.Default.Chat)
+        AuthSocialIconButton(Icons.AutoMirrored.Filled.Chat)
         AuthSocialIconButton(Icons.Default.Language)
         AuthSocialIconButton(Icons.Default.PhoneIphone)
     }

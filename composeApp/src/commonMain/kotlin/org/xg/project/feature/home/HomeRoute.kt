@@ -2,7 +2,6 @@ package org.xg.project.feature.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
@@ -18,8 +17,8 @@ import kotlinx.datetime.todayIn
 import org.koin.compose.viewmodel.koinViewModel
 import org.xg.project.domain.model.DailyMenuRecord
 import org.xg.project.domain.model.MealType
-import org.xg.project.core.navigation.isDesktopWidth
-import org.xg.project.core.navigation.isTabletLandscape
+import org.xg.project.core.navigation.AppAdaptiveLayout
+import org.xg.project.core.navigation.currentAppAdaptiveLayout
 
 @Composable
 fun HomeScreen(
@@ -41,16 +40,15 @@ fun HomeScreen(
         )
     }
     val content = state.toHomeContentUi(today, emptyRecord)
+    val adaptiveLayout = currentAppAdaptiveLayout()
+    val pageBackground =
+        if (adaptiveLayout == AppAdaptiveLayout.Expanded) {
+            HomeColors.CardWhite
+        } else {
+            HomeColors.PageBackground
+        }
 
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-        val layoutWidth = maxWidth
-        val tabletLandscape = isTabletLandscape(maxWidth, maxHeight)
-        val pageBackground =
-            if (tabletLandscape && isDesktopWidth(layoutWidth)) {
-                HomeColors.CardWhite
-            } else {
-                HomeColors.PageBackground
-            }
+    Box(modifier = Modifier.fillMaxSize()) {
         when {
             state.isLoading -> {
                 Box(
@@ -68,8 +66,8 @@ fun HomeScreen(
                         .fillMaxSize()
                         .background(pageBackground),
                 ) {
-                    when {
-                        !tabletLandscape || layoutWidth < HomeBreakpoints.CompactMax -> {
+                    when (adaptiveLayout) {
+                        AppAdaptiveLayout.Compact -> {
                             HomeCompactContent(
                                 content = content,
                                 onAddPlan = onAddPlan,
@@ -77,7 +75,7 @@ fun HomeScreen(
                                 modifier = Modifier.weight(1f),
                             )
                         }
-                        isDesktopWidth(layoutWidth) -> {
+                        AppAdaptiveLayout.Expanded -> {
                             HomeWideContent(
                                 content = content,
                                 onAddPlan = onAddPlan,
@@ -85,7 +83,7 @@ fun HomeScreen(
                                 modifier = Modifier.weight(1f),
                             )
                         }
-                        else -> {
+                        AppAdaptiveLayout.Medium -> {
                             HomeMediumContent(
                                 content = content,
                                 onAddPlan = onAddPlan,
