@@ -20,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -32,8 +33,10 @@ import org.xg.project.feature.home.HomeScreen
 import org.xg.project.feature.profile.ProfileScreen
 import org.xg.project.feature.recipes.RecipesScreen
 
-private val AppNavigationRailWidth = 92.dp
-private val AppNavigationRailItemHorizontalPadding = 10.dp
+private val AppNavigationMediumRailWidth = 80.dp
+private val AppNavigationExpandedRailWidth = 140.dp
+private val AppNavigationMediumItemHorizontalPadding = 10.dp
+private val AppNavigationExpandedItemHorizontalPadding = 18.dp
 
 @OptIn(ExperimentalMaterial3AdaptiveNavigationSuiteApi::class)
 @Composable
@@ -79,13 +82,15 @@ internal fun HomeNavDisplay(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
+        val adaptiveLayout = currentAppAdaptiveLayout()
         val navigationSuiteType =
-            if (currentAppAdaptiveLayout() == AppAdaptiveLayout.Compact) {
+            if (adaptiveLayout == AppAdaptiveLayout.Compact) {
                 NavigationSuiteType.NavigationBar
             } else {
                 NavigationSuiteType.NavigationRail
             }
         val useSideNavigation = navigationSuiteType != NavigationSuiteType.NavigationBar
+        val navigationRailWidth = adaptiveLayout.navigationRailWidth()
 
         Box(
             modifier = Modifier
@@ -104,7 +109,7 @@ internal fun HomeNavDisplay(
                         layoutType = navigationSuiteType,
                         modifier = if (useSideNavigation) {
                             Modifier
-                                .width(AppNavigationRailWidth)
+                                .width(navigationRailWidth)
                                 .padding(vertical = 8.dp)
                         } else {
                             Modifier
@@ -113,7 +118,7 @@ internal fun HomeNavDisplay(
                         appNavigationSuiteItems(
                             selectedTab = selectedTab,
                             selectTab = selectTab,
-                            useSideNavigation = useSideNavigation,
+                            adaptiveLayout = adaptiveLayout,
                         )
                     }
                 },
@@ -150,7 +155,7 @@ internal fun HomeNavDisplay(
 private fun androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScope.appNavigationSuiteItems(
     selectedTab: BottomTabRoute,
     selectTab: (BottomTabRoute) -> Unit,
-    useSideNavigation: Boolean,
+    adaptiveLayout: AppAdaptiveLayout,
 ) {
     appTabNavItems.forEach { item ->
         item(
@@ -162,13 +167,28 @@ private fun androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteS
             label = {
                 Text(item.label)
             },
-            modifier = if (useSideNavigation) {
-                Modifier.padding(horizontal = AppNavigationRailItemHorizontalPadding, vertical = 4.dp)
-            } else {
+            modifier = if (adaptiveLayout == AppAdaptiveLayout.Compact) {
                 Modifier
+            } else {
+                Modifier.padding(
+                    horizontal = adaptiveLayout.navigationItemHorizontalPadding(),
+                    vertical = 4.dp,
+                )
             },
         )
     }
+}
+
+private fun AppAdaptiveLayout.navigationRailWidth(): Dp = when (this) {
+    AppAdaptiveLayout.Compact -> 0.dp
+    AppAdaptiveLayout.Medium -> AppNavigationMediumRailWidth
+    AppAdaptiveLayout.Expanded -> AppNavigationExpandedRailWidth
+}
+
+private fun AppAdaptiveLayout.navigationItemHorizontalPadding(): Dp = when (this) {
+    AppAdaptiveLayout.Compact -> 0.dp
+    AppAdaptiveLayout.Medium -> AppNavigationMediumItemHorizontalPadding
+    AppAdaptiveLayout.Expanded -> AppNavigationExpandedItemHorizontalPadding
 }
 
 private fun homeTabEntries(
