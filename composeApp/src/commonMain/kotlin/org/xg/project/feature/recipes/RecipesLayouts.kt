@@ -224,14 +224,11 @@ fun RecipesWideContent(
     RecipesDesktopLayout(
         content = content,
         isFromHome = isFromHome,
-        activeTab = BottomTabRoute.Recipes,
-        onTabClick = {},
         onIntent = onIntent,
         onNavigateToManualInput = onNavigateToManualInput,
         onRecipeOpen = onRecipeOpen,
         onSaveOrManual = onSaveOrManual,
         saveButtonLabel = saveButtonLabel,
-        showSidebar = false,
         gridColumns = 4,
         modifier = modifier,
     )

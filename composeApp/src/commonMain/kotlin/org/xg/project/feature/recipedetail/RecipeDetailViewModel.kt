@@ -9,8 +9,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import org.xg.project.data.model.ResponseResult
 import org.xg.project.data.repository.FoodRepository
+import org.xg.project.domain.Result
 
 class RecipeDetailViewModel(
     private val repository: FoodRepository,
@@ -36,15 +36,15 @@ class RecipeDetailViewModel(
 
         viewModelScope.launch {
             _state.value = RecipeDetailState(isLoading = true)
-            _state.value = when (val result = repository.getAllRecipe()) {
-                is ResponseResult.Success -> {
+            _state.value = when (val result = repository.fetchRecipes()) {
+                is Result.Success -> {
                     val recipe = result.data.firstOrNull { it.id == id }
                     RecipeDetailState(
                         recipe = recipe,
                         error = if (recipe == null) "未找到该食谱" else null,
                     )
                 }
-                is ResponseResult.Error -> RecipeDetailState(error = result.message)
+                is Result.Error -> RecipeDetailState(error = result.message)
             }
         }
     }

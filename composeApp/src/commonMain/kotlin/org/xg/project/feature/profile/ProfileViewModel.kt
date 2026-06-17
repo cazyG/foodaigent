@@ -9,9 +9,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import org.xg.project.data.model.ResponseResult
 import org.xg.project.data.repository.FoodRepository
 import org.xg.project.data.session.UserSessionRepository
+import org.xg.project.domain.Result
 import org.xg.project.feature.profile.AchievementStyle
 import org.xg.project.feature.profile.MemberDietaryStyle
 import org.xg.project.feature.profile.PreferenceStyle
@@ -42,14 +42,14 @@ class ProfileViewModel(
             val displayName = userSessionRepository.currentUser.value?.displayName ?: "锅铲黄小厨"
             val avatarUrl = userSessionRepository.currentUser.value?.avatarUrl
 
-            val recipeCount = when (val result = foodRepository.getAllRecipe()) {
-                is ResponseResult.Success -> result.data.size
-                is ResponseResult.Error -> _state.value.favoriteRecipes
+            val recipeCount = when (val result = foodRepository.fetchRecipes()) {
+                is Result.Success -> result.data.size
+                is Result.Error -> _state.value.favoriteRecipes
             }
 
             val preferences = when (val radarResult = foodRepository.fetchTasteRadar()) {
-                is org.xg.project.domain.Result.Success -> tasteRadarToPreferences(radarResult.data)
-                is org.xg.project.domain.Result.Error -> defaultPreferences()
+                is Result.Success -> tasteRadarToPreferences(radarResult.data)
+                is Result.Error -> defaultPreferences()
             }
 
             _state.value = _state.value.copy(

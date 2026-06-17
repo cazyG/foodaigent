@@ -118,7 +118,6 @@ fun HomeWideContent(
         content = content,
         onAddPlan = onAddPlan,
         showAppChrome = true,
-        showSidebar = false,
         onProfileClick = onProfileClick,
         modifier = modifier,
     )

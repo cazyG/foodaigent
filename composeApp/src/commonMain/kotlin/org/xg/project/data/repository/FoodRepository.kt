@@ -14,7 +14,6 @@ import org.xg.project.data.remote.ApiConfig
 import org.xg.project.data.remote.decodeBaseResponse
 import org.xg.project.data.remote.httpClient
 import org.xg.project.data.remote.toUserFriendlyNetworkMessage
-import org.xg.project.data.model.ResponseResult
 import org.xg.project.domain.model.DailyMenuRecord
 import org.xg.project.domain.model.MealType
 import org.xg.project.domain.model.MenuItemData
@@ -93,12 +92,6 @@ class FoodRepository {
             Result.Error(toUserFriendlyNetworkMessage(e))
         }
     }
-
-    suspend fun getAllRecipe(): ResponseResult<List<RecipeMenu>> =
-        when (val result = fetchRecipes()) {
-            is Result.Success -> ResponseResult.Success(result.data)
-            is Result.Error -> ResponseResult.Error(result.message)
-        }
 
     private fun todayLabel(): String {
         val today = Clock.System.todayIn(TimeZone.currentSystemDefault())

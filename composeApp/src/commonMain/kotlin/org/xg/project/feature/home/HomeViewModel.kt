@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.xg.project.data.repository.FoodRepository
+import org.xg.project.domain.Result
 import org.xg.project.domain.model.MealType
 import org.xg.project.domain.usecase.CheckMealReviewEligibilityUseCase
 
@@ -32,7 +33,7 @@ class HomeViewModel(
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
             when (val result = repository.fetchDailyRecords()) {
-                is org.xg.project.domain.Result.Success -> {
+                is Result.Success -> {
                     val records = result.data
                     val todayRecord = records.firstOrNull()
 
@@ -51,7 +52,7 @@ class HomeViewModel(
                         canReviewSnack = canSnack
                     )
                 }
-                is org.xg.project.domain.Result.Error -> {
+                is Result.Error -> {
                     _state.value = _state.value.copy(
                         isLoading = false,
                         todayRecord = null,

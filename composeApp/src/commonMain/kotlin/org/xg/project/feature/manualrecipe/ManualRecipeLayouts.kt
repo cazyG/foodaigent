@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -31,9 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import org.xg.project.core.navigation.BottomTabRoute
-import org.xg.project.data.session.UserAccount
-import org.xg.project.core.navigation.AppDesktopSidebar
 
 @Composable
 fun ManualRecipeCompactLayout(
@@ -77,53 +73,29 @@ fun ManualRecipeDesktopLayout(
     onPickImage: () -> Unit,
     onBack: () -> Unit,
     onSave: () -> Unit,
-    userAccount: UserAccount? = null,
-    onProfileClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    Row(
+    Column(
         modifier = modifier
             .fillMaxSize()
             .background(ManualRecipeColors.PageBackground)
             .imePadding(),
     ) {
-        AppDesktopSidebar(
-            activeTab = BottomTabRoute.Recipes,
-            onTabClick = {},
-            onProfileClick = onProfileClick,
-            userAccount = userAccount,
-            modifier = Modifier.fillMaxHeight(),
-            footerTop = {
-                Button(
-                    onClick = {},
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = ManualRecipeColors.BrandBrown),
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = null, tint = Color.White)
-                    Spacer(modifier = Modifier.size(6.dp))
-                    Text("+ 手动录入", color = Color.White, fontWeight = FontWeight.SemiBold)
-                }
-                Spacer(modifier = Modifier.size(20.dp))
-            },
-        )
-        Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
-            ManualRecipeDesktopTopBar(onBack = onBack, onSave = onSave, isSaving = content.isSaving)
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 32.dp, vertical = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                content.error?.let { ManualRecipeErrorBanner(it) }
-                ManualRecipeFormContent(
-                    content = content,
-                    onIntent = onIntent,
-                    onPickImage = onPickImage,
-                    layout = ManualRecipeFormLayout.Desktop,
-                )
-            }
+        ManualRecipeDesktopTopBar(onBack = onBack, onSave = onSave, isSaving = content.isSaving)
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 32.dp, vertical = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            content.error?.let { ManualRecipeErrorBanner(it) }
+            ManualRecipeFormContent(
+                content = content,
+                onIntent = onIntent,
+                onPickImage = onPickImage,
+                layout = ManualRecipeFormLayout.Desktop,
+            )
         }
     }
 }

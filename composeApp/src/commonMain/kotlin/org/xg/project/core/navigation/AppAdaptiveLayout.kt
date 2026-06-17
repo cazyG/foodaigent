@@ -1,6 +1,8 @@
 package org.xg.project.core.navigation
 
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.navigationsuite.ExperimentalMaterial3AdaptiveNavigationSuiteApi
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.window.core.layout.WindowSizeClass
 
@@ -12,6 +14,13 @@ enum class AppAdaptiveLayout {
 
 val AppAdaptiveLayout.isMediumOrExpanded: Boolean
     get() = this == AppAdaptiveLayout.Medium || this == AppAdaptiveLayout.Expanded
+
+@OptIn(ExperimentalMaterial3AdaptiveNavigationSuiteApi::class)
+fun AppAdaptiveLayout.navigationSuiteType(): NavigationSuiteType = when (this) {
+    AppAdaptiveLayout.Compact -> NavigationSuiteType.NavigationBar
+    AppAdaptiveLayout.Medium -> NavigationSuiteType.NavigationRail
+    AppAdaptiveLayout.Expanded -> NavigationSuiteType.NavigationDrawer
+}
 
 @Composable
 fun currentAppAdaptiveLayout(): AppAdaptiveLayout {

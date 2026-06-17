@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.xg.project.data.model.ResponseResult
 import org.xg.project.data.repository.FoodRepository
+import org.xg.project.domain.Result
 
 class RecipesViewModel(
     private val repository: FoodRepository,
@@ -36,8 +36,8 @@ class RecipesViewModel(
     private fun loadRecipes() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
-            when (val result = repository.getAllRecipe()) {
-                is ResponseResult.Success -> {
+            when (val result = repository.fetchRecipes()) {
+                is Result.Success -> {
                     _state.update {
                         it.copy(
                             isLoading = false,
@@ -45,7 +45,7 @@ class RecipesViewModel(
                         )
                     }
                 }
-                is ResponseResult.Error -> {
+                is Result.Error -> {
                     _state.update {
                         it.copy(
                             isLoading = false,

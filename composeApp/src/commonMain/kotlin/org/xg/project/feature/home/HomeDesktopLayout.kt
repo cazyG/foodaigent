@@ -44,10 +44,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import org.xg.project.core.navigation.BottomTabRoute
-import org.xg.project.data.session.UserAccount
 import org.xg.project.domain.model.MealType
-import org.xg.project.core.navigation.AppDesktopSidebar
 
 private val DesktopRightRailWidth = 300.dp
 private val DesktopCardShape = RoundedCornerShape(10.dp)
@@ -63,11 +60,7 @@ fun HomeDesktopLayout(
     content: HomeContentUi,
     onAddPlan: (MealType) -> Unit,
     showAppChrome: Boolean,
-    showSidebar: Boolean = true,
-    activeTab: BottomTabRoute = BottomTabRoute.Home,
-    onTabClick: (BottomTabRoute) -> Unit = {},
     onProfileClick: () -> Unit = {},
-    userAccount: UserAccount? = null,
     modifier: Modifier = Modifier,
 ) {
     val scrollState = rememberScrollState()
@@ -79,15 +72,6 @@ fun HomeDesktopLayout(
                 .background(HomeColors.CardWhite),
         ) {
             Row(modifier = Modifier.weight(1f)) {
-                if (showSidebar) {
-                    HomeDesktopSidebar(
-                        activeTab = activeTab,
-                        onTabClick = onTabClick,
-                        onProfileClick = onProfileClick,
-                        userAccount = userAccount,
-                        modifier = Modifier.fillMaxHeight(),
-                    )
-                }
                 Column(
                     modifier = Modifier
                         .weight(1f)
@@ -219,36 +203,6 @@ fun HomeDesktopMainSection(
             }
         }
     }
-}
-
-@Composable
-private fun HomeDesktopSidebar(
-    activeTab: BottomTabRoute,
-    onTabClick: (BottomTabRoute) -> Unit,
-    onProfileClick: () -> Unit,
-    userAccount: UserAccount?,
-    modifier: Modifier = Modifier,
-) {
-    AppDesktopSidebar(
-        activeTab = activeTab,
-        onTabClick = onTabClick,
-        onProfileClick = onProfileClick,
-        userAccount = userAccount,
-        modifier = modifier,
-        footerTop = {
-            Button(
-                onClick = { },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = HomeColors.BrandBrown),
-            ) {
-                Icon(Icons.Default.Add, contentDescription = null, tint = Color.White)
-                Spacer(modifier = Modifier.width(6.dp))
-                Text("上传新菜谱", fontSize = HomeDesktopFonts.actionButton, color = Color.White)
-            }
-            Spacer(modifier = Modifier.height(20.dp))
-        },
-    )
 }
 
 @Composable

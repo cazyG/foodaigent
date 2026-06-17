@@ -75,8 +75,6 @@ fun ManualRecipeInputScreen(
                     onPickImage = onPickImage,
                     onBack = resetAndBack,
                     onSave = onSaveClick,
-                    userAccount = state.userAccount,
-                    onProfileClick = onNavigateToProfile,
                 )
             }
             AppAdaptiveLayout.Medium -> {

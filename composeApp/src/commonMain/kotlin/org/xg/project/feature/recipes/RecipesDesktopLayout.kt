@@ -30,25 +30,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import org.xg.project.core.navigation.BottomTabRoute
-import org.xg.project.data.session.UserAccount
 import org.xg.project.domain.model.RecipeMenu
-import org.xg.project.core.navigation.AppDesktopSidebar
 
 @Composable
 fun RecipesDesktopLayout(
     content: RecipesContentUi,
     isFromHome: Boolean,
-    activeTab: BottomTabRoute,
-    onTabClick: (BottomTabRoute) -> Unit,
     onIntent: (RecipesIntent) -> Unit,
     onNavigateToManualInput: () -> Unit,
     onRecipeOpen: (RecipeMenu) -> Unit,
     onSaveOrManual: () -> Unit,
     saveButtonLabel: String,
-    showSidebar: Boolean = true,
-    onProfileClick: () -> Unit = {},
-    userAccount: UserAccount? = null,
     gridColumns: Int = 4,
     modifier: Modifier = Modifier,
 ) {
@@ -57,16 +49,6 @@ fun RecipesDesktopLayout(
             .fillMaxSize()
             .background(RecipesColors.CardWhite),
     ) {
-        if (showSidebar) {
-            RecipesDesktopSidebar(
-                activeTab = activeTab,
-                onTabClick = onTabClick,
-                onManualEntry = onNavigateToManualInput,
-                onProfileClick = onProfileClick,
-                userAccount = userAccount,
-                modifier = Modifier.fillMaxHeight(),
-            )
-        }
         Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
             RecipesDesktopTopBar(
                 query = content.searchQuery,
@@ -120,37 +102,6 @@ fun RecipesDesktopLayout(
             }
         }
     }
-}
-
-@Composable
-private fun RecipesDesktopSidebar(
-    activeTab: BottomTabRoute,
-    onTabClick: (BottomTabRoute) -> Unit,
-    onManualEntry: () -> Unit,
-    onProfileClick: () -> Unit,
-    userAccount: UserAccount?,
-    modifier: Modifier = Modifier,
-) {
-    AppDesktopSidebar(
-        activeTab = activeTab,
-        onTabClick = onTabClick,
-        onProfileClick = onProfileClick,
-        userAccount = userAccount,
-        modifier = modifier,
-        footerTop = {
-            Button(
-                onClick = onManualEntry,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = RecipesColors.BrandBrown),
-            ) {
-                Icon(Icons.Default.Add, contentDescription = null, tint = Color.White)
-                Spacer(modifier = Modifier.width(6.dp))
-                Text("+ 手动录入", color = Color.White, fontSize = RecipesFonts.actionButton)
-            }
-            Spacer(modifier = Modifier.height(20.dp))
-        },
-    )
 }
 
 @Composable

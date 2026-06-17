@@ -1,16 +1,12 @@
 package org.xg.project.core.navigation
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Badge
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.ExperimentalMaterial3AdaptiveNavigationSuiteApi
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuite
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldLayout
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -19,24 +15,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import org.koin.compose.koinInject
-import org.xg.project.core.ui.GlassStyle
 import org.xg.project.feature.history.HistoryScreen
 import org.xg.project.feature.home.HomeScreen
+import org.xg.project.feature.home.HomeColors
 import org.xg.project.feature.profile.ProfileScreen
 import org.xg.project.feature.recipes.RecipesScreen
-
-private val AppNavigationMediumRailWidth = 80.dp
-private val AppNavigationExpandedRailWidth = 140.dp
-private val AppNavigationMediumItemHorizontalPadding = 10.dp
-private val AppNavigationExpandedItemHorizontalPadding = 18.dp
 
 @OptIn(ExperimentalMaterial3AdaptiveNavigationSuiteApi::class)
 @Composable
@@ -81,114 +71,59 @@ internal fun HomeNavDisplay(
         BottomTabRoute.Profile -> profileBackStack
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        val adaptiveLayout = currentAppAdaptiveLayout()
-        val navigationSuiteType =
-            if (adaptiveLayout == AppAdaptiveLayout.Compact) {
-                NavigationSuiteType.NavigationBar
-            } else {
-                NavigationSuiteType.NavigationRail
-            }
-        val useSideNavigation = navigationSuiteType != NavigationSuiteType.NavigationBar
-        val navigationRailWidth = adaptiveLayout.navigationRailWidth()
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .then(
-                    if (useSideNavigation) {
-                        Modifier.background(Color.White)
-                    } else {
-                        Modifier.background(GlassStyle.BgGradient)
-                    },
-                ),
-        ) {
-            NavigationSuiteScaffoldLayout(
-                navigationSuite = {
-                    NavigationSuite(
-                        layoutType = navigationSuiteType,
-                        modifier = if (useSideNavigation) {
-                            Modifier
-                                .width(navigationRailWidth)
-                                .padding(vertical = 8.dp)
-                        } else {
-                            Modifier
-                        },
-                    ) {
-                        appNavigationSuiteItems(
-                            selectedTab = selectedTab,
-                            selectTab = selectTab,
-                            adaptiveLayout = adaptiveLayout,
-                        )
-                    }
-                },
-                layoutType = navigationSuiteType,
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(
-                            start = if (useSideNavigation) 12.dp else 0.dp,
-                            end = if (useSideNavigation) 12.dp else 0.dp,
-                        ),
-                ) {
-                    NavDisplay(
-                        backStack = activeBackStack,
-                        modifier = Modifier.fillMaxSize(),
-                        onBack = { activeBackStack.popOne() },
-                        entryProvider = homeTabEntries(
-                            recipesBackStack = recipesBackStack,
-                            recipesRefreshKey = recipesRefreshKey.value,
-                            selectTab = selectTab,
-                            onNavigateToManualInput = onNavigateToManualInput,
-                            onNavigateToRecipeDetail = onNavigateToRecipeDetail,
-                            onLogout = onLogout,
-                        ),
-                    )
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3AdaptiveNavigationSuiteApi::class)
-private fun androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScope.appNavigationSuiteItems(
-    selectedTab: BottomTabRoute,
-    selectTab: (BottomTabRoute) -> Unit,
-    adaptiveLayout: AppAdaptiveLayout,
-) {
-    appTabNavItems.forEach { item ->
-        item(
-            selected = selectedTab == item.route,
-            onClick = { selectTab(item.route) },
-            icon = {
-                Icon(item.icon, contentDescription = null)
-            },
-            label = {
-                Text(item.label)
-            },
-            modifier = if (adaptiveLayout == AppAdaptiveLayout.Compact) {
-                Modifier
-            } else {
-                Modifier.padding(
-                    horizontal = adaptiveLayout.navigationItemHorizontalPadding(),
-                    vertical = 4.dp,
-                )
-            },
+    NavigationSuiteScaffold(
+        navigationSuiteItems = {
+            navigationItems(
+                selectedTab = selectedTab,
+                selectTab = selectTab,
+            )
+        },
+        layoutType = currentAppAdaptiveLayout().navigationSuiteType(),
+    ) {
+        NavDisplay(
+            backStack = activeBackStack,
+            modifier = Modifier.fillMaxSize(),
+            onBack = { activeBackStack.popOne() },
+            entryProvider = homeTabEntries(
+                recipesBackStack = recipesBackStack,
+                recipesRefreshKey = recipesRefreshKey.value,
+                selectTab = selectTab,
+                onNavigateToManualInput = onNavigateToManualInput,
+                onNavigateToRecipeDetail = onNavigateToRecipeDetail,
+                onLogout = onLogout,
+            ),
         )
     }
 }
 
-private fun AppAdaptiveLayout.navigationRailWidth(): Dp = when (this) {
-    AppAdaptiveLayout.Compact -> 0.dp
-    AppAdaptiveLayout.Medium -> AppNavigationMediumRailWidth
-    AppAdaptiveLayout.Expanded -> AppNavigationExpandedRailWidth
-}
-
-private fun AppAdaptiveLayout.navigationItemHorizontalPadding(): Dp = when (this) {
-    AppAdaptiveLayout.Compact -> 0.dp
-    AppAdaptiveLayout.Medium -> AppNavigationMediumItemHorizontalPadding
-    AppAdaptiveLayout.Expanded -> AppNavigationExpandedItemHorizontalPadding
+@OptIn(ExperimentalMaterial3AdaptiveNavigationSuiteApi::class)
+private fun NavigationSuiteScope.navigationItems(
+    selectedTab: BottomTabRoute,
+    selectTab: (BottomTabRoute) -> Unit,
+) {
+    appTabNavItems.forEach { item ->
+        val selected = selectedTab == item.route
+        item(
+            selected = selected,
+            onClick = { selectTab(item.route) },
+            icon = {
+                Icon(
+                    imageVector = item.icon,
+                    contentDescription = item.label,
+                    tint = if (selected) HomeColors.BrandBrown else HomeColors.TextSecondary,
+                )
+            },
+            label = {
+                Text(
+                    text = item.label,
+                    color = if (selected) HomeColors.TextPrimary else HomeColors.TextSecondary,
+                    fontSize = 15.sp,
+                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                )
+            },
+            badge = { Badge { Text("+99") } },
+        )
+    }
 }
 
 private fun homeTabEntries(
