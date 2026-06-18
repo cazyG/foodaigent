@@ -84,9 +84,10 @@ fun GreetingScreen(
             }
         }
 
-        if (uiState.errorMessage != null) {
+        val errorMessage = uiState.errorMessage
+        if (errorMessage != null) {
             Text(
-                text = uiState.errorMessage,
+                text = errorMessage,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.widthIn(max = 320.dp),
             )
