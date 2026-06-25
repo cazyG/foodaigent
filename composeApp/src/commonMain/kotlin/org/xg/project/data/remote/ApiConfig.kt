@@ -4,4 +4,7 @@ object ApiConfig {
     const val HOST = "http://43.167.217.211:8090"
 //    const val HOST = "http://localhost:8090"
     const val API_BASE_URL = "$HOST/api"
+
+    // 图片上传专用服务器
+    const val UPLOAD_HOST = "https://admin.api.tantuwuyou.com"
 }

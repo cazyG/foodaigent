@@ -22,9 +22,7 @@ import org.xg.project.domain.model.RecipeDraft
 import org.xg.project.domain.Result
 import org.xg.project.domain.model.RecipeMenu
 
-class FoodRepository {
-
-    private val baseUrl = ApiConfig.API_BASE_URL
+class FoodRepository : BaseRepository() {
 
 
     suspend fun fetchDailyRecords(): Result<List<DailyMenuRecord>> {

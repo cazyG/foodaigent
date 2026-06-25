@@ -16,9 +16,7 @@ import org.xg.project.domain.model.User
 import org.xg.project.domain.model.UserResponse
 import org.xg.project.domain.model.toUser
 
-class UserRepository {
-
-    private val baseUrl = ApiConfig.API_BASE_URL
+class UserRepository : BaseRepository() {
 
     /**
      * 用户注册。优先 `POST /api/register`，404 时回退 `POST /api/users`。

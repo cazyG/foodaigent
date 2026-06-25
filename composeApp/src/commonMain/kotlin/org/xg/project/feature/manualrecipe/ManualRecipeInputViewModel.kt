@@ -6,17 +6,20 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import org.xg.project.core.ui.AppStrings
 import org.xg.project.data.session.UserSessionRepository
 import org.xg.project.domain.Result
 import org.xg.project.domain.model.Ingredient
 import org.xg.project.feature.manualrecipe.usecase.BuildRecipeDraftUseCase
 import org.xg.project.feature.manualrecipe.usecase.CreateRecipeUseCase
 import org.xg.project.feature.manualrecipe.usecase.UploadImageUseCase
-import kotlin.time.Clock
 import kotlin.random.Random
+import kotlin.time.Clock
 
 class ManualRecipeInputViewModel(
     private val userSessionRepository: UserSessionRepository,
@@ -125,14 +128,14 @@ class ManualRecipeInputViewModel(
                         )
                     } else {
                         _state.value = _state.value.copy(
-                            error = "图片上传失败: 服务器返回失败",
+                            error = AppStrings.IMAGE_UPLOAD_FAILED_SERVER,
                             isUploading = false
                         )
                     }
                 }
                 is Result.Error -> {
                     _state.value = _state.value.copy(
-                        error = "图片上传失败: ${result.message}",
+                        error = AppStrings.IMAGE_UPLOAD_FAILED_PREFIX + result.message,
                         isUploading = false
                     )
                 }
@@ -143,11 +146,13 @@ class ManualRecipeInputViewModel(
     private fun saveRecipe() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isSaving = true, error = null)
-            // 如果有选中的图片但尚未上传，则先上传图片
-            if ( _state.value.uploadedImageUrl == null) {
-                // 等待上传完成
-                while (_state.value.isUploading) {
-                    kotlinx.coroutines.delay(100)
+            // 如果有选中的图片但尚未上传，则先等待上传完成
+            if (_state.value.uploadedImageUrl == null) {
+                try {
+                    _state.filter { !it.isUploading }.first()
+                } catch (e: Exception) {
+                    _state.value = _state.value.copy(isSaving = false)
+                    return@launch
                 }
                 // 如果上传失败，直接返回
                 if (_state.value.error != null) {
@@ -171,7 +176,7 @@ class ManualRecipeInputViewModel(
                         }
                         is Result.Error -> {
                             _state.value = _state.value.copy(
-                                error = "保存失败: ${response.message}",
+                                error = AppStrings.RECIPE_SAVE_FAILED_PREFIX + response.message,
                                 isSaving = false
                             )
                         }

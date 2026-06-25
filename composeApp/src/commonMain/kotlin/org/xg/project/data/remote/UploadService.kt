@@ -7,11 +7,14 @@ import io.ktor.client.request.put
 import io.ktor.client.request.headers
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
+import io.ktor.http.HttpStatusCode
 import kotlinx.serialization.Serializable
+import org.xg.project.core.ui.AppStrings
 import org.xg.project.domain.Result
+
 class UploadService(private val httpClient: HttpClient) {
-    
-    private val baseUrl = "https://admin.api.tantuwuyou.com"
+
+    private val baseUrl = ApiConfig.UPLOAD_HOST
     
     @Serializable
     data class PresignedUrlResponse(val data: PresignedUrlData)
@@ -29,12 +32,7 @@ class UploadService(private val httpClient: HttpClient) {
     suspend fun getPresignedUrl(filename: String): Result<PresignedUrlResponse> {
         return try {
             val response = httpClient.get("$baseUrl/api/generatePresignedUrl?filename=$filename")
-            try {
-                Result.Success(response.body<PresignedUrlResponse>())
-            } catch (e: Exception) {
-                val responseBody = response.body<String>()
-                Result.Error("服务器返回错误: $responseBody")
-            }
+            Result.Success(response.body<PresignedUrlResponse>())
         } catch (e: Exception) {
             Result.Error(e.message ?: "Unknown error")
         }
@@ -48,8 +46,8 @@ class UploadService(private val httpClient: HttpClient) {
                 }
                 setBody(file)
             }
-            
-            if (response.status.value == 200) {
+
+            if (response.status == HttpStatusCode.OK) {
                 Result.Success(UploadResult(success = true, url = getUrl))
             } else {
                 Result.Error("Upload failed with status: ${response.status.value}")

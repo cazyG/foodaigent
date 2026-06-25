@@ -56,7 +56,7 @@ class HomeViewModel(
                     _state.value = _state.value.copy(
                         isLoading = false,
                         todayRecord = null,
-                        error = null,
+                        error = result.message,
                     )
                 }
             }
